@@ -64,8 +64,8 @@ y = y/int_tabulated(x,y) * ynorm
 ;Finally, get the amplitude of the power-law component.
 ; Normalize each power law, then multiply by the fraction of pts in
 ; that range.
-norm_upper = ub^(p_upper-1) * total(pts gt ub,/double)/float(npts)*2.
-norm_lower = abs(lb)^(p_lower-1) * total(pts lt lb,/double)/float(npts)*2.
+norm_upper = ub^(p_upper-1) * total(pts gt ub,/double)/float(npts)
+norm_lower = abs(lb)^(p_lower-1) * total(pts lt lb,/double)/float(npts)
 model = create_struct('x',x,'y',y,'p_upper',p_upper,'p_lower',p_lower,'norm_upper',norm_upper,'norm_lower',norm_lower)
 
 return,model
@@ -76,7 +76,7 @@ function em_shear_estimate,g_initial,model_e1,model_e2,cat,converge=converge,$
                            r1=R1_avg, r2=R2_avg, c1=c1, c2=c2, a1=R1psf, a2=R2psf
 n_iter = 10
 g = g_initial
-L_thresh = 1e-12
+L_thresh = 1e-6
 print,'Running EM algorithm, monitor for convergence:'
 
 diff = 1.
@@ -95,12 +95,14 @@ while (diff gt 1e-4) AND (n_iter lt 250) do begin
    ;Use g_inital to calculate new 'unlensed' ellipticities.
    e1 = cat.e1 - (g[0]*cat.R1  + R1psf * psf_e1)
    e2 = cat.e2 - (g[1]*cat.R2  + R2psf * psf_e2)
+   e1 = e1[where(abs(e1) lt 1)]
+   e2 = e2[where(abs(e2) lt 1)]
 
    ; Then do a likelihood-weighted average of the responsivities.
    L1 = (model_compute(model_e1,e1))
    L2 = (model_compute(model_e2,e2))
-   cut1 = where(L1 lt L_thresh,ctcut1)
-   cut2 = where(L2 lt L_thresh,ctcut2)
+;   cut1 = where(L1 lt L_thresh,ctcut1)
+;   cut2 = where(L2 lt L_thresh,ctcut2)
 ;   if ctcut1 gt 0 then L1[cut1] = 0.
 ;   if ctcut2 gt 0 then L2[cut2] = 0.
 
@@ -123,6 +125,9 @@ while (diff gt 1e-4) AND (n_iter lt 250) do begin
    ; And use these to compute a new guess for the shear.
    g1_new = total(L1 * (cat.e1 - c1 - e1_psf_correction) )/ total(L1) / R1_avg
    g2_new = total(L2 * (cat.e2 - c2 - e2_psf_correction) )/ total(L2) / R2_avg
+;   g1_new = total(L1 * (cat.e1 - cat.c1 - cat.a1*cat.psf_e1)/cat.R1*L1 )/ total(L1)
+;   g2_new = total(L2 * (cat.e2 - cat.c2 - cat.a2*cat.psf_e2)/cat.R2*L2 )/ total(L2)
+
    diff = max([abs(g1_new-g[0]),abs(g2_new-g[1])])
    if (n_iter eq 249 AND n_retry lt 3) then begin
       g = [mean([g1_new,g[0]]),mean([g2_new,g[1]])]
@@ -146,8 +151,8 @@ function em_shear_estimate_simple, cat, r1=r1, r2 = r2, c1 = c1, c2 = c2, a1 = r
 if n_elements(w1) eq 0 then w1 = replicate(1.,n_elements(cat))
 if n_elements(w2) eq 0 then w2 = replicate(1.,n_elements(cat))
 
-R1 = median(cat.R1);total(cat.R1*w1)/total(w1)
-R2 = median(cat.R2);total(cat.R2*w2)/total(w2)
+R1 = total(cat.R1*w1)/total(w1)
+R2 = total(cat.R2*w2)/total(w2)
 R1psf = total(cat.a1*w1)/total(w1)
 R2psf = total(cat.a2*w2)/total(w2)
 c1 = total(cat.c1*w1)/total(w1)
@@ -157,21 +162,32 @@ psf2 = total(cat.psf_e2*w2)/total(w2)
 
 ;g1 = total(( cat.e1 - R1psf*cat.psf_e1/2. - cat.c1 )/R1 * w1)/total(w1) 
 ;g2 = total(( cat.e2 - R2psf*cat.psf_e2/2. - cat.c2 )/R2 * w2)/total(w2) 
-g1 = median( ( cat.e1 - R1psf*cat.psf_e1/2. - cat.c1 )/R1 )
-g2 =  median( ( cat.e2 - R2psf*cat.psf_e2/2. - cat.c2 )/R2 )
+g1 = total( ( cat.e1 - R1psf*cat.psf_e1/2. - cat.c1 )/R1  * w1) / total(w1)
+g2 =  total( ( cat.e2 - R2psf*cat.psf_e2/2. - cat.c2 )/R2 * w2) / total(w2)
 
 g = [g1,g2]
 return,g
 end
+
+
+function select_for_analysis,cat
+  keep = where(cat.e1 ne -10 AND cat.c1 ne -10 AND $
+               cat.e2 ne -10 AND cat.c2 ne -10 AND $
+               cat.r1 ne -10 AND cat.r2 ne -10 AND $
+               cat.weight gt 0 AND $
+               abs(cat.e1) lt 100 AND abs(cat.e2) lt 100,ct)
+  return,keep
+end
+
 
 pro em_shear_calib
 ;common ellipticity_prior_models,model_e1,model_e2,cat
 ; Go and get the shear calibration files.
 ;template = "../Great3/Outputs-Moments/cgc_metacal_moments-*.fits"
 template = "../Great3/Outputs-Regauss/cgc_metacal_regauss_fix-*.fits"
-;template = "../Great3/Outputs-KSB/Control-Ground-Constant/output_catalog-*.fits"
+;template = "../Great3/Outputs-KSB/output_catalog-*.fits"
 ;template = "../Great3/Outputs/Control-Ground-Constant/output_catalog-*.fits"
-;template = "../Great3/Outputs/Real-Ground-Constant/output_catalog*.fits"
+;template = "../Great3/Outputs-Real-Regauss/output_catalog*.fits"
 catfiles = file_search(template,count=ct)
 print,'Found ',ct,' files. Loading data.'
 cat = mrdfits(catfiles[0],1,/silent)
@@ -182,10 +198,8 @@ cat = jjadd_tag(cat,'e1',cat.g1)
 cat = jjadd_tag(cat,'e2',cat.g2)
 
 print,' Removing bad shape measurements.'
-cat = cat[where(cat.e1 ne -10 AND cat.c1 ne -10 AND $
-                abs(cat.r1) lt 100 AND abs(cat.r2) lt 100 AND $
-                abs(cat.c1) lt 100 AND abs(cat.c2) lt 100)]
-
+keep = select_for_analysis(cat)
+cat = cat[keep]
 
 ; Construct the global ellipticity prior. We could try to deconvolve a
 ; shear prior from this if we wanted to, but we don't really want to.
@@ -224,7 +238,6 @@ oplot,z,y,thick=4
 
 prepare_plots,/reset
 psclose
-
 ; Use Expectations-Maximization to estimate the shear on a per-field
 ; basis.
 g_initial = [0.,0.]
@@ -242,46 +255,54 @@ c2 = fltarr(ct)
 psf_e1 = fltarr(ct)
 psf_e2 = fltarr(ct)
 
+; We're going to assess how well each field corresponds to the prior.
+; Take a sample of the (symmetrized) shape distribution.
+nsample = 500000
+ks_e1 = [cat.e1,-cat.e1]
+ks_e2 = [cat.e2,-cat.e2]
+ks_e1 = ks_e1[random_indices(n_elements(ks_e1),nsample)]
+ks_e2 = ks_e2[random_indices(n_elements(ks_e2),nsample)]
+
+
+ksstat1 = fltarr(ct)
+ksstat2 = fltarr(ct)
+
 ; Make plots showing how the distribution shifts when shear is
 ; applied.
 
 readcol,'cgc-truthtable.txt',id_true,g1,g2
 
 
-psopen,'metacal-shear-distributions',xsize=8,ysize=5,/inches,/color
+psopen,'metacal-regauss-distributions',xsize=8,ysize=5,/inches,/color
 prepare_plots,/color
 for i = 0,ct-1 do begin
    this_catalog = mrdfits(catfiles[i],1,/silent)
    id[i] = long((stregex(catfiles[i],'-([0-9]{3}).fits',/sub,/extract))[1])
    this_catalog = jjadd_tag(this_catalog,'e1',this_catalog.g1)
    this_catalog = jjadd_tag(this_catalog,'e2',this_catalog.g2)
-   print,'Using EM and the prior to estimate the shear for '+catfiles[i]
-;   good = where(this_catalog.e1 ne -10 AND this_catalog.e2 ne -10 AND this_catalog.c1 ne -10 AND this_catalog.c2 ne -10)
-   good = where(this_catalog.e1 ne -10 AND this_catalog.c1 ne -10 AND $
-                abs(this_catalog.r1) lt 100 AND abs(this_catalog.r2) lt 100 AND $
-                abs(this_catalog.c1) lt 100 AND abs(this_catalog.c2) lt 100); AND $
-;                abs(this_catalog.a1) lt 2. AND abs(this_catalog.a2) lt 2.)
+   this_keep = select_for_analysis(this_catalog)
+   this_catalog = this_catalog[this_keep]
+   print,'Using EM and the prior to estimate the shear for field: '+(stregex(catfiles[i],'-([0-9]*).fits',/sub,/ext))[1]
 
-
-   g = em_shear_estimate(g_initial,model_e1,model_e2,this_catalog[good],converge=this_converged, $
+   mean_shear[i,*] = [mean(this_catalog.e1),mean(this_catalog.e2)]
+   g = em_shear_estimate(g_initial,model_e1,model_e2,this_catalog,converge=this_converged, $
                          r1=this_r1, r2=this_r2, c1=this_c1, c2=this_c2, a1=this_a1, a2=this_a2)
- ;  L1 = model_compute(model_e1, this_catalog[good].e1)
- ;  L2 = model_compute(model_e2, this_catalog[good].e2)
- ;  g = em_shear_estimate_simple(this_catalog[good], r1=this_r1, r2=this_r2, c1=this_c1, c2=this_c2, $
- ;                               a1=this_a1, a2=this_a2, psf1=psf1,psf2=psf2, weight1=L1, weight2 = L2)
-   psf_e1[i] = mean(this_catalog[good].psf_e1)
-   psf_e2[i] = mean(this_catalog[good].psf_e2)
-;   r1[i] = this_r1
-;   r2[i] = this_r2
-;   a1psf[i] = this_a1
-;   a2psf[i] = this_a2
-;   c1[i] = this_c1
-;   c2[i] = this_c2
+;   L1 = model_compute(model_e1, this_catalog.e1)
+;   L2 = model_compute(model_e2, this_catalog.e2)
+;   g = em_shear_estimate_simple(this_catalog, r1=this_r1, r2=this_r2, c1=this_c1, c2=this_c2, $
+;                                a1=this_a1, a2=this_a2, psf1=psf1,psf2=psf2, weight1=this_catalog.weight,$
+;                                weight2 = this_catalog.weight)
+   psf_e1[i] = mean(this_catalog.psf_e1)
+   psf_e2[i] = mean(this_catalog.psf_e2)
+   r1[i] = this_r1
+   r2[i] = this_r2
+   a1psf[i] = this_a1
+   a2psf[i] = this_a2
+   c1[i] = this_c1
+   c2[i] = this_c2
    converged[i] = this_converged
    field_shear[i,0] = g[0]
    field_shear[i,1] = g[1]
-
-   print,'Estimated shear (g1, g2) is:', g[0], g[1]
    
 
 ;--------------------------------------------------
@@ -290,29 +311,38 @@ for i = 0,ct-1 do begin
    y = (model_compute(model_e2,z)  + model_compute(model_e2,-z))/2.
 ;  Then plot the uncorrected shape distribution
    peak = max(y)
-   plothist,this_catalog[good].e2,bin=0.05,xr=[-2,2],/ylog,peak=peak,title='e2 prior',yr=[1e-2,1]
+   xb = 2 ; min/max on x-axis for histogram
+   plothist,this_catalog.e2,bin=0.05,xr=[-xb,xb],/ylog,peak=peak,title='e2, field '+(stregex(catfiles[i],'-([0-9]*).fits',/sub,/ext))[1],yr=[1e-2,1]
    oplot,z,y,color=50
 ;  Finally, plot the unsheared shape distribution
-   e2_unsheared = (this_catalog[good].e2 - this_catalog[good].r2 * g[1] - this_a2*psf_e2[i] - this_c2)
-   plothist,e2_unsheared,bin=0.05,xr=[-2,2],/ylog,peak=peak,/overplot,color=120,yr=[1e-2,1]
-   e2_best = (this_catalog[good].e2 - this_catalog[good].r2 * g2[i] - this_a2*psf_e2[i] - this_c2)
-   plothist,e2_best,bin=0.05,xr=[-2,2],/ylog,peak=peak,/overplot,color=200,yr=[1e-2,1]
+   e2_unsheared = (this_catalog.e2 - this_catalog.r2 * g[1] - this_a2*psf_e2[i] - this_c2)
+   plothist,e2_unsheared,bin=0.05,xr=[-xb,xb],/ylog,peak=peak,/overplot,color=120,yr=[1e-2,1]
+   e2_best = (this_catalog.e2 - this_catalog.r2 * g2[i] - this_a2*psf_e2[i] - this_c2)
+   plothist,e2_best,bin=0.05,xr=[-xb,xb],/ylog,peak=peak,/overplot,color=200,yr=[1e-2,1]
    legend,['prior','raw','estimated','true'],color=[50,255,120,200],box=0,/top,/right,charsize=1.,line=0
+;   legend,['prior','raw','estimated'],color=[50,255,120],box=0,/top,/right,charsize=1.,line=0
    legend,['g_true = '+string(g2[i],form='(F0.4)'), 'g_est = '+string(g[1],form='(F0.4)')],/top,/left,box=0,charsize=.75
 ;--------------------------------------------------   
+   e1test = [(this_catalog.e1 - this_catalog.r1 * g[0] - this_a1*psf_e1[i] - this_c1)]
+   e2test = [(this_catalog.e2 - this_catalog.r2 * g[1] - this_a2*psf_e2[i] - this_c2)]
+   ;kstwo,e1test,ks_e1,ks1,ksp1
+   ;kstwo,e2test,ks_e2,ks2,ksp2
+   ksstat1[i] = variance(e1test)/variance(ks_e1)
+   ksstat2[i] = variance(e2test)/variance(ks_e2)
+   print,'Estimated shear (g1, g2) is:', g[0], g[1]
 endfor
 psclose
 
-forprint,text='Great3-metaCal-CGC-regauss-EM.txt',id,field_shear[*,0],field_shear[*,1],converged,/nocomment
+forprint,text='Great3-metaCal-CGC-regauss.txt',id,field_shear[*,0],field_shear[*,1],converged,/nocomment
 
 
 readcol,'cgc-truthtable.txt',id_true,g1,g2
-use = where(converged eq 1)
-id = id[use]
-field_shear = field_shear[use,*]
+;use = where(converged eq 1)
+;id = id[use]
+;field_shear = field_shear[use,*]
 
 match,id_true,id,ind_true,ind_mc
-psopen,'metaCalResults-regauss-EM',xsize=8,ysize=8,/inches,/color
+psopen,'metaCalResults-regauss',xsize=8,ysize=8,/inches,/color
 prepare_plots,/color
 coeff1 = linfit(g1[ind_true],field_shear[ind_mc,0],y=y1)
 ; What's the scatter around this?
@@ -357,14 +387,14 @@ zz1 = aa1 ## xx1
 zz2 = aa2 ## xx2
 
 
-psopen,'metaCalResults-regauss-EM-sigClipped',xsize=7,ysize=7,/inches,/color
+psopen,'metaCalResults-regauss-sigClipped',xsize=7,ysize=7,/inches,/color
 prepare_plots,/color
 
 plot,g1[ind_true],field_shear[ind_mc,0],ps=6,xtitle='g_1 (true)', ytitle='g_1 (recovered)', yr=[-0.1,0.1]
 oplot,[-1,1],[-1,1],color=200,line=2
 oplot,aa1[0,*], zz1, color=50,line=3
 xyouts,0.2,0.2,string(form='("m, b = ",F0," ",F0,"  !9 + !6  ",F0," ",F0 )',xx1[0],xx1[1],sqrt(covar1[0,0]),sqrt(covar1[1,1])),/norm,charsize=1.
-plot,g1[ind_true],field_shear[ind_mc,0] - g1[ind_true],ps=1,xtitle='g_1 (true)', ytitle='g_1 (recovered) - g_1 (true)', yr=[-0.05, 0.05]
+plot,g1[ind_true],field_shear[ind_mc,0] - g1[ind_true],ps=1,xtitle='g_1 (true)', ytitle='g_1 (recovered) - g_1 (true)', yr=[-0.01, 0.01]
 hline,0,color=200,line=1
 oplot,aa1[0,*], zz1 - g1[ind_true], color=50,line=3
 xyouts,0.2,0.2,string(form='("m,b = ",F0," ",F0,"  !9 + !6  ",F0," ",F0 )',xx1[0],xx1[1],sqrt(covar1[0,0]),sqrt(covar1[1,1])),/norm,charsize=1.
@@ -381,14 +411,20 @@ xyouts,0.2,0.2,string(form='("m, b = ",F0," ",F0,"  !9 + !6  ",F0," ",F0 )',xx2[
 psclose
 
 ; Is there any residual psf dependence?
-psopen,'metaCalResults-regauss-EM-psf_dependence',xsize=7,ysize=6,/inches,/color
+psopen,'metaCalResults-regauss-psf_dependence',xsize=7,ysize=6,/inches,/color
 prepare_plots,/color
- plot,psf_e1[ind_mc],field_shear[ind_mc,0]-g1[ind_true],ps=1,xtitle='!3psf_e1',ytitle='g_1 (measured) - g_1 (true)',charsize=2.,xmargin=[14,4],yr=[-0.015,0.015],/ystyle
+ plot,psf_e1[ind_mc],field_shear[ind_mc,0]-g1[ind_true],ps=1,xtitle='!3psf_e1',ytitle='g_1 (measured) - g_1 (true)',charsize=2.,xmargin=[14,4];,yr=[-0.015,0.015],/ystyle
 
- plot,psf_e2[ind_mc],field_shear[ind_mc,1]-g2[ind_true],ps=1,xtitle='!3psf_e2',ytitle='g_2 (measured) - g_2 (true)',charsize=2.,xmargin=[14,4],yr=[-0.015,0.015],/ystyle
+ plot,psf_e2[ind_mc],field_shear[ind_mc,1]-g2[ind_true],ps=1,xtitle='!3psf_e2',ytitle='g_2 (measured) - g_2 (true)',charsize=2.,xmargin=[14,4];,yr=[-0.015,0.015],/ystyle
+psclose
+
+; Can we predict which fields are likely to be bad by comparing them
+; with the ellipticity prior?
+psopen,'metaCalResults-regauss-'
+plot,ksstat1[ind_mc],field_shear[ind_mc,0]-g1[ind_true],ps=1,xtitle='(dis-)similarity to prior',ytitle='g_1 (measured) - g_1 (true)',charsize=2.,xmargin=[14,4]
+plot,ksstat2[ind_mc],field_shear[ind_mc,1]-g2[ind_true],ps=1,xtitle='(dis-)similarity to prior',ytitle='g_2 (measured) - g_2 (true)',charsize=2.,xmargin=[14,4]
 psclose
 prepare_plots,/reset
-
 
 stop
 

@@ -200,7 +200,7 @@ def checkFailures(shear_results, responsivity_stat):
     hsmparams = galsim.hsm.HSMParams()
     for index in range(n_gal):
         test_e = numpy.sqrt(
-            shear_results[index].corrected_g1**2 + shear_results[index].corrected_g2**2
+            shear_results[index].corrected_e1**2 + shear_results[index].corrected_e2**2
             )
         if shear_results[index].resolution_factor == hsmparams.failed_moments or \
                 shear_results[index].corrected_shape_err < 0 or test_e > 4. or \
@@ -389,8 +389,8 @@ def getRMSEllip(shear_results=None, use_shape=None, weight=None, e1=None, e2=Non
         sigma_e = []
         for index in range(n_gal):
             if use_shape[index]:
-                e1.append(shear_results[index].corrected_g1)
-                e2.append(shear_results[index].corrected_g2)
+                e1.append(shear_results[index].corrected_e1)
+                e2.append(shear_results[index].corrected_e2)
                 # There's a factor of ~2 here, because we want sigma_e and it returns sigma_g.
                 # Actually, the exact factor is 2/(1+2*sigma_g^2) according to Bernstein & Jarvis
                 # (2002), but the sigma_g values are usually <~0.15 so the denominator is quite
@@ -570,48 +570,48 @@ def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catal
 
 
         res = galsim.hsm.EstimateShear(unsheared1Galaxy, reconv1PSF, sky_var=float(sky_var),
-                                       guess_sig_PSF = guess_sig, shear_est="KSB",  **default_shear_kwds)
+                                       guess_sig_PSF = guess_sig, shear_est="REGAUSS",  **default_shear_kwds)
 
         shear_results.append(res)
         try:
             sky_var = float(sky_var)
             # Things needed for multiplicative bias etc.
             res_g1 = galsim.hsm.EstimateShear(sheared1Galaxy, reconv1PSF, sky_var=sky_var,
-                                              guess_sig_PSF = guess_sig, shear_est="KSB")
+                                              guess_sig_PSF = guess_sig, shear_est="REGAUSS")
 
             res_g2 = galsim.hsm.EstimateShear(sheared2Galaxy, reconv2PSF, sky_var=sky_var,
-                                              guess_sig_PSF = guess_sig, shear_est="KSB")
+                                              guess_sig_PSF = guess_sig, shear_est="REGAUSS")
 
             res_mg1 = galsim.hsm.EstimateShear(shearedm1Galaxy, reconvm1PSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="KSB")
+                                               guess_sig_PSF = guess_sig, shear_est="REGAUSS")
 
             res_mg2 = galsim.hsm.EstimateShear(shearedm2Galaxy, reconvm2PSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="KSB")
+                                               guess_sig_PSF = guess_sig, shear_est="REGAUSS")
             # Things needed for additive bias
             res_g1p = galsim.hsm.EstimateShear(unsheared1PGalaxy, reconv1PPSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="KSB")
+                                               guess_sig_PSF = guess_sig, shear_est="REGAUSS")
             res_g2p = galsim.hsm.EstimateShear(unsheared2PGalaxy, reconv2PPSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="KSB")
+                                               guess_sig_PSF = guess_sig, shear_est="REGAUSS")
             res_mg1p = galsim.hsm.EstimateShear(unshearedm1PGalaxy, reconvm1PPSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="KSB")
+                                               guess_sig_PSF = guess_sig, shear_est="REGAUSS")
             res_mg2p = galsim.hsm.EstimateShear(unshearedm2PGalaxy, reconvm2PPSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="KSB")
+                                               guess_sig_PSF = guess_sig, shear_est="REGAUSS")
             psf_mom = galsim.hsm.FindAdaptiveMom(reconv1PSF)
             
             # Get most of what we need to make a derivative, i.e., (distortion with +g applied) -
             # (distortion with -g applied).  Then divide by 2 since we're doing a 2-sided
             # derivative.  Later, we'll sum these up with weights, and divide by the applied shear.
             # This is for multiplicative bias:
-            de1_g1 = 0.5*(res_g1.corrected_g1 - res_mg1.corrected_g1)/0.01
-            de2_g2 = 0.5*(res_g2.corrected_g2 - res_mg2.corrected_g2)/0.01
+            de1_g1 = 0.5*(res_g1.corrected_e1 - res_mg1.corrected_e1)/0.01
+            de2_g2 = 0.5*(res_g2.corrected_e2 - res_mg2.corrected_e2)/0.01
             # Basic systematics correction for regauss oddities:
-            c1 = 0.5 * (res_g1.corrected_g1 + res_mg1.corrected_g1) - res.corrected_g1
-            c2 = 0.5 * (res_g2.corrected_g2 + res_mg2.corrected_g2) - res.corrected_g2
+            c1 = 0.5 * (res_g1.corrected_e1 + res_mg1.corrected_e1) - res.corrected_e1
+            c2 = 0.5 * (res_g2.corrected_e2 + res_mg2.corrected_e2) - res.corrected_e2
 #            if numpy.random.randomu() <= 0.1:
 #                print "measured responsivity: ",de1_g1
             # This is the new stuff for additive PSF anisotropy correction:
-            de1_dpg1 = 0.5*(res_g1p.corrected_g1 - res_mg1p.corrected_g1)/0.01
-            de2_dpg2 = 0.5*(res_g2p.corrected_g2 - res_mg2p.corrected_g2)/0.01
+            de1_dpg1 = 0.5*(res_g1p.corrected_e1 - res_mg1p.corrected_e1)/0.01
+            de2_dpg2 = 0.5*(res_g2p.corrected_e2 - res_mg2p.corrected_e2)/0.01
             responsivity_stat.append(1)
             responsivity_1.append(de1_g1)
             responsivity_2.append(de2_g2)
@@ -714,8 +714,8 @@ def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catal
     use_index = 0
 
     for index in range(n_gal):
-        g1[index] = shear_results[index].corrected_g1
-        g2[index] = shear_results[index].corrected_g2
+        g1[index] = shear_results[index].corrected_e1
+        g2[index] = shear_results[index].corrected_e2
         if sn_weight:
             weight[index] = use_weight[use_index]
         if not use_shape[index]:
