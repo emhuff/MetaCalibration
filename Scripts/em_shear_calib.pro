@@ -184,7 +184,8 @@ pro em_shear_calib
 ;common ellipticity_prior_models,model_e1,model_e2,cat
 ; Go and get the shear calibration files.
 ;template = "../Great3/Outputs-Moments/cgc_metacal_moments-*.fits"
-template = "../Great3/Outputs-Regauss/cgc_metacal_regauss_fix-*.fits"
+;template = "../Great3/Outputs-Regauss/cgc_metacal_regauss_fix-*.fits"
+template = "../Great3/Outputs-Regauss-SymNoise/output_catalog-*.fits"
 ;template = "../Great3/Outputs-KSB/output_catalog-*.fits"
 ;template = "../Great3/Outputs/Control-Ground-Constant/output_catalog-*.fits"
 ;template = "../Great3/Outputs-Real-Regauss/output_catalog*.fits"

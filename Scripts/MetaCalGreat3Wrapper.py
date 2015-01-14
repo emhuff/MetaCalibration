@@ -109,6 +109,9 @@ def extractPSF(starfield_im):
 
     # Cut out the lower-left postage stamp.
     psf_im = starfield_im[galsim.BoundsI(0,ps_size-1,0,ps_size-1)]
+    psf_im.wcs = galsim.PixelScale(0.2)
+
+    
     return psf_im
 
 
@@ -294,13 +297,13 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
 
     # Draw to an ImageD object, and then return.
     psfGrownImage = galsim.ImageD(psfImage.bounds)
-    psfGrown.draw(psfGrownImage,dx=pixelscale)
+    psfGrown.draw(psfGrownImage,scale=pixelscale)
     return psfGrownImage
 
 
-def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1 = 0.01, g2 = 0.0):
+def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1 = 0.01, g2 = 0.0,variance=1.):
     
-    pixel = galsim.Pixel(psfImage.scale)
+    pixel = psfImage.scale
     l5 = galsim.Lanczos(5, True, 1.0E-4)
     l52d = galsim.InterpolantXY(l5)
     # Turn the provided image arrays into GSObjects
@@ -320,12 +323,23 @@ def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1 = 0.01, g2
 
     # Draw reconvolved, sheared image to an ImageD object, and return.
     galaxyImageSheared = galsim.ImageD(galaxyImage.bounds)
-    galaxy_sheared_reconv.draw(image=galaxyImageSheared,dx=psfImage.scale)
+    galaxy_sheared_reconv.draw(image=galaxyImageSheared,scale=psfImage.scale)
 
+
+    # Symmetrize the noise.
+    # For this we need to know something about the noise field. Let this be represented by the noise object CN.
+    # Initialize as uncorrelated noise with fixed (known) variance.
+    CN = galsim.UncorrelatedNoise(variance=variance)
+    # Now apply the same set of operations to this...
+    CN.convolvedWith(psfInv)
+    CN.shear(g1 = g1, g2 = g2)
+    CN.convolvedWith(psfTarget)
+    galaxyImageSheared.symmetrizeNoise(CN,order=4)
+                
     return galaxyImageSheared
 
 
-def metaCalibrate(galaxyImage, psfImage, g1 = 0.01, g2 = 0.00, gal_shear = True):
+def metaCalibrate(galaxyImage, psfImage, g1 = 0.01, g2 = 0.00, gal_shear = True, variance = 0.01):
     """The new gal_shear argument tells metaCalibrate whether to interpret the (g1, g2) args as a
     shear to apply to the *galaxy* (True - which is the default behavior and the only behavior this
     function had before) or to the *PSF* (False - in which case the galaxy is unsheared but the PSF
@@ -340,8 +354,8 @@ def metaCalibrate(galaxyImage, psfImage, g1 = 0.01, g2 = 0.00, gal_shear = True)
     
     if gal_shear:
         # Then, produce the reconvolved images, with and without shear.
-        reconvSheared   = metaCalibrateReconvolve(galaxyImage, psfImage, targetPSFImage, g1 = g1, g2 = g2)
-        reconvUnsheared = metaCalibrateReconvolve(galaxyImage, psfImage, targetPSFImage, g1 = 0.0, g2 = 0.0)
+        reconvSheared   = metaCalibrateReconvolve(galaxyImage, psfImage, targetPSFImage, g1 = g1, g2 = g2,variance = variance)
+        reconvUnsheared = metaCalibrateReconvolve(galaxyImage, psfImage, targetPSFImage, g1 = 0.0, g2 = 0.0, variance = variance)
         return reconvSheared, reconvUnsheared, targetPSFImage
     else:
         # We only really have to produce one thing since the galaxy isn't sheared.
@@ -418,7 +432,7 @@ def EstimateAllShearsStar(args):
     return EstimateAllShears(*args)
 
 def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catalog", output_type="fits",
-                      clobber=True, sn_weight=True, calib_factor=0.98, coadd=False,
+                      clobber=True, sn_weight=False, calib_factor=0.98, coadd=False,
                       variable_psf_dir=""):
     """Main driver for all routines in this file, and the implementation of most of the command-line
     interface.
@@ -449,7 +463,7 @@ def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catal
 
       clobber --------- Overwrite pre-existing output files?  Default: true.
 
-      sn_weight ------- Apply S/N-dependent weighting to each object?  Default: true.  If false, all
+      sn_weight ------- Apply S/N-dependent weighting to each object?  Default: false.  If false, all
                         objects get an equal weight.
 
       calib_factor ---- Multiplicative calibration factor to apply to all shears.  Default value of
@@ -474,8 +488,13 @@ def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catal
     # First read inputs.
     gal_im, starfield_im, gal_catalog = readData(sim_dir, subfield, coadd=coadd,
                                                  variable_psf_dir=variable_psf_dir)
-  
 
+    #gal_catalog=gal_catalog[0:2]
+    # In order for the deconvolution to work, we really need the wcs to be a simple pixel scale. The units are totally arbitrary.
+    gal_im.wcs = galsim.PixelScale(0.2)
+    starfield_im.wcs = galsim.PixelScale(0.2)
+    pix = gal_im.scale
+    
     guess_sig = 3.0 # the default guess for PSF sigma
     if variable_psf_dir=="":
         # Since this is a constant PSF branch, make a PSF image from the lower-left (centered) star
@@ -534,7 +553,6 @@ def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catal
         ii_alive = ii_alive+1
         if ii_alive % 100 == 0:
             print "subfield: ",subfield,", galaxy: ",ii_alive
-
         if variable_psf_dir=="":
             gal_ps = getPS(record, gal_im, ps_size)
         else:
@@ -542,28 +560,26 @@ def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catal
             gal_ps, psf_im = getPS(record, gal_im, ps_size, starfield_image=starfield_im)
 
         # Estimate the shear, requiring a silent failure if something goes wrong.  (That flag is in
-        # `default_shear_kwds`
-
-        pix = galsim.Pixel(psf_im.scale)
-
-        # Here are the bits that are needed for a calibration bias (multiplicative) correction.
-        sheared1Galaxy, unsheared1Galaxy, reconv1PSF = metaCalibrate(gal_ps, psf_im, g1 = 0.01, g2 = 0.00)
+        # `default_shear_kwds`)
         
-        # Write some example image files for diagnosis.
-        #sheared1Galaxy.write("./MCImages/shearedImage1.%d.%d.fits" % (subfield, ii_alive))
-        #unsheared1Galaxy.write("./MCImages/unShearedImage1.%d.%d.fits" % (subfield, ii_alive))
-        #reconv1PSF.write("./MCImages/reconvPSF1.%d.%d.fits" % (subfield, ii_alive))
-
-
-        shearedm1Galaxy, unshearedm1Galaxy, reconvm1PSF = metaCalibrate(gal_ps, psf_im, g1 = -0.01, g2 = 0.00)
-        sheared2Galaxy, unsheared2Galaxy, reconv2PSF = metaCalibrate(gal_ps, psf_im, g1 = 0.00, g2 = 0.01)
-        shearedm2Galaxy, unshearedm2Galaxy, reconvm2PSF = metaCalibrate(gal_ps, psf_im, g1 = 0.00, g2 = -0.01)
+        # We need to infer the background noise somehow.
+        variance = estimateVariance(gal_ps)
+        
+        # Here are the bits that are needed for a calibration bias (multiplicative) correction.
+        
+        sheared1Galaxy, unsheared1Galaxy, reconv1PSF = metaCalibrate(gal_ps, psf_im, g1 = 0.01, g2 = 0.00, variance = variance)
+        
+        
+        shearedm1Galaxy, unshearedm1Galaxy, reconvm1PSF = metaCalibrate(gal_ps, psf_im, g1 = -0.01, g2 = 0.00, variance = variance)
+        sheared2Galaxy, unsheared2Galaxy, reconv2PSF = metaCalibrate(gal_ps, psf_im, g1 = 0.00, g2 = 0.01, variance = variance)
+        shearedm2Galaxy, unshearedm2Galaxy, reconvm2PSF = metaCalibrate(gal_ps, psf_im, g1 = 0.00, g2 = -0.01, variance = variance)
         # These new bits make some images that we need for a PSF anisotropy correction.
-        unsheared1PGalaxy, _, reconv1PPSF = metaCalibrate(gal_ps, psf_im, g1=0.01, g2=0.0, gal_shear=False)
-        unshearedm1PGalaxy, _, reconvm1PPSF = metaCalibrate(gal_ps, psf_im, g1=-0.01, g2=0.0, gal_shear=False)
-        unsheared2PGalaxy, _, reconv2PPSF = metaCalibrate(gal_ps, psf_im, g1=0.0, g2=0.01, gal_shear=False)
-        unshearedm2PGalaxy, _, reconvm2PPSF = metaCalibrate(gal_ps, psf_im, g1=0.0, g2=-0.01, gal_shear=False)
+        unsheared1PGalaxy, _, reconv1PPSF = metaCalibrate(gal_ps, psf_im, g1=0.01, g2=0.0, gal_shear=False, variance = variance)
+        unshearedm1PGalaxy, _, reconvm1PPSF = metaCalibrate(gal_ps, psf_im, g1=-0.01, g2=0.0, gal_shear=False, variance = variance)
+        unsheared2PGalaxy, _, reconv2PPSF = metaCalibrate(gal_ps, psf_im, g1=0.0, g2=0.01, gal_shear=False, variance = variance)
+        unshearedm2PGalaxy, _, reconvm2PPSF = metaCalibrate(gal_ps, psf_im, g1=0.0, g2=-0.01, gal_shear=False, variance = variance)
 
+        #gal_ps.write("./MCImages/originalImage.%d.%d.fits" % (subfield, ii_alive))
         #sheared2Galaxy.write("./MCImages/shearedImage2.%d.%d.fits" % (subfield, ii_alive))
         #unsheared2Galaxy.write("./MCImages/unShearedImage2.%d.%d.fits" % (subfield, ii_alive))
         #reconv2PSF.write("./MCImages/reconvPSF2.%d.%d.fits" % (subfield, ii_alive))
@@ -632,7 +648,6 @@ def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catal
             psf_e1.append(-10)
             psf_e2.append(-10)
 
-            
     dt = time.time() - t2
     log("...Time per object=%f s, total time for loop=%f s"%(dt/n_gal,dt))
 
@@ -793,7 +808,7 @@ def main(argv):
         verbose = True
 
     # Run on all available CPUs.
-#    '''
+
     from multiprocessing import Pool
     import itertools
     pool = Pool(processes=30)
@@ -817,4 +832,10 @@ def main(argv):
     '''
 
 if __name__ == "__main__":
-    main(sys.argv)
+    import pdb, traceback
+    try:
+        main(sys.argv)
+    except:
+        thingtype, value, tb = sys.exc_info()
+        traceback.print_exc()
+        pdb.post_mortem(tb)
