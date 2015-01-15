@@ -211,8 +211,8 @@ print, 'Removing our estimate of the constant shape measurement biases first.'
 ; To build the prior, assume that the correct shear is zero.
 ; Then subtract off what we think the effects of psf and additive bias
 ; are.
-e1_prior = (cat.e1 - cat.a1 * cat.psf_e1 - cat.c1)
-e2_prior = (cat.e2 - cat.a2 * cat.psf_e1 - cat.c2)
+e1_prior = cat.e1;(cat.e1 - cat.a1 * cat.psf_e1 - cat.c1)
+e2_prior = cat.e2;(cat.e2 - cat.a2 * cat.psf_e1 - cat.c2)
 
 
 model_e1 = model_initialize(e1_prior ,bad=-10)
@@ -421,7 +421,7 @@ psclose
 
 ; Can we predict which fields are likely to be bad by comparing them
 ; with the ellipticity prior?
-psopen,'metaCalResults-regauss-'
+psopen,'metaCalResults-regauss-symnoise',xsize=6,ysize=6,/inches,/color
 plot,ksstat1[ind_mc],field_shear[ind_mc,0]-g1[ind_true],ps=1,xtitle='(dis-)similarity to prior',ytitle='g_1 (measured) - g_1 (true)',charsize=2.,xmargin=[14,4]
 plot,ksstat2[ind_mc],field_shear[ind_mc,1]-g2[ind_true],ps=1,xtitle='(dis-)similarity to prior',ytitle='g_2 (measured) - g_2 (true)',charsize=2.,xmargin=[14,4]
 psclose

@@ -358,9 +358,9 @@ def metaCalibrate(galaxyImage, psfImage, g1 = 0.01, g2 = 0.00, gal_shear = True,
         reconvUnsheared = metaCalibrateReconvolve(galaxyImage, psfImage, targetPSFImage, g1 = 0.0, g2 = 0.0, variance = variance)
         return reconvSheared, reconvUnsheared, targetPSFImage
     else:
-        # We only really have to produce one thing since the galaxy isn't sheared.
+        # We really only have to produce one image since the galaxy isn't sheared.
         reconvUnsheared = \
-            metaCalibrateReconvolve(galaxyImage, psfImage, targetPSFImage, g1=0.0, g2=0.0)
+            metaCalibrateReconvolve(galaxyImage, psfImage, targetPSFImage, g1=0.0, g2=0.0,variance=variance)
         return reconvUnsheared, reconvUnsheared, targetPSFImage
 
 
@@ -562,17 +562,16 @@ def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catal
         # Estimate the shear, requiring a silent failure if something goes wrong.  (That flag is in
         # `default_shear_kwds`)
         
-        # We need to infer the background noise somehow.
+        # We need to infer the background noise somehow, for use in the metaCalibration noise symmetrization.
         variance = estimateVariance(gal_ps)
         
         # Here are the bits that are needed for a calibration bias (multiplicative) correction.
         
         sheared1Galaxy, unsheared1Galaxy, reconv1PSF = metaCalibrate(gal_ps, psf_im, g1 = 0.01, g2 = 0.00, variance = variance)
-        
-        
         shearedm1Galaxy, unshearedm1Galaxy, reconvm1PSF = metaCalibrate(gal_ps, psf_im, g1 = -0.01, g2 = 0.00, variance = variance)
         sheared2Galaxy, unsheared2Galaxy, reconv2PSF = metaCalibrate(gal_ps, psf_im, g1 = 0.00, g2 = 0.01, variance = variance)
         shearedm2Galaxy, unshearedm2Galaxy, reconvm2PSF = metaCalibrate(gal_ps, psf_im, g1 = 0.00, g2 = -0.01, variance = variance)
+        
         # These new bits make some images that we need for a PSF anisotropy correction.
         unsheared1PGalaxy, _, reconv1PPSF = metaCalibrate(gal_ps, psf_im, g1=0.01, g2=0.0, gal_shear=False, variance = variance)
         unshearedm1PGalaxy, _, reconvm1PPSF = metaCalibrate(gal_ps, psf_im, g1=-0.01, g2=0.0, gal_shear=False, variance = variance)
