@@ -329,11 +329,14 @@ def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1 = 0.01, g2
     # Symmetrize the noise.
     # For this we need to know something about the noise field. Let this be represented by the noise object CN.
     # Initialize as uncorrelated noise with fixed (known) variance.
-    CN = galsim.UncorrelatedNoise(variance=variance)
+    GN = galsim.GaussianNoise(sigma=numpy.double(numpy.sqrt(variance)))
+    test_im = galsim.Image(512,512,scale=pixel)
+    test_im.addNoise(GN)
+    CN = galsim.CorrelatedNoise(test_im,scale=pixel)
     # Now apply the same set of operations to this...
-    CN.convolvedWith(psfInv)
-    CN.shear(g1 = g1, g2 = g2)
-    CN.convolvedWith(psfTarget)
+    CN = CN.convolvedWith(psfInv)
+    CN = CN.shear(g1 = g1, g2 = g2)
+    CN = CN.convolvedWith(psfTarget)
     varCalc = galaxyImageSheared.symmetrizeNoise(CN,order=4)
     varEst = estimateVariance(galaxyImageSheared)
     print 'Estimated, Calculated noise after reconvolution:', varEst, varCalc
@@ -581,10 +584,10 @@ def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catal
         unshearedm2PGalaxy, _, reconvm2PPSF = metaCalibrate(gal_ps, psf_im, g1=0.0, g2=-0.01, gal_shear=False, variance = variance)
 
         #gal_ps.write("./MCImages/originalImage.%d.%d.fits" % (subfield, ii_alive))
-        #sheared2Galaxy.write("./MCImages/shearedImage2.%d.%d.fits" % (subfield, ii_alive))
-        #unsheared2Galaxy.write("./MCImages/unShearedImage2.%d.%d.fits" % (subfield, ii_alive))
-        #reconv2PSF.write("./MCImages/reconvPSF2.%d.%d.fits" % (subfield, ii_alive))
-
+        #sheared1Galaxy.write("./MCImages/shearedImage1.%d.%d.fits" % (subfield, ii_alive))
+        #unsheared1Galaxy.write("./MCImages/unShearedImage1.%d.%d.fits" % (subfield, ii_alive))
+        #reconv1PSF.write("./MCImages/reconvPSF1.%d.%d.fits" % (subfield, ii_alive))
+        
 
         res = galsim.hsm.EstimateShear(unsheared1Galaxy, reconv1PSF, sky_var=float(sky_var),
                                        guess_sig_PSF = guess_sig, shear_est="REGAUSS",  **default_shear_kwds)
@@ -809,11 +812,11 @@ def main(argv):
         verbose = True
 
     # Run on all available CPUs.
-    '''
-    
-    from multiprocessing import Pool
+
+    from multiprocessing import Pool, cpu_count
     import itertools
-    pool = Pool(processes=30)
+    n_proc = cpu_count()
+    pool = Pool(processes=n_proc)
     
     subfield_range = numpy.arange(200)
     iterator = itertools.izip(subfield_range,
@@ -831,6 +834,8 @@ def main(argv):
         coadd=opts.coadd,
         variable_psf_dir=opts.variable_psf_dir
         )
+    '''
+
  
 if __name__ == "__main__":
     import pdb, traceback
