@@ -339,8 +339,8 @@ def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1 = 0.01, g2
     CN = CN.convolvedWith(psfTarget)
     varCalc = galaxyImageSheared.symmetrizeNoise(CN,order=4)
     varEst = estimateVariance(galaxyImageSheared)
-    print 'Estimated, Calculated noise after reconvolution:', varEst, varCalc
-    print 'Input noise estimate:', variance
+    #print 'Estimated, Calculated noise after reconvolution:', varEst, varCalc
+    #print 'Input noise estimate:', variance
     return galaxyImageSheared
 
 
@@ -812,10 +812,11 @@ def main(argv):
         verbose = True
 
     # Run on all available CPUs.
+    '''
 
     from multiprocessing import Pool, cpu_count
     import itertools
-    n_proc = cpu_count()
+    n_proc = cpu_count()-2
     pool = Pool(processes=n_proc)
     
     subfield_range = numpy.arange(200)
@@ -834,7 +835,6 @@ def main(argv):
         coadd=opts.coadd,
         variable_psf_dir=opts.variable_psf_dir
         )
-    '''
 
  
 if __name__ == "__main__":

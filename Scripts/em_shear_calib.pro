@@ -74,9 +74,9 @@ end
 
 function em_shear_estimate,g_initial,model_e1,model_e2,cat,converge=converge,$
                            r1=R1_avg, r2=R2_avg, c1=c1, c2=c2, a1=R1psf, a2=R2psf
-n_iter = 10
+
 g = g_initial
-L_thresh = 1e-6
+L_thresh = 0.
 print,'Running EM algorithm, monitor for convergence:'
 
 diff = 1.
@@ -90,24 +90,25 @@ psf_e2 = mean(cat.psf_e2)
 c1 = median(cat.c1)
 c2 = median(cat.c2)
 
-while (diff gt 1e-4) AND (n_iter lt 250) do begin
+while (diff gt 1e-3) AND (n_iter lt 500) do begin
    n_iter++
    ;Use g_inital to calculate new 'unlensed' ellipticities.
    e1 = cat.e1 - (g[0]*cat.R1  + R1psf * psf_e1)
    e2 = cat.e2 - (g[1]*cat.R2  + R2psf * psf_e2)
-   e1 = e1[where(abs(e1) lt 1)]
-   e2 = e2[where(abs(e2) lt 1)]
-
-   ; Then do a likelihood-weighted average of the responsivities.
-   L1 = (model_compute(model_e1,e1))
-   L2 = (model_compute(model_e2,e2))
-;   cut1 = where(L1 lt L_thresh,ctcut1)
-;   cut2 = where(L2 lt L_thresh,ctcut2)
-;   if ctcut1 gt 0 then L1[cut1] = 0.
-;   if ctcut2 gt 0 then L2[cut2] = 0.
+   ;e1 = e1[where(abs(e1) lt 1)]
+   ;e2 = e2[where(abs(e2) lt 1)]
 
 
    ; But! Assign zero weight to points of extremely low likelihood.
+
+   L1 = (model_compute(model_e1,e1))
+   L2 = (model_compute(model_e2,e2))
+   cut1 = where(L1 lt L_thresh,ctcut1)
+   cut2 = where(L2 lt L_thresh,ctcut2)
+   if ctcut1 gt 0 then L1[cut1] = 0.
+   if ctcut2 gt 0 then L2[cut2] = 0.
+
+   ; Then do a likelihood-weighted average of the responsivities.
    
 
    R1_avg = total(L1 * cat.R1,/double) / total(L1,/double)
@@ -125,24 +126,28 @@ while (diff gt 1e-4) AND (n_iter lt 250) do begin
    ; And use these to compute a new guess for the shear.
    g1_new = total(L1 * (cat.e1 - c1 - e1_psf_correction) )/ total(L1) / R1_avg
    g2_new = total(L2 * (cat.e2 - c2 - e2_psf_correction) )/ total(L2) / R2_avg
-;   g1_new = total(L1 * (cat.e1 - cat.c1 - cat.a1*cat.psf_e1)/cat.R1*L1 )/ total(L1)
-;   g2_new = total(L2 * (cat.e2 - cat.c2 - cat.a2*cat.psf_e2)/cat.R2*L2 )/ total(L2)
+   ;g1_new = total(L1 * (cat.e1 - cat.c1 - cat.a1*cat.psf_e1)/cat.R1 )/ total(L1)
+   ;g2_new = total(L2 * (cat.e2 - cat.c2 - cat.a2*cat.psf_e2)/cat.R2 )/ total(L2)
+   ;g1_new = total(L1 * (cat.e1 - cat.c1 - cat.a1*cat.psf_e1)/cat.R1 )/ total(L1) / median(cat.r1)
+   ;g2_new = total(L2 * (cat.e2 - cat.c2 - cat.a2*cat.psf_e2)/cat.R2 )/ total(L2) / median(cat.r2)
+   
 
    diff = max([abs(g1_new-g[0]),abs(g2_new-g[1])])
-   if (n_iter eq 249 AND n_retry lt 3) then begin
+;   if (n_iter eq 249 AND n_retry lt 3) then begin
+   if (n_iter eq 499 AND n_retry lt 4) then begin
       g = [mean([g1_new,g[0]]),mean([g2_new,g[1]])]
 ;     This is a defense against limit cycles, which seem to be very common here.
       n_iter = 0
       n_retry = n_retry+1
    endif else $
       g = [g1_new,g2_new]
-   print,g[0],g[1] ;Watch for convergence.
+   if n_iter mod 10 eq 0 then print,g[0],g[1]              ;Watch for convergence.
    g1_series = [g1_series,g1_new]
 
 endwhile
 converge = 1
-if n_iter gt 249 then converge=0
-;if max(abs(g)) gt 1 then stop
+if ((n_retry gt 4) OR  (sqrt(g[0]^2 + g[1]^2) gt 1.)) OR (( ~finite(g[0]) ) OR (~finite(g[1]) ) )  then converge=0
+if ( (sqrt(g[0]^2 + g[1]^2) gt 1.) OR (( ~finite(g[0]) ) OR (~finite(g[1]) ) ) ) then converge=0
 return,g
 end
 
@@ -184,8 +189,8 @@ pro em_shear_calib
 ;common ellipticity_prior_models,model_e1,model_e2,cat
 ; Go and get the shear calibration files.
 ;template = "../Great3/Outputs-Moments/cgc_metacal_moments-*.fits"
-;template = "../Great3/Outputs-Regauss/cgc_metacal_regauss_fix-*.fits"
-template = "../Great3/Outputs-Regauss-SymNoise/output_catalog-*.fits"
+template = "../Great3/Outputs-Regauss/cgc_metacal_regauss_fix-*.fits"
+;template = "../Great3/Outputs-Regauss-SymNoise/output_catalog-*.fits"
 ;template = "../Great3/Outputs-KSB/output_catalog-*.fits"
 ;template = "../Great3/Outputs/Control-Ground-Constant/output_catalog-*.fits"
 ;template = "../Great3/Outputs-Real-Regauss/output_catalog*.fits"
@@ -337,36 +342,48 @@ psclose
 forprint,text='Great3-metaCal-CGC-regauss.txt',id,field_shear[*,0],field_shear[*,1],converged,/nocomment
 
 
+
 readcol,'cgc-truthtable.txt',id_true,g1,g2
-;use = where(converged eq 1)
-;id = id[use]
-;field_shear = field_shear[use,*]
+
+forprint, text = 'metaCal-outlier-diagnostics.txt', id, field_shear[*,0], g1, psf_e1, field_shear[*,1], g2, psf_e2, $
+          converged, ksstat1, ksstat2,/nocomment, width = 1000
+
+stop
+use = where(converged eq 1)
+id = id[use]
+field_shear = field_shear[use,*]
+
+
 
 match,id_true,id,ind_true,ind_mc
 psopen,'metaCalResults-regauss',xsize=8,ysize=8,/inches,/color
 prepare_plots,/color
+
 coeff1 = linfit(g1[ind_true],field_shear[ind_mc,0],y=y1)
 ; What's the scatter around this?
-histogauss,field_shear[ind_mc,0]-y1,a1,/noplot
-coeff1 = linfit(g1[ind_true],field_shear[ind_mc,0],y=y1,measure_err=replicate(a1[2],n_elements(ind_true)),sigma=sigma)
-plot,g1[ind_true],field_shear[ind_mc,0],ps=1,xtitle='g_1 (true)', ytitle='g_1 (recovered)'
-oplot,[-1,1],[-1,1],color=200,line=2
-xyouts,0.3,0.2,string(form='("m, b = ",F0," ",F0,"  !9 + !6  ",F0," ",F0 )',coeff1[0],coeff1[1],sigma[0],sigma[1]),/norm,charsize=1.
-plot,g1[ind_true],field_shear[ind_mc,0] - g1[ind_true],ps=1,xtitle='g_1 (true)', ytitle='g_1 (recovered) - g_1 (true)'
-hline,0,color=200,line=2
-oplot,g1[ind_true],y1-g1[ind_true],color=75,line=3
+if total(finite(y1)) eq 0 then begin
+   histogauss,field_shear[ind_mc,0]-y1,a1,/noplot
+   coeff1 = linfit(g1[ind_true],field_shear[ind_mc,0],y=y1,measure_err=replicate(a1[2],n_elements(ind_true)),sigma=sigma)
+   plot,g1[ind_true],field_shear[ind_mc,0],ps=1,xtitle='g_1 (true)', ytitle='g_1 (recovered)'
+   oplot,[-1,1],[-1,1],color=200,line=2
+   xyouts,0.3,0.2,string(form='("m, b = ",F0," ",F0,"  !9 + !6  ",F0," ",F0 )',coeff1[0],coeff1[1],sigma[0],sigma[1]),/norm,charsize=1.
+   plot,g1[ind_true],field_shear[ind_mc,0] - g1[ind_true],ps=1,xtitle='g_1 (true)', ytitle='g_1 (recovered) - g_1 (true)'
+   hline,0,color=200,line=2
+   oplot,g1[ind_true],y1-g1[ind_true],color=75,line=3
+endif
 
-coeff2 = linfit(g2[ind_true],field_shear[ind_mc,1],y=y2)
-histogauss,field_shear[ind_mc,1]-y2,a2,/noplot
-coeff2 = linfit(g2[ind_true],field_shear[ind_mc,1],y=y2,measure_err=replicate(a2[2],n_elements(ind_true)),sigma=sigma)
+   coeff2 = linfit(g2[ind_true],field_shear[ind_mc,1],y=y2)
+if total(~finite(y2)) eq 0. then begin
+   histogauss,field_shear[ind_mc,1]-y2,a2,/noplot
+   coeff2 = linfit(g2[ind_true],field_shear[ind_mc,1],y=y2,measure_err=replicate(a2[2],n_elements(ind_true)),sigma=sigma)
 
-plot,g2[ind_true],field_shear[ind_mc,1],ps=1,xtitle='g_2 (true)', ytitle='g_2 (recovered)'
-oplot,[-1,1],[-1,1],color=200,line=2
-xyouts,0.3,0.2,string(form='("m, b = ",F0," ",F0,"  !9 + !6  ",F0," ",F0 )',coeff2[0],coeff2[1],sigma[0],sigma[1]),/norm,charsize=1.
-plot,g2[ind_true],field_shear[ind_mc,1] - g2[ind_true],ps=1,xtitle='g_2 (true)', ytitle='g_2 (recovered) - g_2 (input)'
-hline,0,color=200,line=2
-oplot,g2[ind_true],y2-g2[ind_true],color=75,line=3
-
+   plot,g2[ind_true],field_shear[ind_mc,1],ps=1,xtitle='g_2 (true)', ytitle='g_2 (recovered)'
+   oplot,[-1,1],[-1,1],color=200,line=2
+   xyouts,0.3,0.2,string(form='("m, b = ",F0," ",F0,"  !9 + !6  ",F0," ",F0 )',coeff2[0],coeff2[1],sigma[0],sigma[1]),/norm,charsize=1.
+   plot,g2[ind_true],field_shear[ind_mc,1] - g2[ind_true],ps=1,xtitle='g_2 (true)', ytitle='g_2 (recovered) - g_2 (input)'
+   hline,0,color=200,line=2
+   oplot,g2[ind_true],y2-g2[ind_true],color=75,line=3
+endif
 psclose
 prepare_plots,/reset
 
@@ -414,16 +431,16 @@ psclose
 ; Is there any residual psf dependence?
 psopen,'metaCalResults-regauss-psf_dependence',xsize=7,ysize=6,/inches,/color
 prepare_plots,/color
- plot,psf_e1[ind_mc],field_shear[ind_mc,0]-g1[ind_true],ps=1,xtitle='!3psf_e1',ytitle='g_1 (measured) - g_1 (true)',charsize=2.,xmargin=[14,4];,yr=[-0.015,0.015],/ystyle
+ plot,psf_e1[ind_mc],field_shear[ind_mc,0]-g1[ind_true],ps=1,xtitle='!3psf_e1',ytitle='g_1 (measured) - g_1 (true)',charsize=2.,xmargin=[14,4],yr=[-0.015,0.015],/ystyle
 
- plot,psf_e2[ind_mc],field_shear[ind_mc,1]-g2[ind_true],ps=1,xtitle='!3psf_e2',ytitle='g_2 (measured) - g_2 (true)',charsize=2.,xmargin=[14,4];,yr=[-0.015,0.015],/ystyle
+ plot,psf_e2[ind_mc],field_shear[ind_mc,1]-g2[ind_true],ps=1,xtitle='!3psf_e2',ytitle='g_2 (measured) - g_2 (true)',charsize=2.,xmargin=[14,4],yr=[-0.015,0.015],/ystyle
 psclose
 
 ; Can we predict which fields are likely to be bad by comparing them
 ; with the ellipticity prior?
-psopen,'metaCalResults-regauss-symnoise',xsize=6,ysize=6,/inches,/color
-plot,ksstat1[ind_mc],field_shear[ind_mc,0]-g1[ind_true],ps=1,xtitle='(dis-)similarity to prior',ytitle='g_1 (measured) - g_1 (true)',charsize=2.,xmargin=[14,4]
-plot,ksstat2[ind_mc],field_shear[ind_mc,1]-g2[ind_true],ps=1,xtitle='(dis-)similarity to prior',ytitle='g_2 (measured) - g_2 (true)',charsize=2.,xmargin=[14,4]
+psopen,'metaCalResults-regauss',xsize=6,ysize=6,/inches,/color
+plot,ksstat1[ind_mc],field_shear[ind_mc,0]-g1[ind_true],ps=1,xtitle='(dis-)similarity to prior',ytitle='g_1 (measured) - g_1 (true)',charsize=2.,xmargin=[14,4],/xlog
+plot,ksstat2[ind_mc],field_shear[ind_mc,1]-g2[ind_true],ps=1,xtitle='(dis-)similarity to prior',ytitle='g_2 (measured) - g_2 (true)',charsize=2.,xmargin=[14,4],/xlog
 psclose
 prepare_plots,/reset
 
