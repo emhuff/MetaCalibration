@@ -11,6 +11,7 @@ import time
 import os
 import optparse
 import numpy
+import socket
 
 try:
     import astropy.io.fits as pyfits
@@ -813,30 +814,31 @@ def main(argv):
     else:
         verbose = True
 
-    # Run on all available CPUs.
+    if 'coma' in socket.gethostname():
+        # Just use one CPU on the coma cluster, since we've already made this whole thing
+        # embarrassingly parallel by farming out each subfield to a single CPU.
+        EstimateAllShears(
+            subfield, sim_dir, output_dir,
+            output_prefix=opts.output_prefix,
+            output_type=opts.output_type,
+            clobber=clobber,
+            sn_weight=sn_weight,
+            calib_factor=opts.calib_factor,
+            coadd=opts.coadd,
+            variable_psf_dir=opts.variable_psf_dir
+            )
+    else:
+        # Run on all available CPUs.
+        from multiprocessing import Pool, cpu_count
+        import itertools
+        n_proc = cpu_count()
+        pool = Pool(processes=n_proc)
 
-    from multiprocessing import Pool, cpu_count
-    import itertools
-    n_proc = cpu_count()
-    pool = Pool(processes=n_proc)
-    
-    subfield_range = numpy.arange(200)
-    iterator = itertools.izip(subfield_range,
-                              itertools.repeat(sim_dir),
-                              itertools.repeat(output_dir))                              
-    R = pool.map(EstimateAllShearsStar,iterator)
-    '''
-    EstimateAllShears(
-        subfield, sim_dir, output_dir,
-        output_prefix=opts.output_prefix,
-        output_type=opts.output_type,
-        clobber=clobber,
-        sn_weight=sn_weight,
-        calib_factor=opts.calib_factor,
-        coadd=opts.coadd,
-        variable_psf_dir=opts.variable_psf_dir
-        )
-    '''
+        subfield_range = numpy.arange(200)
+        iterator = itertools.izip(subfield_range,
+                                  itertools.repeat(sim_dir),
+                                  itertools.repeat(output_dir))                              
+        R = pool.map(EstimateAllShearsStar,iterator)
 
  
 if __name__ == "__main__":
