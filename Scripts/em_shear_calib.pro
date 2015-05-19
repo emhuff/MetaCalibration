@@ -215,7 +215,7 @@ print, 'Removing our estimate of the constant shape measurement biases first.'
 ; Then subtract off what we think the effects of psf and additive bias
 ; are.
 e1_prior = (cat.e1 - cat.a1 * cat.psf_e1 - cat.c1);cat.e1
-e2_prior = (cat.e2 - cat.a2 * cat.psf_e1 - cat.c2);cat.e2
+e2_prior = (cat.e2 - cat.a2 * cat.psf_e2 - cat.c2);cat.e2
 
 
 model_e1 = model_initialize(e1_prior ,bad=-10)
@@ -234,8 +234,8 @@ oplot,z,y,thick=4
 y = model_compute(model_e2,z)
 prepare_plots,/color
 plot,z,y,/ylog,xr=[-20,20],thick=3
-peak = max(model_e1.y)
-plothist,cat.e2,bin=0.01,xr=[-10,10],/ylog,peak=peak,/overplot,color=200,yr=[0.1*model_compute(model_e1,10),1.],title='e2 prior'
+peak = max(model_e2.y)
+plothist,cat.e2,bin=0.01,xr=[-10,10],/ylog,peak=peak,/overplot,color=200,yr=[0.1*model_compute(model_e2,10),1.],title='e2 prior'
 oplot,z,y,thick=4
 
 
@@ -325,7 +325,7 @@ for i = 0,ct-1 do begin
    plothist,e1_best,bin=0.05,xr=[-xb,xb],/ylog,peak=peak,/overplot,color=200,yr=[1e-2,1]
    legend,['prior','raw','estimated','true'],color=[50,255,120,200],box=0,/top,/right,charsize=1.,line=0
 ;   legend,['prior','raw','estimated'],color=[50,255,120],box=0,/top,/right,charsize=1.,line=0
-   legend,['g_true = '+string(g2[i],form='(F0.4)'), 'g_est = '+string(g[1],form='(F0.4)')],/top,/left,box=0,charsize=.75
+   legend,['g_true = '+string(g1[i],form='(F0.4)'), 'g_est = '+string(g[0],form='(F0.4)'),'!7D!6'],/top,/left,box=0,charsize=.75
 ;--------------------------------------------------   
    e1test = [(this_catalog.e1 - this_catalog.r1 * g[0] - this_a1*psf_e1[i] - this_c1)]
    e2test = [(this_catalog.e2 - this_catalog.r2 * g[1] - this_a2*psf_e2[i] - this_c2)]
@@ -346,7 +346,7 @@ forprint,text='Great3-metaCal-CGC-regauss.txt',id,field_shear[*,0],field_shear[*
 readcol,'cgc-truthtable.txt',id_true,g1,g2
 
 forprint, text = 'metaCal-outlier-diagnostics.txt', id, field_shear[*,0], g1, psf_e1, field_shear[*,1], g2, psf_e2, $
-          converged, ksstat1, ksstat2,/nocomment, width = 1000
+          converged, ksstat1, ksstat2, width = 1000, comment = "id   g1 (est)    g1 (true)     psf e1    g2 (est)    g2 (true)    psf e2    converged    ks1    ks2"
 
 
 ;use = where( ( converged eq 1) AND (ksstat1 le 1.01) AND (ksstat2 lt 1.01) )
@@ -441,9 +441,12 @@ psclose
 
 ; Can we predict which fields are likely to be bad by comparing them
 ; with the ellipticity prior?
-psopen,'metaCalResults-regauss-ks',xsize=6,ysize=6,/inches,/color
+psopen,'metaCalResults-regauss-ks',xsize=8,ysize=8,/inches,/color
+prepare_plots
 plot,ksstat1[ind_mc],field_shear[ind_mc,0]-g1[ind_true],ps=1,xtitle='(dis-)similarity to prior',ytitle='g_1 (measured) - g_1 (true)',charsize=2.,xmargin=[14,4],/xlog
+vline,1e-5,color=200,line=2
 plot,ksstat2[ind_mc],field_shear[ind_mc,1]-g2[ind_true],ps=1,xtitle='(dis-)similarity to prior',ytitle='g_2 (measured) - g_2 (true)',charsize=2.,xmargin=[14,4],/xlog
+vline,1e-5,color=200,line=2
 psclose
 prepare_plots,/reset
 

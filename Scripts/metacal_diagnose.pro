@@ -53,6 +53,8 @@ pro metacal_diagnose
   sigma2=  fltarr(nfiles)
   g1_arr = fltarr(nfiles)
   g2_arr = fltarr(nfiles)
+  psf1_arr = fltarr(nfiles)
+  psf2_arr = fltarr(nfiles)
 
   for i = 0,nfiles-1 do begin
      ncat = mrdfits(files_none[i],1)
@@ -77,6 +79,9 @@ pro metacal_diagnose
      sigma2[i] = stddev(ccat.r2 - de2_dg2)
      g1_arr[i] = g1
      g2_arr[i] = g2
+     psf1_arr[i] = psf_g1
+     psf2_arr[i] = psf_g2
+  
 
 ;  Now make some plots.
      ;window,0
