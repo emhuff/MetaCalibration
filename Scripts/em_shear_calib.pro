@@ -331,8 +331,10 @@ for i = 0,ct-1 do begin
    e2test = [(this_catalog.e2 - this_catalog.r2 * g[1] - this_a2*psf_e2[i] - this_c2)]
    kstwo,e1test,ks_e1,ks1,ksp1
    kstwo,e2test,ks_e2,ks2,ksp2
-   ksstat1[i] = variance(e1test)/variance(ks_e1)
-   ksstat2[i] = variance(e2test)/variance(ks_e2)
+   ksstat1[i] = ksp1
+   ksstat2[i] = ksp2
+   ;ksstat1[i] = variance(e1test)/variance(ks_e1)
+   ;ksstat2[i] = variance(e2test)/variance(ks_e2)
    print,'Estimated shear (g1, g2) is:', g[0], g[1]
 endfor
 psclose
@@ -346,8 +348,9 @@ readcol,'cgc-truthtable.txt',id_true,g1,g2
 forprint, text = 'metaCal-outlier-diagnostics.txt', id, field_shear[*,0], g1, psf_e1, field_shear[*,1], g2, psf_e2, $
           converged, ksstat1, ksstat2,/nocomment, width = 1000
 
-stop
-use = where(converged eq 1)
+
+;use = where( ( converged eq 1) AND (ksstat1 le 1.01) AND (ksstat2 lt 1.01) )
+use = where( ( converged eq 1) AND (ksstat1 gt 1.e-5) AND (ksstat2 gt 1e-5) )
 id = id[use]
 field_shear = field_shear[use,*]
 
@@ -358,9 +361,11 @@ psopen,'metaCalResults-regauss',xsize=8,ysize=8,/inches,/color
 prepare_plots,/color
 
 coeff1 = linfit(g1[ind_true],field_shear[ind_mc,0],y=y1)
+coeff2 = linfit(g2[ind_true],field_shear[ind_mc,1],y=y2)
+
 ; What's the scatter around this?
-if total(finite(y1)) eq 0 then begin
-   histogauss,field_shear[ind_mc,0]-y1,a1,/noplot
+if total(~finite(y1)) eq 0 then begin
+   histogauss,field_shear[ind_mc,0]-y1,a1;,/noplot
    coeff1 = linfit(g1[ind_true],field_shear[ind_mc,0],y=y1,measure_err=replicate(a1[2],n_elements(ind_true)),sigma=sigma)
    plot,g1[ind_true],field_shear[ind_mc,0],ps=1,xtitle='g_1 (true)', ytitle='g_1 (recovered)'
    oplot,[-1,1],[-1,1],color=200,line=2
@@ -372,7 +377,7 @@ endif
 
    coeff2 = linfit(g2[ind_true],field_shear[ind_mc,1],y=y2)
 if total(~finite(y2)) eq 0. then begin
-   histogauss,field_shear[ind_mc,1]-y2,a2,/noplot
+   histogauss,field_shear[ind_mc,1]-y2,a2;,/noplot
    coeff2 = linfit(g2[ind_true],field_shear[ind_mc,1],y=y2,measure_err=replicate(a2[2],n_elements(ind_true)),sigma=sigma)
 
    plot,g2[ind_true],field_shear[ind_mc,1],ps=1,xtitle='g_2 (true)', ytitle='g_2 (recovered)'
@@ -410,7 +415,7 @@ plot,g1[ind_true],field_shear[ind_mc,0],ps=6,xtitle='g_1 (true)', ytitle='g_1 (r
 oplot,[-1,1],[-1,1],color=200,line=2
 oplot,aa1[0,*], zz1, color=50,line=3
 xyouts,0.2,0.2,string(form='("m, b = ",F0," ",F0,"  !9 + !6  ",F0," ",F0 )',xx1[0],xx1[1],sqrt(covar1[0,0]),sqrt(covar1[1,1])),/norm,charsize=1.
-plot,g1[ind_true],field_shear[ind_mc,0] - g1[ind_true],ps=1,xtitle='g_1 (true)', ytitle='g_1 (recovered) - g_1 (true)', yr=[-0.01, 0.01]
+plot,g1[ind_true],field_shear[ind_mc,0] - g1[ind_true],ps=1,xtitle='g_1 (true)', ytitle='g_1 (recovered) - g_1 (true)', yr=[-0.05, 0.05]
 hline,0,color=200,line=1
 oplot,aa1[0,*], zz1 - g1[ind_true], color=50,line=3
 xyouts,0.2,0.2,string(form='("m,b = ",F0," ",F0,"  !9 + !6  ",F0," ",F0 )',xx1[0],xx1[1],sqrt(covar1[0,0]),sqrt(covar1[1,1])),/norm,charsize=1.
@@ -427,16 +432,16 @@ xyouts,0.2,0.2,string(form='("m, b = ",F0," ",F0,"  !9 + !6  ",F0," ",F0 )',xx2[
 psclose
 
 ; Is there any residual psf dependence?
-psopen,'metaCalResults-regauss-psf_dependence',xsize=7,ysize=6,/inches,/color
+psopen,'metaCalResults-regauss-psf_dependence',xsize=6,ysize=6,/inches,/color
 prepare_plots,/color
- plot,psf_e1[ind_mc],field_shear[ind_mc,0]-g1[ind_true],ps=1,xtitle='!3psf_e1',ytitle='g_1 (measured) - g_1 (true)',charsize=2.,xmargin=[14,4],yr=[-0.015,0.015],/ystyle
+ plot,psf_e1[ind_mc],field_shear[ind_mc,0]-g1[ind_true],ps=1,xtitle='!3psf_e1',ytitle='g_1 (measured) - g_1 (true)',xmargin=[14,4],yr=[-0.015,0.015],/ystyle
 
- plot,psf_e2[ind_mc],field_shear[ind_mc,1]-g2[ind_true],ps=1,xtitle='!3psf_e2',ytitle='g_2 (measured) - g_2 (true)',charsize=2.,xmargin=[14,4],yr=[-0.015,0.015],/ystyle
+ plot,psf_e2[ind_mc],field_shear[ind_mc,1]-g2[ind_true],ps=1,xtitle='!3psf_e2',ytitle='g_2 (measured) - g_2 (true)',xmargin=[14,4],yr=[-0.015,0.015],/ystyle
 psclose
 
 ; Can we predict which fields are likely to be bad by comparing them
 ; with the ellipticity prior?
-psopen,'metaCalResults-regauss',xsize=6,ysize=6,/inches,/color
+psopen,'metaCalResults-regauss-ks',xsize=6,ysize=6,/inches,/color
 plot,ksstat1[ind_mc],field_shear[ind_mc,0]-g1[ind_true],ps=1,xtitle='(dis-)similarity to prior',ytitle='g_1 (measured) - g_1 (true)',charsize=2.,xmargin=[14,4],/xlog
 plot,ksstat2[ind_mc],field_shear[ind_mc,1]-g2[ind_true],ps=1,xtitle='(dis-)similarity to prior',ytitle='g_2 (measured) - g_2 (true)',charsize=2.,xmargin=[14,4],/xlog
 psclose
