@@ -102,7 +102,75 @@ pro metacal_diagnose
   endfor
   psclose
   prepare_plots,/reset
-  plot,g1_arr, bias1,ps=3
-  plot,g1_Arr, sigma1,ps=3
-  stop
+
+  badfields = [93,97,150]
+  for i = 0,nfiles-1 do begin
+     ncat = mrdfits(files_none[i],1)
+     ncat = ncat[select_for_analysis(ncat)]
+     ccat = mrdfits(files_const[i],1)
+     ccat = ccat[select_for_analysis(ccat)]
+     match,ccat.id,ncat.id,cind,nind
+     ccat = ccat[cind]
+     ncat = ncat[nind]
+; Look up the field properties.
+     g1 = (truth_g1[where(truth_field_id eq fieldnumbers[i])])[0]
+     g2 = (truth_g2[where(truth_field_id eq fieldnumbers[i])])[0]
+     psf_g1 = (truth_psf_g1[where(truth_field_id eq fieldnumbers[i])])[0]
+     psf_g2 = (truth_psf_g2[where(truth_field_id eq fieldnumbers[i])])[0]
+     
+     de1_dg1 = (ccat.g1 - ncat.g1)/g1
+     de2_dg2 = (ccat.g2 - ncat.g2)/g2
+     if total(i eq badfields) gt 0 then begin
+        if n_elements(badTrueR1) eq 0 then begin
+           badTrueR1 = de1_dg1
+           badEmpR1  = ccat.r1
+        endif else begin
+           badTrueR1 = [badTrueR1, de1_dg1]
+           badEmpR1 = [badEmpR1, ccat.r1]
+        endelse
+     endif else begin
+        if abs(g1) gt 0.01 then begin
+           if n_elements(goodTrueR1) eq 0 then begin
+              goodTrueR1 = de1_dg1
+              goodEmpR1 = ccat.r1
+           endif else begin
+              goodTrueR1 = [goodTrueR1, de1_dg1]
+              goodEmpR1 = [goodEmpR1, ccat.r1]
+           endelse
+        endif
+     endelse
+  endfor
+
+  plothist,asinh(goodTrueR1),bin=0.01,xgt,ygt,/noplot
+  plothist,asinh(badTrueR1),bin=0.01,xbt,ybt,/noplot
+  ygt = ygt/total(ygt)
+  ybt = ybt/total(ybt)
+
+  window,0
+  plot,xgt,ygt,ps=10,/ylog,yr=[1e-5,.1],xtitle='arcsinh(R1)',ytitle='N(R1)',charsize=2.,xr=[-5,5]
+  oplot,xbt,ybt,ps=10,color=200 
+  legend,['asinh(R1) (diff, all)','asinh(R1) (diff, bad)'],line=[0,0],color=[-1,200],box=0,/top,/left,charsize=1.5
+
+  window,1
+  plot,xgt,ybt - interpol(ygt, xgt, xbt), xtitle='arcsinh(R1)', ytitle='N(asinh(R1), bad) - N(asinh(R1), good)',charsize=2.,$
+       xr=[-6,6],/xstyle,yr=[-0.003,0.003]
+
+
+  plothist,asinh(goodEmpR1),bin=0.01,xge,yge,/noplot
+  plothist,asinh(badEmpR1),bin=0.01,xbe,ybe,/noplot
+  yge = yge/total(yge)
+  ybe = ybe/total(ybe)
+  
+
+  window,2
+  plot,xge,yge,ps=10,/ylog,yr=[1e-5,.1],xtitle='arcsinh(R1)',ytitle='N(R1)',charsize=2.,xr=[-5,5]
+  oplot,xbe,ybe,ps=10,color=200 
+  legend,['asinh(R1) (metacal, all)','asinh(R1) (metacal, bad)'],line=[0,0],color=[-1,200],box=0,/top,/left,charsize=1.5
+
+  window,3
+  plot,xbe,ybe - interpol(yge, xge, xbe), xtitle='arcsinh(R1)', ytitle='N(asinh(R1), bad) - N(asinh(R1), good)',charsize=2.,$
+       xr=[-6,6],/xstyle,yr=[-0.003,0.003]
+
+
+stop
 end

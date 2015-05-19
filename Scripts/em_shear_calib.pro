@@ -270,7 +270,9 @@ ks_e2 = ks_e2[random_indices(n_elements(ks_e2),nsample)]
 
 ksstat1 = fltarr(ct)
 ksstat2 = fltarr(ct)
-
+outlierFrac1 = fltarr(ct)
+outlierFrac2 = fltarr(ct)
+outlierThresh = 3.
 ; Make plots showing how the distribution shifts when shear is
 ; applied.
 
@@ -279,6 +281,9 @@ readcol,'cgc-truthtable.txt',id_true,g1,g2
 
 psopen,'metacal-regauss-distributions',xsize=8,ysize=5,/inches,/color
 prepare_plots,/color
+badfields = [93,97,150,160]
+
+
 for i = 0,ct-1 do begin
    this_catalog = mrdfits(catfiles[i],1,/silent)
    id[i] = long((stregex(catfiles[i],'-([0-9]{3}).fits',/sub,/extract))[1])
@@ -308,6 +313,7 @@ for i = 0,ct-1 do begin
    field_shear[i,0] = g[0]
    field_shear[i,1] = g[1]
    
+   
 
 ;--------------------------------------------------
 ;  Make plots.   
@@ -315,27 +321,33 @@ for i = 0,ct-1 do begin
    y = (model_compute(model_e1,z)  + model_compute(model_e1,-z))/2.
 ;  Then plot the uncorrected shape distribution
    peak = max(y)
-   xb = 2 ; min/max on x-axis for histogram
-   plothist,this_catalog.e1,bin=0.05,xr=[-xb,xb],/ylog,peak=peak,title='e1, field '+(stregex(catfiles[i],'-([0-9]*).fits',/sub,/ext))[1],yr=[1e-2,1]
+   xb = 5 ; min/max on x-axis for histogram
+   plothist,this_catalog.e1,bin=0.05,xr=[-xb,xb],/ylog,peak=peak,title='e1, field '+(stregex(catfiles[i],'-([0-9]*).fits',/sub,/ext))[1],yr=[1e-7,1]
    oplot,z,y,color=50
 ;  Finally, plot the unsheared shape distribution
    e1_unsheared = (this_catalog.e1 - this_catalog.r1 * g[0] - this_a1*psf_e1[i] - this_c1)
-   plothist,e1_unsheared,bin=0.05,xr=[-xb,xb],/ylog,peak=peak,/overplot,color=120,yr=[1e-2,1]
+   e2_unsheared = (this_catalog.e2 - this_catalog.r2 * g[1] - this_a2*psf_e2[i] - this_c2)
+   plothist,e1_unsheared,bin=0.05,xr=[-xb,xb],/ylog,peak=peak,/overplot,color=120,yr=[1e-7,1]
    e1_best = (this_catalog.e1 - this_catalog.r1 * g1[i] - this_a1*psf_e1[i] - this_c1)
-   plothist,e1_best,bin=0.05,xr=[-xb,xb],/ylog,peak=peak,/overplot,color=200,yr=[1e-2,1]
+   plothist,e1_best,bin=0.05,xr=[-xb,xb],/ylog,peak=peak,/overplot,color=200,yr=[1e-7,1]
    legend,['prior','raw','estimated','true'],color=[50,255,120,200],box=0,/top,/right,charsize=1.,line=0
 ;   legend,['prior','raw','estimated'],color=[50,255,120],box=0,/top,/right,charsize=1.,line=0
-   legend,['g_true = '+string(g1[i],form='(F0.4)'), 'g_est = '+string(g[0],form='(F0.4)'),'!7D!6'],/top,/left,box=0,charsize=.75
+   legend,['g_true = '+string(g1[i],form='(F0.4)'), 'g_est = '+string(g[0],form='(F0.4)'),'!7D!6 = '+string(g[0]-g1[i],form='(F0.4)')],/top,/left,box=0,charsize=.75
 ;--------------------------------------------------   
    e1test = [(this_catalog.e1 - this_catalog.r1 * g[0] - this_a1*psf_e1[i] - this_c1)]
    e2test = [(this_catalog.e2 - this_catalog.r2 * g[1] - this_a2*psf_e2[i] - this_c2)]
+   outlierFrac1[i] = total(abs(e1_unsheared) gt outlierThresh) / float(n_elements(e1_unsheared) )
+   outlierFrac2[i] = total(abs(e2_unsheared) gt outlierThresh) / float(n_elements(e2_unsheared) )
+
    kstwo,e1test,ks_e1,ks1,ksp1
    kstwo,e2test,ks_e2,ks2,ksp2
    ksstat1[i] = ksp1
    ksstat2[i] = ksp2
+
    ;ksstat1[i] = variance(e1test)/variance(ks_e1)
    ;ksstat2[i] = variance(e2test)/variance(ks_e2)
    print,'Estimated shear (g1, g2) is:', g[0], g[1]
+
 endfor
 psclose
 
@@ -345,18 +357,22 @@ forprint,text='Great3-metaCal-CGC-regauss.txt',id,field_shear[*,0],field_shear[*
 
 readcol,'cgc-truthtable.txt',id_true,g1,g2
 
-forprint, text = 'metaCal-outlier-diagnostics.txt', id, field_shear[*,0], g1, psf_e1, field_shear[*,1], g2, psf_e2, $
-          converged, ksstat1, ksstat2, width = 1000, comment = "id   g1 (est)    g1 (true)     psf e1    g2 (est)    g2 (true)    psf e2    converged    ks1    ks2"
+forprint, text = 'metaCal-outlier-diagnostics-regauss.txt', id, field_shear[*,0], g1, psf_e1, field_shear[*,1], g2, psf_e2, $
+          converged, ksstat1, ksstat2, outlierFrac1, outlierFrac2, width = 1000, comment = "id   g1 (est)    g1 (true)     psf e1    g2 (est)    g2 (true)    psf e2    converged    ks1    ks2    outlierFrac (|g1|>2)  outlierFrac (|g2|>2)"
 
 
 ;use = where( ( converged eq 1) AND (ksstat1 le 1.01) AND (ksstat2 lt 1.01) )
 use = where( ( converged eq 1) AND (ksstat1 gt 1.e-5) AND (ksstat2 gt 1e-5) )
+id_cut = id[where( (( converged eq 1) AND (ksstat1 gt 1.e-5) AND (ksstat2 gt 1e-5)) eq 0) ]
 id = id[use]
+field_shear_cut = field_shear(where(use eq 0 ),* )
+
 field_shear = field_shear[use,*]
 
 
 
 match,id_true,id,ind_true,ind_mc
+match,id_true,id_cut, ind_cut, ind_mn
 psopen,'metaCalResults-regauss',xsize=8,ysize=8,/inches,/color
 prepare_plots,/color
 
@@ -368,11 +384,14 @@ if total(~finite(y1)) eq 0 then begin
    histogauss,field_shear[ind_mc,0]-y1,a1;,/noplot
    coeff1 = linfit(g1[ind_true],field_shear[ind_mc,0],y=y1,measure_err=replicate(a1[2],n_elements(ind_true)),sigma=sigma)
    plot,g1[ind_true],field_shear[ind_mc,0],ps=1,xtitle='g_1 (true)', ytitle='g_1 (recovered)'
+   oplot,g1[ind_cut], field_shear[ind_mn,0],ps=7,color=50
    oplot,[-1,1],[-1,1],color=200,line=2
-   xyouts,0.3,0.2,string(form='("m, b = ",F0," ",F0,"  !9 + !6  ",F0," ",F0 )',coeff1[0],coeff1[1],sigma[0],sigma[1]),/norm,charsize=1.
+   xyouts,0.3,0.2,string(form='("b, m = ",F0," ",F0,"  !9 + !6  ",F0," ",F0 )',coeff1[0],coeff1[1],sigma[0],sigma[1]),/norm,charsize=1.
    plot,g1[ind_true],field_shear[ind_mc,0] - g1[ind_true],ps=1,xtitle='g_1 (true)', ytitle='g_1 (recovered) - g_1 (true)'
+   oplot,g1[ind_cut], field_shear[ind_mn,0] - g1[ind_cut],ps=7,color=50
    hline,0,color=200,line=2
    oplot,g1[ind_true],y1-g1[ind_true],color=75,line=3
+   xyouts,0.3,0.2,string(form='("b, m = ",F0," ",F0,"  !9 + !6  ",F0," ",F0 )',coeff1[0],coeff1[1],sigma[0],sigma[1]),/norm,charsize=1.
 endif
 
    coeff2 = linfit(g2[ind_true],field_shear[ind_mc,1],y=y2)
@@ -381,11 +400,15 @@ if total(~finite(y2)) eq 0. then begin
    coeff2 = linfit(g2[ind_true],field_shear[ind_mc,1],y=y2,measure_err=replicate(a2[2],n_elements(ind_true)),sigma=sigma)
 
    plot,g2[ind_true],field_shear[ind_mc,1],ps=1,xtitle='g_2 (true)', ytitle='g_2 (recovered)'
+   oplot,g2[ind_cut], field_shear[ind_mn,1],ps=7,color=50
    oplot,[-1,1],[-1,1],color=200,line=2
-   xyouts,0.3,0.2,string(form='("m, b = ",F0," ",F0,"  !9 + !6  ",F0," ",F0 )',coeff2[0],coeff2[1],sigma[0],sigma[1]),/norm,charsize=1.
+   xyouts,0.3,0.2,string(form='("b, m = ",F0," ",F0,"  !9 + !6  ",F0," ",F0 )',coeff2[0],coeff2[1],sigma[0],sigma[1]),/norm,charsize=1.
    plot,g2[ind_true],field_shear[ind_mc,1] - g2[ind_true],ps=1,xtitle='g_2 (true)', ytitle='g_2 (recovered) - g_2 (input)'
    hline,0,color=200,line=2
    oplot,g2[ind_true],y2-g2[ind_true],color=75,line=3
+   oplot,g2[ind_cut], field_shear[ind_mn,1] - g2[ind_cut],ps=7,color=50
+   xyouts,0.3,0.2,string(form='("b, m = ",F0," ",F0,"  !9 + !6  ",F0," ",F0 )',coeff2[0],coeff2[1],sigma[0],sigma[1]),/norm,charsize=1.
+
 endif
 psclose
 prepare_plots,/reset
@@ -443,9 +466,9 @@ psclose
 ; with the ellipticity prior?
 psopen,'metaCalResults-regauss-ks',xsize=8,ysize=8,/inches,/color
 prepare_plots
-plot,ksstat1[ind_mc],field_shear[ind_mc,0]-g1[ind_true],ps=1,xtitle='(dis-)similarity to prior',ytitle='g_1 (measured) - g_1 (true)',charsize=2.,xmargin=[14,4],/xlog
+plot,ksstat1[use[ind_mc]],field_shear[ind_mc,0]-g1[ind_true],ps=1,xtitle='(dis-)similarity to prior',ytitle='g_1 (measured) - g_1 (true)',charsize=2.,xmargin=[14,4],/xlog
 vline,1e-5,color=200,line=2
-plot,ksstat2[ind_mc],field_shear[ind_mc,1]-g2[ind_true],ps=1,xtitle='(dis-)similarity to prior',ytitle='g_2 (measured) - g_2 (true)',charsize=2.,xmargin=[14,4],/xlog
+plot,ksstat2[use[ind_mc]],field_shear[ind_mc,1]-g2[ind_true],ps=1,xtitle='(dis-)similarity to prior',ytitle='g_2 (measured) - g_2 (true)',charsize=2.,xmargin=[14,4],/xlog
 vline,1e-5,color=200,line=2
 psclose
 prepare_plots,/reset
