@@ -314,25 +314,25 @@ for i = 0,ct-1 do begin
 ;--------------------------------------------------
 ;  Make plots.   
 ; First, plot the prior.
-   y = (model_compute(model_e2,z)  + model_compute(model_e2,-z))/2.
+   y = (model_compute(model_e1,z)  + model_compute(model_e1,-z))/2.
 ;  Then plot the uncorrected shape distribution
    peak = max(y)
    xb = 2 ; min/max on x-axis for histogram
-   plothist,this_catalog.e2,bin=0.05,xr=[-xb,xb],/ylog,peak=peak,title='e2, field '+(stregex(catfiles[i],'-([0-9]*).fits',/sub,/ext))[1],yr=[1e-2,1]
+   plothist,this_catalog.e1,bin=0.05,xr=[-xb,xb],/ylog,peak=peak,title='e1, field '+(stregex(catfiles[i],'-([0-9]*).fits',/sub,/ext))[1],yr=[1e-2,1]
    oplot,z,y,color=50
 ;  Finally, plot the unsheared shape distribution
-   e2_unsheared = (this_catalog.e2 - this_catalog.r2 * g[1] - this_a2*psf_e2[i] - this_c2)
-   plothist,e2_unsheared,bin=0.05,xr=[-xb,xb],/ylog,peak=peak,/overplot,color=120,yr=[1e-2,1]
-   e2_best = (this_catalog.e2 - this_catalog.r2 * g2[i] - this_a2*psf_e2[i] - this_c2)
-   plothist,e2_best,bin=0.05,xr=[-xb,xb],/ylog,peak=peak,/overplot,color=200,yr=[1e-2,1]
+   e1_unsheared = (this_catalog.e1 - this_catalog.r1 * g[0] - this_a1*psf_e1[i] - this_c1)
+   plothist,e1_unsheared,bin=0.05,xr=[-xb,xb],/ylog,peak=peak,/overplot,color=120,yr=[1e-2,1]
+   e1_best = (this_catalog.e1 - this_catalog.r1 * g1[i] - this_a1*psf_e1[i] - this_c1)
+   plothist,e1_best,bin=0.05,xr=[-xb,xb],/ylog,peak=peak,/overplot,color=200,yr=[1e-2,1]
    legend,['prior','raw','estimated','true'],color=[50,255,120,200],box=0,/top,/right,charsize=1.,line=0
 ;   legend,['prior','raw','estimated'],color=[50,255,120],box=0,/top,/right,charsize=1.,line=0
    legend,['g_true = '+string(g2[i],form='(F0.4)'), 'g_est = '+string(g[1],form='(F0.4)')],/top,/left,box=0,charsize=.75
 ;--------------------------------------------------   
    e1test = [(this_catalog.e1 - this_catalog.r1 * g[0] - this_a1*psf_e1[i] - this_c1)]
    e2test = [(this_catalog.e2 - this_catalog.r2 * g[1] - this_a2*psf_e2[i] - this_c2)]
-   ;kstwo,e1test,ks_e1,ks1,ksp1
-   ;kstwo,e2test,ks_e2,ks2,ksp2
+   kstwo,e1test,ks_e1,ks1,ksp1
+   kstwo,e2test,ks_e2,ks2,ksp2
    ksstat1[i] = variance(e1test)/variance(ks_e1)
    ksstat2[i] = variance(e2test)/variance(ks_e2)
    print,'Estimated shear (g1, g2) is:', g[0], g[1]

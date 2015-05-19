@@ -11,6 +11,7 @@ import time
 import os
 import optparse
 import numpy
+import socket
 
 try:
     import astropy.io.fits as pyfits
@@ -285,7 +286,7 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
     psfNoPixel = galsim.Convolve([psf , pixInv])
 
     # Increase the size of the PSF by 2*shear
-    psfGrownNoPixel = psfNoPixel.createDilated(1 + 2*numpy.max([g1,g2]))
+    psfGrownNoPixel = psfNoPixel.dilate(1 + 2*numpy.max([g1,g2]))
 
     # Convolve the grown psf with the pixel
     psfGrown = galsim.Convolve(psfGrownNoPixel,pixel)
@@ -293,11 +294,11 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
     # I think it's actually the shear of the effective, PSF-convolved PSF that we're sensitive
     # to. So I'm going to shear at this stage if gal_shear is False.
     if not gal_shear:
-        psfGrown.applyShear(g1=g1, g2=g2)
+        psfGrown = psfGrown.shear(g1=g1, g2=g2)
 
     # Draw to an ImageD object, and then return.
     psfGrownImage = galsim.ImageD(psfImage.bounds)
-    psfGrown.draw(psfGrownImage,scale=pixelscale)
+    psfGrownImage=psfGrown.drawImage(image=psfGrownImage, scale=pixelscale, method='no_pixel')
     return psfGrownImage
 
 
@@ -316,14 +317,16 @@ def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1 = 0.01, g2
     galaxy_noPSF = galsim.Convolve(galaxy,psfInv)
 
     # Apply a shear
-    galaxy_noPSF.applyShear(g1 = g1, g2 = g2)
+    galaxy_noPSF = galaxy_noPSF.shear(g1 = g1, g2 = g2)
 
     # Reconvolve to the target psf
     galaxy_sheared_reconv = galsim.Convolve([galaxy_noPSF, psfTarget])
 
     # Draw reconvolved, sheared image to an ImageD object, and return.
     galaxyImageSheared = galsim.ImageD(galaxyImage.bounds)
-    galaxy_sheared_reconv.draw(image=galaxyImageSheared,scale=psfImage.scale)
+    galaxyImageSheared = galaxy_sheared_reconv.drawImage(image=galaxyImageSheared,
+                                                         method='no_pixel',
+                                                         scale=psfImage.scale)
 
 
     # Symmetrize the noise.
@@ -811,6 +814,7 @@ def main(argv):
     else:
         verbose = True
 
+<<<<<<< HEAD
     # Run on all available CPUs.
     '''
 
@@ -835,6 +839,33 @@ def main(argv):
         coadd=opts.coadd,
         variable_psf_dir=opts.variable_psf_dir
         )
+=======
+    if 'coma' in socket.gethostname():
+        # Just use one CPU on the coma cluster, since we've already made this whole thing
+        # embarrassingly parallel by farming out each subfield to a single CPU.
+        EstimateAllShears(
+            subfield, sim_dir, output_dir,
+            output_prefix=opts.output_prefix,
+            output_type=opts.output_type,
+            clobber=clobber,
+            sn_weight=sn_weight,
+            calib_factor=opts.calib_factor,
+            coadd=opts.coadd,
+            variable_psf_dir=opts.variable_psf_dir
+            )
+    else:
+        # Run on all available CPUs.
+        from multiprocessing import Pool, cpu_count
+        import itertools
+        n_proc = cpu_count()
+        pool = Pool(processes=n_proc)
+
+        subfield_range = numpy.arange(200)
+        iterator = itertools.izip(subfield_range,
+                                  itertools.repeat(sim_dir),
+                                  itertools.repeat(output_dir))                              
+        R = pool.map(EstimateAllShearsStar,iterator)
+>>>>>>> origin/master
 
  
 if __name__ == "__main__":
