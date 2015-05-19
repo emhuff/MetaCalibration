@@ -95,8 +95,6 @@ while (diff gt 1e-3) AND (n_iter lt 500) do begin
    ;Use g_inital to calculate new 'unlensed' ellipticities.
    e1 = cat.e1 - (g[0]*cat.R1  + R1psf * psf_e1)
    e2 = cat.e2 - (g[1]*cat.R2  + R2psf * psf_e2)
-   ;e1 = e1[where(abs(e1) lt 1)]
-   ;e2 = e2[where(abs(e2) lt 1)]
 
 
    ; But! Assign zero weight to points of extremely low likelihood.
@@ -216,8 +214,8 @@ print, 'Removing our estimate of the constant shape measurement biases first.'
 ; To build the prior, assume that the correct shear is zero.
 ; Then subtract off what we think the effects of psf and additive bias
 ; are.
-e1_prior = cat.e1;(cat.e1 - cat.a1 * cat.psf_e1 - cat.c1)
-e2_prior = cat.e2;(cat.e2 - cat.a2 * cat.psf_e1 - cat.c2)
+e1_prior = (cat.e1 - cat.a1 * cat.psf_e1 - cat.c1);cat.e1
+e2_prior = (cat.e2 - cat.a2 * cat.psf_e1 - cat.c2);cat.e2
 
 
 model_e1 = model_initialize(e1_prior ,bad=-10)
