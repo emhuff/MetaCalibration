@@ -12,8 +12,9 @@ pro metacal_diagnose
 
 ; Go get the files.
 ;--------------------------------------------------
-  template_const = '/n/des/huff.791/Great3/Outputs-Regauss/cgc_metacal_regauss_fix*.fits'
+;  template_const = '/n/des/huff.791/Great3/Outputs-Regauss/cgc_metacal_regauss_fix*.fits'
 ;  template_const = '/n/des/huff.791/Great3/Outputs-Regauss-SymNoise/output_catalog-*.fits'
+  template_const = '../Great3/Outputs-Regauss-SymNoise/cgc_metacal_symm-*.fits'
   files_const = file_search(template_const,count=ctc)
 
   
