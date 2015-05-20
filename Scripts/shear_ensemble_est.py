@@ -107,7 +107,6 @@ def doInference(catalogs= None):
 
     print '  About to build prior...'
     bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg = buildPrior(catalogs)
-    print de1_dg
     print '  Done building prior, now doing rest of inference.'
     gamma1_raw = np.zeros(len(catalogs))
     gamma2_raw = np.zeros(len(catalogs))
@@ -118,23 +117,23 @@ def doInference(catalogs= None):
 
     covar1_scaled = - np.outer( e1_prior_hist, e1_prior_hist) * ( np.ones( (e1_prior_hist.size, e1_prior_hist.size) ) - np.diag(np.ones(e1_prior_hist.size) ) ) + np.diag( e1_prior_hist * (1 - e1_prior_hist) )
     covar2_scaled = - np.outer( e2_prior_hist, e2_prior_hist) * ( np.ones( (e2_prior_hist.size, e2_prior_hist.size) ) - np.diag(np.ones(e2_prior_hist.size) ) ) + np.diag( e2_prior_hist * (1 - e2_prior_hist) )    
-    
-    
     for catalog,i in zip(catalogs, xrange(len(catalogs) )):
         
         this_e1_hist, _ = np.histogram(catalog.g1, bins = bin_edges )
-        this_e1_hist = this_e1_hist / catalog.size
+        this_e1_hist = this_e1_hist * 1./catalog.size
         this_e2_hist, _ = np.histogram(catalog.g2, bins = bin_edges )
-        this_e2_hist = this_e2_hist / catalog.size
+        this_e2_hist = this_e2_hist * 1./catalog.size
         # covar_hist = N_obj  * covar; but we divide hist by N_obj, so divide covar_hist by N_obj*N_obj
-        this_covar1 = covar1_scaled / catalog.size 
-        this_covar2 = covar2_scaled / catalog.size
+        this_covar1 = covar1_scaled * 1./catalog.size 
+        this_covar2 = covar2_scaled * 1./catalog.size
         this_cinv1 = np.linalg.pinv(this_covar1)
         this_cinv2 = np.linalg.pinv(this_covar2)
-        gamma1_raw[i] = linear_estimator( data = this_e1_hist, null = e1_prior_hist, deriv = de1_dg)
-        gamma2_raw[i] = linear_estimator( data = this_e2_hist, null = e2_prior_hist, deriv = de2_dg) 
-        this_g1_opt, this_g1_var = linear_estimator( data = this_e1_hist, null = e1_prior_hist, deriv = de1_dg, cinv = this_cinv1)
-        this_g2_opt, this_g2_var = linear_estimator( data = this_e2_hist, null = e2_prior_hist, deriv = de2_dg, cinv = this_cinv2) 
+        gamma1_raw[i] = linear_estimator(data=this_e1_hist, null=e1_prior_hist, deriv=de1_dg)
+        gamma2_raw[i] = linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv=de2_dg) 
+        this_g1_opt, this_g1_var = \
+            linear_estimator(data=this_e1_hist, null=e1_prior_hist, deriv=de1_dg, cinv=this_cinv1)
+        this_g2_opt, this_g2_var = \
+            linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv=de2_dg, cinv=this_cinv2) 
         gamma1_opt[i] = this_g1_opt
         gamma2_opt[i] = this_g2_opt
         gamma1_var[i] = this_g1_var
