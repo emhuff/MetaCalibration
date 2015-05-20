@@ -86,10 +86,9 @@ def buildPrior(catalogs = None, nbins = 25):
         np.hstack( (e2_corr+r2*dg, -e2_corr+(r2*dg) ) ),  bins=bin_edges)
     e2_prior_hist_mod = e2_prior_hist_mod * 1./e2prior.size
 
-    # Note from Rachel: updated the denominator to be 2*dg since we did a two-sided derivative.
-    de1_dg = ( e1_prior_hist_mod - e1_prior_hist) / (2*dg)
-    de2_dg = ( e2_prior_hist_mod - e2_prior_hist) / (2*dg)
-    
+    de1_dg = ( e1_prior_hist_mod - e1_prior_hist) / dg
+    de2_dg = ( e2_prior_hist_mod - e2_prior_hist) / dg
+ 
     return bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg
 
 
@@ -124,7 +123,7 @@ def doInference(catalogs= None):
         this_e2_hist, _ = np.histogram(catalog.g2, bins = bin_edges )
         this_e2_hist = this_e2_hist * 1./catalog.size
         # covar_hist = N_obj  * covar; but we divide hist by N_obj, so divide covar_hist by N_obj*N_obj
-        this_covar1 = covar1_scaled * 1./catalog.size 
+        this_covar1 = covar1_scaled * 1./catalog.size
         this_covar2 = covar2_scaled * 1./catalog.size
         this_cinv1 = np.linalg.pinv(this_covar1)
         this_cinv2 = np.linalg.pinv(this_covar2)
