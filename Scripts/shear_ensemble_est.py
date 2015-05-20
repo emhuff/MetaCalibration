@@ -73,13 +73,17 @@ def buildPrior(catalogs = None, nbins = 25):
     e2_prior_hist = e2_prior_hist * 1./e2prior.size
     
     # Compute derivatives.
+    # Note from Rachel: changed code inside of the np.hstack() below.  I think it should be e1+r1*dg
+    # and -e1+r1*dg, because regardless of whether e1 is >0 or <0, it should still be shifted to a
+    # positive direction if dg>0.  Previous code had -(e1+r1*dg) which does the opposite, i.e.,
+    # shifts e1 negative if dg is positive.
     dg = 0.01
     e1_prior_hist_mod, _  = np.histogram( 
-        np.hstack( (e1_corr+r1*dg, -(e1_corr+r1*dg) ) ),  bins=bin_edges )
+        np.hstack( (e1_corr+r1*dg, -e1_corr+(r1*dg) ) ),  bins=bin_edges )
     e1_prior_hist_mod = e1_prior_hist_mod / (e1prior.size)
 
     e2_prior_hist_mod, _  = np.histogram( 
-        np.hstack( (e2_corr+r2*dg, -(e2_corr+r2*dg) ) ),  bins = bin_edges )
+        np.hstack( (e2_corr+r2*dg, -e2_corr+(r2*dg) ) ),  bins = bin_edges )
     e2_prior_hist_mod = e2_prior_hist_mod / (e2prior.size)
 
     # Note from Rachel: updated the denominator to be 2*dg since we did a two-sided derivative.
