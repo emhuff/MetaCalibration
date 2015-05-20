@@ -67,7 +67,7 @@ def buildPrior(catalogs = None, nbins = 25):
 
     # Compute priors.
     e1_prior_hist, _ = np.histogram(e1prior, bins = bin_edges)
-    e2_prior_hist, _ = np.histogram(e2prior, bins = bin_edges )
+    e2_prior_hist, _ = np.histogram(e2prior, bins = bin_edges)
 
     e1_prior_hist = e1_prior_hist * 1./e1prior.size
     e2_prior_hist = e2_prior_hist * 1./e2prior.size
@@ -79,12 +79,12 @@ def buildPrior(catalogs = None, nbins = 25):
     # shifts e1 negative if dg is positive.
     dg = 0.01
     e1_prior_hist_mod, _  = np.histogram( 
-        np.hstack( (e1_corr+r1*dg, -e1_corr+(r1*dg) ) ),  bins=bin_edges )
-    e1_prior_hist_mod = e1_prior_hist_mod / (e1prior.size)
+        np.hstack( (e1_corr+r1*dg, -e1_corr+(r1*dg) ) ),  bins=bin_edges)
+    e1_prior_hist_mod = e1_prior_hist_mod * 1./e1prior.size
 
     e2_prior_hist_mod, _  = np.histogram( 
-        np.hstack( (e2_corr+r2*dg, -e2_corr+(r2*dg) ) ),  bins = bin_edges )
-    e2_prior_hist_mod = e2_prior_hist_mod / (e2prior.size)
+        np.hstack( (e2_corr+r2*dg, -e2_corr+(r2*dg) ) ),  bins=bin_edges)
+    e2_prior_hist_mod = e2_prior_hist_mod * 1./e2prior.size
 
     # Note from Rachel: updated the denominator to be 2*dg since we did a two-sided derivative.
     de1_dg = ( e1_prior_hist_mod - e1_prior_hist) / (2*dg)
@@ -107,6 +107,7 @@ def doInference(catalogs= None):
 
     print '  About to build prior...'
     bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg = buildPrior(catalogs)
+    print de1_dg
     print '  Done building prior, now doing rest of inference.'
     gamma1_raw = np.zeros(len(catalogs))
     gamma2_raw = np.zeros(len(catalogs))
