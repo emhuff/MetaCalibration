@@ -53,8 +53,6 @@ def buildPrior(catalogs = None, nbins = 25):
     r2 = np.hstack(r2)
     e1prior = np.hstack( (e1_corr, -e1_corr ) )
     e2prior = np.hstack( (e2_corr, -e2_corr ) )
-    r1 = np.hstack( (r1, r1) )
-    r2 = np.hstack( (r2, r2) )
     all_e = np.hstack( (e1prior, e2prior))
 
     # Define bins.  np.percentile cannot take a list of percentile levels, so we have to stupidly
@@ -102,7 +100,9 @@ def linear_estimator(data = None, null = None, deriv = None, cinv = None):
     
 def doInference(catalogs= None):
 
+    print '  About to build prior...'
     bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg = buildPrior(catalogs)
+    print '  Done building prior, now doing rest of inference.'
     gamma1_raw = np.zeros(len(catalogs))
     gamma2_raw = np.zeros(len(catalogs))
     gamma1_opt = np.zeros(len(catalogs))
@@ -117,14 +117,18 @@ def doInference(catalogs= None):
     for catalog,i in zip(catalogs, xrange(len(catalogs) )):
         
         this_e1_hist, _ = np.histogram(catalog.g1, bins = bin_edges )
-        this_e1_hist = this_e1_hist * 1./catalog.size
+        this_e1_hist = this_e1_hist / catalog.size
+        this_e2_hist, _ = np.histogram(catalog.g2, bins = bin_edges )
+        this_e2_hist = this_e2_hist / catalog.size
         # covar_hist = N_obj  * covar; but we divide hist by N_obj, so divide covar_hist by N_obj*N_obj
-        this_covar =  covar_scaled * 1./catalog.size 
-        this_cinv = np.linalg.pinv(this_covar)
+        this_covar1 = covar1_scaled / catalog.size 
+        this_covar2 = covar2_scaled / catalog.size
+        this_cinv1 = np.linalg.pinv(this_covar1)
+        this_cinv2 = np.linalg.pinv(this_covar2)
         gamma1_raw[i] = linear_estimator( data = this_e1_hist, null = e1_prior_hist, deriv = de1_dg)
         gamma2_raw[i] = linear_estimator( data = this_e2_hist, null = e2_prior_hist, deriv = de2_dg) 
-        this_g1_opt, this_g1_var = linear_estimator( data = this_e1_hist, null = e1_prior_hist, deriv = de1_dg, cinv = this_cinv)
-        this_g2_opt, this_g2_var = linear_estimator( data = this_e2_hist, null = e2_prior_hist, deriv = de2_dg, cinv = this_cinv) 
+        this_g1_opt, this_g1_var = linear_estimator( data = this_e1_hist, null = e1_prior_hist, deriv = de1_dg, cinv = this_cinv1)
+        this_g2_opt, this_g2_var = linear_estimator( data = this_e2_hist, null = e2_prior_hist, deriv = de2_dg, cinv = this_cinv2) 
         gamma1_opt[i] = this_g1_opt
         gamma2_opt[i] = this_g2_opt
         gamma1_var[i] = this_g1_var
@@ -134,12 +138,17 @@ def doInference(catalogs= None):
 
 def main(args):
 
-    # Set defaults and parse args.
+    # Set defaults and parse args.  This is kind of a stupid way to do it, since right now you can
+    # specify either path, or path AND mc_type, or path AND mc_type AND outfile, but you can't (for
+    # example) just specify outfile or just specify mc_type.  But it'll do for now.
     path = '../Great3/'
     mc_type = 'regauss'
+    outfile = 'tmp_outfile.txt'
     if len(args) > 1:
-        if len(args) > 3:
+        if len(args) > 4:
             raise RuntimeError("I do not know how to handle that many arguments.")
+        elif len(args) == 4:
+            outfile = args[3]
         elif len(args) == 3:
             mc_type = args[2]
         path = args[1]
@@ -148,6 +157,9 @@ def main(args):
     catalogs = getAllCatalogs(path=path, mc_type=mc_type)
     print 'Got %d catalogs, doing inference'%len(catalogs)
     g1raw, g2raw, g1opt, g2opt, g1var,g2var = doInference(catalogs= catalogs)
+    print 'Writing g1raw, g2raw, g1opt, g2opt, g1var,g2var to file %s'%outfile
+    out_data = np.column_stack((g1raw, g2raw, g1opt, g2opt, g1var, g2var))
+    np.savetxt(outfile, out_data, fmt='%10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
 
 if __name__ == "__main__":
     main(sys.argv)
