@@ -837,7 +837,7 @@ def main(argv):
     else:
         verbose = True
 
-    if 'coma' in socket.gethostname():
+    if 'compute' in socket.gethostname() or 'coma' in socket.gethostname():
         # Just use one CPU on the coma cluster, since we've already made this whole thing
         # embarrassingly parallel by farming out each subfield to a single CPU.
         EstimateAllShears(
