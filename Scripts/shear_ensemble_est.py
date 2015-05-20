@@ -82,8 +82,9 @@ def buildPrior(catalogs = None, nbins = 25):
         np.hstack( (e2_corr+r2*dg, -(e2_corr+r2*dg) ) ),  bins = bin_edges )
     e2_prior_hist_mod = e2_prior_hist_mod / (e2prior.size)
 
-    de1_dg = ( e1_prior_hist_mod - e1_prior_hist) / dg    
-    de2_dg = ( e2_prior_hist_mod - e2_prior_hist) / dg
+    # Note from Rachel: updated the denominator to be 2*dg since we did a two-sided derivative.
+    de1_dg = ( e1_prior_hist_mod - e1_prior_hist) / (2*dg)
+    de2_dg = ( e2_prior_hist_mod - e2_prior_hist) / (2*dg)
     
     return bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg
 
