@@ -35,16 +35,37 @@ def getAllCatalogs( path = '../Great3/', mc_type = None ):
 
 
 def buildPrior(catalogs = None, nbins = 25):
-    master = np.hstack(catalogs)
-    e1_corr = master.g1 - master.c1 - master.a1 * master.psf_e1
-    e2_corr = master.g2 - master.c2 - master.a2 * master.psf_e2
+    # Get a big master list of all the ellipticities in all fields.
+    # Sadly you cannot retain column identity when using hstack, so we have to do the manipulations
+    # for each catalog to get a list of e1 arrays to stack.
+    e1_corr = []
+    e2_corr = []
+    r1 = []
+    r2 = []
+    for catalog in catalogs:
+        e1_corr.append(catalog.g1 - catalog.c1 - catalog.a1*catalog.psf_e1)
+        e2_corr.append(catalog.g2 - catalog.c2 - catalog.a2*catalog.psf_e2)
+        r1.append(catalog.R1)
+        r2.append(catalog.R2)
+    e1_corr = np.hstack(e1_corr)
+    e2_corr = np.hstack(e2_corr)
+    r1 = np.hstack(r1)
+    r2 = np.hstack(r2)
     e1prior = np.hstack( (e1_corr, -e1_corr ) )
     e2prior = np.hstack( (e2_corr, -e2_corr ) )
+    r1 = np.hstack( (r1, r1) )
+    r2 = np.hstack( (r2, r2) )
     all_e = np.hstack( (e1prior, e2prior))
-    # Define bins.
-    bin_edges = np.percentile( alle, np.linspace(0,100,nbins ) )
+
+    # Define bins.  np.percentile cannot take a list of percentile levels, so we have to stupidly
+    # loop over the percentile levels we want.
+    percentile_levels = np.linspace(0, 100, nbins)
+    bin_edges = []
+    for percentile_level in percentile_levels:
+        bin_edges.append(np.percentile(all_e, percentile_level))
+    bin_edges = np.array(bin_edges)
     bin_edges[0] = bin_edges[0] - 1.1*np.abs(bin_edges[0] )
-    bin_edges[-1] = bin_edgs[-1] + 1.1*np.abs(bin_edges[-1] )
+    bin_edges[-1] = bin_edges[-1] + 1.1*np.abs(bin_edges[-1] )
 
     # Compute priors.
     e1_prior_hist, _ = np.histogram(e1prior, bins = bin_edges)
@@ -54,11 +75,13 @@ def buildPrior(catalogs = None, nbins = 25):
     e2_prior_hist = e2_prior_hist * 1./e2prior.size
     
     # Compute derivatives.
-    dg1 = 0.01
-    e1_prior_hist_mod, _  = np.histogram( np.hstack( ( e1_corr + master.r1 * dg, - (e1_corr + master.r1 * dg) ) ),  bins = bin_edges )
+    dg = 0.01
+    e1_prior_hist_mod, _  = np.histogram( 
+        np.hstack( (e1_corr+r1*dg, -(e1_corr+r1*dg) ) ),  bins=bin_edges )
     e1_prior_hist_mod = e1_prior_hist_mod / (e1prior.size)
 
-    e2_prior_hist_mod, _  = np.histogram( np.hstack( ( e2_corr + master.r1 * dg, - (e2_corr + master.r1 * dg) ) ),  bins = bin_edges )
+    e2_prior_hist_mod, _  = np.histogram( 
+        np.hstack( (e2_corr+r2*dg, -(e2_corr+r2*dg) ) ),  bins = bin_edges )
     e2_prior_hist_mod = e2_prior_hist_mod / (e2prior.size)
 
     de1_dg = ( e1_prior_hist_mod - e1_prior_hist) / dg    
@@ -121,7 +144,9 @@ def main(args):
             mc_type = args[2]
         path = args[1]
 
+    print 'Getting catalogs from path %s and mc_type %s'%(path, mc_type)
     catalogs = getAllCatalogs(path=path, mc_type=mc_type)
+    print 'Got %d catalogs, doing inference'%len(catalogs)
     g1raw, g2raw, g1opt, g2opt, g1var,g2var = doInference(catalogs= catalogs)
 
 if __name__ == "__main__":
