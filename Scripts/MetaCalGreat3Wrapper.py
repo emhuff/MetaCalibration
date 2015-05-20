@@ -38,7 +38,8 @@ def log(msg):
 # unique number by combining 4 numbers of similar order.  If you don't want to use this whole
 # caching scheme, then set `use_cache=False` to revert to the previous behavior, which gives a new
 # noise symmetrization field for each postage stamp (and is thus verrrrrry expensive).
-use_cache = True
+use_symm = True # make noise symmetrization optional
+use_cache = True # decide whether to use the caching trick or not
 cached_noise_field = {}
 
 def readData(sim_dir, subfield, coadd, variable_psf_dir=""):
@@ -345,25 +346,26 @@ def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1=0.01, g2=0
 
     # Symmetrize the noise.  We need to check if the info for this is already cached:
     test_val = 1000.*g1 + 100.*g2 + 10.*g1psf + g2psf
-    if use_cache and (test_val in cached_noise_field.keys()):
-        galaxyImageSheared += cached_noise_field[test_val]
-    else:
-        # For this we need to know something about the noise field. Let this be represented by the
-        # noise object CN.  Initialize as uncorrelated noise with fixed (known) variance.
-        GN = galsim.GaussianNoise(sigma=numpy.double(numpy.sqrt(variance)))
-        test_im = galsim.Image(512,512,scale=pixel)
-        test_im.addNoise(GN)
-        CN = galsim.CorrelatedNoise(test_im, scale=pixel)
-        # Now apply the same set of operations to this...
-        CN = CN.convolvedWith(psfInv)
-        CN = CN.shear(g1 = g1, g2 = g2)
-        CN = CN.convolvedWith(psfTarget)
-        origIm = galaxyImageSheared.copy()
-        varCalc = galaxyImageSheared.symmetrizeNoise(CN,order=4)
-        noiseDiff = galaxyImageSheared.copy() - origIm
-        if use_cache:
-            # Store this for later usage.
-            cached_noise_field[test_val] = noiseDiff
+    if use_symm:
+        if use_cache and (test_val in cached_noise_field.keys()):
+            galaxyImageSheared += cached_noise_field[test_val]
+        else:
+            # For this we need to know something about the noise field. Let this be represented by
+            # the noise object CN.  Initialize as uncorrelated noise with fixed (known) variance.
+            GN = galsim.GaussianNoise(sigma=numpy.double(numpy.sqrt(variance)))
+            test_im = galsim.Image(512,512,scale=pixel)
+            test_im.addNoise(GN)
+            CN = galsim.CorrelatedNoise(test_im, scale=pixel)
+            # Now apply the same set of operations to this...
+            CN = CN.convolvedWith(psfInv)
+            CN = CN.shear(g1 = g1, g2 = g2)
+            CN = CN.convolvedWith(psfTarget)
+            origIm = galaxyImageSheared.copy()
+            varCalc = galaxyImageSheared.symmetrizeNoise(CN,order=4)
+            noiseDiff = galaxyImageSheared.copy() - origIm
+            if use_cache:
+                # Store this for later usage.
+                cached_noise_field[test_val] = noiseDiff
     return galaxyImageSheared
 
 
