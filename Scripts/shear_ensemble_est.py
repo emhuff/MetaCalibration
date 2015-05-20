@@ -9,18 +9,24 @@ from astropy.io import fits
 
 def getAllCatalogs( path = '../Great3/', mc_type = None ):
     
-    if mc_type is 'regauss':
-        path = path+'Ouputs-Regauss/cgc_metacal_regauss_fix*.fits'
-    if mc_type is 'regauss-sym':
+    if mc_type=='regauss':
+        path = path+'Outputs-Regauss/cgc_metacal_regauss_fix*.fits'
+    elif mc_type=='regauss-sym':
         path = path+'Outputs-Regauss-SymNoise/cgc_metacal_symm*.fits'
-    if mc_type is 'ksb':
+    elif mc_type=='ksb':
         path = path+'Outputs-KSB/output_catalog*.fits'
-    if mc_type is 'none-regauss':
+    elif mc_type=='none-regauss':
         path = path+'Outputs-CGN-Regauss/cgc_metacal_moments*.fits'
-    if mc_type is 'moments':
+    elif mc_type=='moments':
         path = path+'cgc_metacal_moments*.fits'
+    elif mc_type=='noaber-regauss-sym':
+        path = path+'Outputs-Regauss/cgc_noaber_metacal_symm*.fits'
+    else:
+        raise RuntimeError('Unrecognized mc_type: %s'%mc_type)
 
     catFiles = glob.glob(path)
+    if len(catFiles) == 0:
+        raise RuntimeError("No catalogs found with path %s!"%path)
     catalogs = []
     for thisFile in catFiles:
         catalogs.append( fits.getdata(thisFile) )
@@ -103,10 +109,20 @@ def doInference(catalogs= None):
 
     return gamma1_raw, gamma2_raw, gamma1_opt, gamma2_opt, gamma1_var, gamma2_var
 
-def main():
+def main(args):
 
-    catalogs = getAllCatalogs( path = '../Great3/', mc_type = 'regauss' )
+    # Set defaults and parse args.
+    path = '../Great3/'
+    mc_type = 'regauss'
+    if len(args) > 1:
+        if len(args) > 3:
+            raise RuntimeError("I do not know how to handle that many arguments.")
+        elif len(args) == 3:
+            mc_type = args[2]
+        path = args[1]
+
+    catalogs = getAllCatalogs(path=path, mc_type=mc_type)
     g1raw, g2raw, g1opt, g2opt, g1var,g2var = doInference(catalogs= catalogs)
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
