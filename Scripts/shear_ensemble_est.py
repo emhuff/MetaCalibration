@@ -3,24 +3,24 @@ import sys
 import time
 import os
 import optparse
-import numpy
-import socket
-from astropy import io.fits
+import numpy as np
+import glob
+from astropy.io import fits
 
-def getAllCatalogs( path = '../Great3/', mc_type = None )
+def getAllCatalogs( path = '../Great3/', mc_type = None ):
     
     if mc_type is 'regauss':
         path = path+'Ouputs-Regauss/cgc_metacal_regauss_fix*.fits'
     if mc_type is 'regauss-sym':
         path = path+'Outputs-Regauss-SymNoise/cgc_metacal_symm*.fits'
     if mc_type is 'ksb':
-        path = path+'Outputs-KSB/output_catalog*.fits'+
+        path = path+'Outputs-KSB/output_catalog*.fits'
     if mc_type is 'none-regauss':
         path = path+'Outputs-CGN-Regauss/cgc_metacal_moments*.fits'
     if mc_type is 'moments':
         path = path+'cgc_metacal_moments*.fits'
 
-    catFiles = glob.glov(path)
+    catFiles = glob.glob(path)
     catalogs = []
     for thisFile in catFiles:
         catalogs.append( fits.getdata(thisFile) )
@@ -49,16 +49,16 @@ def buildPrior(catalogs = None, nbins = 25):
     
     # Compute derivatives.
     dg1 = 0.01
-    e1_prior_hist_mod, _  = np.histogram( np.hstack( ( e1_corr + master.r1 * dg, - (e1_corr + master.r1 * dg) ) )  bins = bin_edges )
+    e1_prior_hist_mod, _  = np.histogram( np.hstack( ( e1_corr + master.r1 * dg, - (e1_corr + master.r1 * dg) ) ),  bins = bin_edges )
     e1_prior_hist_mod = e1_prior_hist_mod / (e1prior.size)
 
-    e2_prior_hist_mod, _  = np.histogram( np.hstack( ( e2_corr + master.r1 * dg, - (e2_corr + master.r1 * dg) ) )  bins = bin_edges )
+    e2_prior_hist_mod, _  = np.histogram( np.hstack( ( e2_corr + master.r1 * dg, - (e2_corr + master.r1 * dg) ) ),  bins = bin_edges )
     e2_prior_hist_mod = e2_prior_hist_mod / (e2prior.size)
 
     de1_dg = ( e1_prior_hist_mod - e1_prior_hist) / dg    
     de2_dg = ( e2_prior_hist_mod - e2_prior_hist) / dg
     
-    return, bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg
+    return bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg
 
 
 def linear_estimator(data = None, null = None, deriv = None, cinv = None):
@@ -107,3 +107,6 @@ def main():
 
     catalogs = getAllCatalogs( path = '../Great3/', mc_type = 'regauss' )
     g1raw, g2raw, g1opt, g2opt, g1var,g2var = doInference(catalogs= catalogs)
+
+if __name__ == "__main__":
+    main()
