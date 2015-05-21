@@ -262,13 +262,13 @@ def main(argv):
                         help = "number of bins to use in histogram estimator.")
     parser.add_argument("-o", "--outfile", dest = "outfile", type = str, default = "tmp_outfile.txt",
                         help = "destination for output per-field shear catalogs.")
+    parser.add_argument("-dp", "--doplot", dest = "doplot", action="store_true")
     args = parser.parse_args(argv[1:])
     
     path = args.path
     mc_type = args.mc_type
     nbins = args.nbins
     outfile = args.outfile
-
     print 'Getting catalogs from path %s and mc_type %s'%(path, mc_type)
     print 'Using %i bins for inference'% (nbins)
     catalogs, truthfile = getAllCatalogs(path=path, mc_type=mc_type)
@@ -278,9 +278,12 @@ def main(argv):
     print 'Writing field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2 to file %s'%outfile
     out_data = np.column_stack((field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2))
     np.savetxt(outfile, out_data, fmt='%d %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
-    #makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
-    #          psf_e1 = psf_e1, psf_e2 = psf_e2,
-    #          truthFile = truthFile,figName=mc_type+'-opt-shear_plots')
+    if args.doplot:
+        print "Making plots..."
+        makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
+                  psf_e1 = psf_e1, psf_e2 = psf_e2,
+                  truthFile = truthfile,figName=mc_type+'-opt-shear_plots')
+        print "wrote plots to "+mc_type+'-opt-shear_plots.png'
 
 
 if __name__ == "__main__":
