@@ -46,7 +46,8 @@ def getAllCatalogs( path = '../Great3/', mc_type = None ):
     return catalogs, truthFile
 
 
-def buildPrior(catalogs=None, nbins=100):
+
+def buildPrior(catalogs=None, nbins=100, bins = None):
     # Get a big master list of all the ellipticities in all fields.
     # Sadly you cannot retain column identity when using hstack, so we have to do the manipulations
     # for each catalog to get a list of e1 arrays to stack.
@@ -69,13 +70,16 @@ def buildPrior(catalogs=None, nbins=100):
 
     # Define bins.  np.percentile cannot take a list of percentile levels, so we have to stupidly
     # loop over the percentile levels we want.
-    percentile_levels = np.linspace(0, 100, nbins)
-    bin_edges = []
-    for percentile_level in percentile_levels:
-        bin_edges.append(np.percentile(all_e, percentile_level))
-    bin_edges = np.array(bin_edges)
-    bin_edges[0] = bin_edges[0] - 1.1*np.abs(bin_edges[0] )
-    bin_edges[-1] = bin_edges[-1] + 1.1*np.abs(bin_edges[-1] )
+    if bins is None:
+        percentile_levels = np.linspace(0, 100, nbins)
+        bin_edges = []
+        for percentile_level in percentile_levels:
+            bin_edges.append(np.percentile(all_e, percentile_level))
+        bin_edges = np.array(bin_edges)
+        bin_edges[0] = bin_edges[0] - 1.1*np.abs(bin_edges[0] )
+        bin_edges[-1] = bin_edges[-1] + 1.1*np.abs(bin_edges[-1] )
+    else:
+        bin_edges = bins
 
     # Compute priors.
     e1_prior_hist, _ = np.histogram(e1prior, bins = bin_edges)
@@ -146,17 +150,20 @@ def doInference(catalogs=None, nbins=None):
         this_covar2 = covar2_scaled * 1./catalog.size
     
         # Try making a covariance matrix from just this field?
-        this_field_covar1 = ( - np.outer( this_e1_hist, this_e1_hist) * ( np.ones( (this_e1_hist.size, this_e1_hist.size) ) - np.diag(np.ones(this_e1_hist.size) ) ) + np.diag( this_e1_hist * (1 - e1_prior_hist) ) ) *1./ catalog.size
-        this_field_covar2 =  (- np.outer( this_e2_hist, this_e2_hist) * ( np.ones( (this_e2_hist.size, this_e2_hist.size) ) - np.diag(np.ones(this_e2_hist.size) ) ) + np.diag( this_e2_hist * (1 - e2_prior_hist) ) ) *1./catalog.size
+        this_field_covar1 = ( - np.outer( this_e1_hist, this_e1_hist) * ( np.ones( (this_e1_hist.size, this_e1_hist.size) ) - np.diag(np.ones(this_e1_hist.size) ) ) + np.diag( this_e1_hist * (1 - this_e1_hist) ) ) / catalog.size
+        this_field_covar2 =  (- np.outer( this_e2_hist, this_e2_hist) * ( np.ones( (this_e2_hist.size, this_e2_hist.size) ) - np.diag(np.ones(this_e2_hist.size) ) ) + np.diag( this_e2_hist * (1 - this_e2_hist) ) ) / catalog.size
         this_cinv1 = np.linalg.pinv(this_field_covar1)
         this_cinv2 = np.linalg.pinv(this_field_covar2)
+
+        # Get derivatives for this shear field.
+        #_, _, _, this_de1_dg, this_de2_dg = buildPrior([catalog], nbins=nbins, bins = bin_edges)
 
         gamma1_raw[i] = linear_estimator(data=this_e1_hist, null=e1_prior_hist, deriv=de1_dg)
         gamma2_raw[i] = linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv=de2_dg) 
         this_g1_opt, this_g1_var = \
-            linear_estimator(data=this_e1_hist, null=e1_prior_hist, deriv=de1_dg, cinv=this_cinv1)
+            linear_estimator(data=this_e1_hist, null=e1_prior_hist, deriv= de1_dg, cinv=this_cinv1)
         this_g2_opt, this_g2_var = \
-            linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv=de2_dg, cinv=this_cinv2) 
+            linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv= de2_dg, cinv=this_cinv2) 
         gamma1_opt[i] = this_g1_opt
         gamma2_opt[i] = this_g2_opt
         gamma1_var[i] = this_g1_var
@@ -236,14 +243,14 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None,
         ax5.plot(obsTable['psf_e1'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
         ax5.axhline(0.,linestyle='--',color='red')
         ax5.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')
-        ax5.set_xlim([-0.1,0.1])
+        ax5.set_xlim([-0.04,0.04])
         ax5.set_ylim([-shear_range, shear_range])
         ax5.set_title('psf trend (e1)')
         ax6.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
         ax6.axhline(0.,linestyle='--',color='red')
         ax6.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')
         ax6.set_title('psf trend (e2)')
-        ax6.set_xlim([-0.05,0.05])
+        ax6.set_xlim([-0.04,0.04])
         ax6.set_ylim([-shear_range, shear_range])
         fig.savefig(figName)
 
