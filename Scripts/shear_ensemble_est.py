@@ -34,7 +34,7 @@ def getAllCatalogs( path = '../Great3/', mc_type = None ):
     return catalogs
 
 
-def buildPrior(catalogs = None, nbins = 25):
+def buildPrior(catalogs = None, nbins = 200):
     # Get a big master list of all the ellipticities in all fields.
     # Sadly you cannot retain column identity when using hstack, so we have to do the manipulations
     # for each catalog to get a list of e1 arrays to stack.
@@ -113,20 +113,22 @@ def doInference(catalogs= None):
     gamma2_opt = np.zeros(len(catalogs))
     gamma1_var = np.zeros(len(catalogs))
     gamma2_var = np.zeros(len(catalogs))
+    field_id = np.zeros(len(catalogs))
 
     covar1_scaled = - np.outer( e1_prior_hist, e1_prior_hist) * ( np.ones( (e1_prior_hist.size, e1_prior_hist.size) ) - np.diag(np.ones(e1_prior_hist.size) ) ) + np.diag( e1_prior_hist * (1 - e1_prior_hist) )
     covar2_scaled = - np.outer( e2_prior_hist, e2_prior_hist) * ( np.ones( (e2_prior_hist.size, e2_prior_hist.size) ) - np.diag(np.ones(e2_prior_hist.size) ) ) + np.diag( e2_prior_hist * (1 - e2_prior_hist) )    
     for catalog,i in zip(catalogs, xrange(len(catalogs) )):
         
-        this_e1_hist, _ = np.histogram(catalog.g1, bins = bin_edges )
+        this_e1_hist, _ = np.histogram(catalog.g1 - catalog.c1 - catalog.a1*catalog.psf_e1 , bins = bin_edges )
         this_e1_hist = this_e1_hist * 1./catalog.size
-        this_e2_hist, _ = np.histogram(catalog.g2, bins = bin_edges )
+        this_e2_hist, _ = np.histogram(catalog.g2 - catalog.c2 - catalog.a2*catalog.psf_e2, bins = bin_edges )
         this_e2_hist = this_e2_hist * 1./catalog.size
         # covar_hist = N_obj  * covar; but we divide hist by N_obj, so divide covar_hist by N_obj*N_obj
         this_covar1 = covar1_scaled * 1./catalog.size
         this_covar2 = covar2_scaled * 1./catalog.size
         this_cinv1 = np.linalg.pinv(this_covar1)
         this_cinv2 = np.linalg.pinv(this_covar2)
+        field_id[i] = catalog[0]['id'] / 100000
         gamma1_raw[i] = linear_estimator(data=this_e1_hist, null=e1_prior_hist, deriv=de1_dg)
         gamma2_raw[i] = linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv=de2_dg) 
         this_g1_opt, this_g1_var = \
@@ -138,7 +140,63 @@ def doInference(catalogs= None):
         gamma1_var[i] = this_g1_var
         gamma2_var[i] = this_g2_var
 
-    return gamma1_raw, gamma2_raw, gamma1_opt, gamma2_opt, gamma1_var, gamma2_var
+    return field_id, gamma1_raw, gamma2_raw, gamma1_opt, gamma2_opt, gamma1_var, gamma2_var
+
+
+def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, truthFile = 'cgc-truthtable.txt', figName= None ):
+    truthTable = np.loadtxt(truthFile, dtype = [('field_id',np.int), ('g1',np.double), ('g2',np.double ) ])
+    
+    obsTable = np.empty(field_id.size, [('field_id',np.int), ('g1',np.double), ('g2',np.double ), ('err1',np.double),('err2',np.double) ] )
+    obsTable['field_id'] = field_id
+    obsTable['g1'] = g1
+    obsTable['g2'] = g2
+    if (err1 is not None) and (err2 is not None):
+        obsTable['err1'] = err1
+        obsTable['err2'] = err2
+        use_errors = True
+    else:
+        use_errors = False
+    
+    truthTable.sort(order='field_id')
+    obsTable.sort(order='field_id')
+
+    import matplotlib.pyplot as plt
+    if not use_errors:
+        fig,((ax1,ax2), (ax3,ax4)) = plt.subplots( nrows=2,ncols=2,figsize=(14,21) )
+        ax1.plot(truthTable['g1'],obsTable['g1'],'.')
+        ax1.plot(truthTable['g1'],truthTable['g1'],'--',color='red')
+        ax1.set_title('g1')
+        ax2.plot(truthTable['g2'],obsTable['g2'],'.')
+        ax2.plot(truthTable['g2'],truthTable['g2'],'--',color='red')
+        ax2.set_title('g2')
+
+    
+        ax3.plot(truthTable['g1'], obsTable['g1'] - truthTable['g1'],'.')
+        ax3.axhline(0.,linestyle='--',color='red')
+        ax3.set_ylim([-0.02,0.02])
+        ax4.plot(truthTable['g2'], obsTable['g2'] - truthTable['g2'],'.')
+        ax4.axhline(0.,linestyle='--',color='red')
+        ax4.set_ylim([-0.02,0.02])
+        fig.savefig(figName)
+    else:
+        fig,((ax1,ax2), (ax3,ax4)) = plt.subplots( nrows=2,ncols=2,figsize=(14,21) )
+        ax1.errorbar(truthTable['g1'],obsTable['g1'],obsTable['err1'],linestyle='.')
+        ax1.plot(truthTable['g1'],truthTable['g1'],linestyle='--',color='red')
+        ax1.set_title('g1')
+        ax2.errorbar(truthTable['g2'],obsTable['g2'],obsTable['err2'],linestyle='.')
+        ax2.plot(truthTable['g2'],truthTable['g2'],'--',color='red')
+        ax2.set_title('g2')
+
+    
+        ax3.errorbar(truthTable['g1'], obsTable['g1'] - truthTable['g1'],obsTable['err1'],linestyle='.')
+        ax3.axhline(0.,linestyle='--',color='red')
+        ax3.set_ylim([-0.02,0.02])
+        ax4.errorbar(truthTable['g2'], obsTable['g2'] - truthTable['g2'],obsTable['err1'],linestyle='.')
+        ax4.axhline(0.,linestyle='--',color='red')
+        ax4.set_ylim([-0.02,0.02])
+        fig.savefig(figName)
+        
+        
 
 def main(args):
 
@@ -160,10 +218,20 @@ def main(args):
     print 'Getting catalogs from path %s and mc_type %s'%(path, mc_type)
     catalogs = getAllCatalogs(path=path, mc_type=mc_type)
     print 'Got %d catalogs, doing inference'%len(catalogs)
-    g1raw, g2raw, g1opt, g2opt, g1var,g2var = doInference(catalogs= catalogs)
-    print 'Writing g1raw, g2raw, g1opt, g2opt, g1var,g2var to file %s'%outfile
-    out_data = np.column_stack((g1raw, g2raw, g1opt, g2opt, g1var, g2var))
-    np.savetxt(outfile, out_data, fmt='%10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
+    field_id, g1raw, g2raw, g1opt, g2opt, g1var,g2var = doInference(catalogs= catalogs)
+    print 'Writing field_id, g1raw, g2raw, g1opt, g2opt, g1var,g2var to file %s'%outfile
+    out_data = np.column_stack((field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var))
+    np.savetxt(outfile, out_data, fmt='%i, %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
+    makePlots(field_id=field_id, g1=g1raw, g2=g2raw, truthFile = 'cgc-truthtable.txt', figName=mc_type+'-raw-shear_plots')
+    makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
+              truthFile = 'cgc-truthtable.txt',figName=mc_type+'-opt-shear_plots')
+    stop
 
 if __name__ == "__main__":
-    main(sys.argv)
+    import pdb, traceback
+    try:
+        main(sys.argv)
+    except:
+        thingtype, value, tb = sys.exc_info()
+        traceback.print_exc()
+        pdb.post_mortem(tb)
