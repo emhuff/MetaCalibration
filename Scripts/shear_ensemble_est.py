@@ -18,9 +18,11 @@ def getAllCatalogs( path = '../Great3/', mc_type = None ):
     elif mc_type=='none-regauss':
         path = path+'Outputs-CGN-Regauss/cgc_metacal_moments*.fits'
     elif mc_type=='moments':
-        path = path+'cgc_metacal_moments*.fits'
+        path = path+'Outputs-Moments/cgc_metacal_moments*.fits'
     elif mc_type=='noaber-regauss-sym':
-        path = path+'Outputs-Regauss/cgc_noaber_metacal_symm*.fits'
+        path = path+'Outputs-Regauss-NoAber-SymNoise/cgc_noaber_metacal_symm*.fits'
+    elif mc_type=='noaber-regauss':
+        path = path+'Outputs-Regauss-NoAber/cgc_noaber_metacal*.fits'
     else:
         raise RuntimeError('Unrecognized mc_type: %s'%mc_type)
 
@@ -34,7 +36,7 @@ def getAllCatalogs( path = '../Great3/', mc_type = None ):
     return catalogs
 
 
-def buildPrior(catalogs = None, nbins = 200):
+def buildPrior(catalogs = None, nbins = 100):
     # Get a big master list of all the ellipticities in all fields.
     # Sadly you cannot retain column identity when using hstack, so we have to do the manipulations
     # for each catalog to get a list of e1 arrays to stack.
@@ -215,13 +217,13 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None,
         ax5.axhline(0.,linestyle='--',color='red')
         ax5.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')
         ax5.set_xlim([-0.1,0.1])
-        ax6.set_ylim([-0.02,0.02])
+        ax5.set_ylim([-0.02,0.02])
         ax5.set_title('psf trend (e1)')
         ax6.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
         ax6.axhline(0.,linestyle='--',color='red')
         ax6.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')
         ax6.set_title('psf trend (e2)')
-        ax6.set_xlim([-0.1,0.1])
+        ax6.set_xlim([-0.05,0.05])
         ax6.set_ylim([-0.02,0.02])
         fig.savefig(figName)
 
@@ -234,6 +236,8 @@ def main(args):
     # example) just specify outfile or just specify mc_type.  But it'll do for now.
     path = '../Great3/'
     mc_type = 'regauss'
+    #truthFile = 'cgc-noaber-truthtable.txt'
+    truthFile = 'cgc-truthtable.txt'
     outfile = 'tmp_outfile.txt'
     if len(args) > 1:
         if len(args) > 4:
@@ -253,7 +257,7 @@ def main(args):
     np.savetxt(outfile, out_data, fmt='%i, %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
     makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
               psf_e1 = psf_e1, psf_e2 = psf_e2,
-              truthFile = 'cgc-truthtable.txt',figName=mc_type+'-opt-shear_plots')
+              truthFile = truthFile,figName=mc_type+'-opt-shear_plots')
 
 
 if __name__ == "__main__":
