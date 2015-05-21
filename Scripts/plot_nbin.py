@@ -102,6 +102,7 @@ ax = fig.add_subplot(321)
 ax.errorbar(n_bins, 100*np.array(m1), yerr=100*np.array(sig_m1), label=r'$m_1$')
 ax.errorbar(n_bins, 100*np.array(m2), yerr=100*np.array(sig_m2), label=r'$m_2$')
 ax.plot(n_bins, np.zeros_like(n_bins), 'k--')
+plt.xlim((0.9*min(n_bins), 1.1*max(n_bins)))
 #ax.set_xlabel(r'$N_{\rm bins}$')
 ax.set_ylabel(r'$10^2 m$')
 
@@ -111,6 +112,7 @@ ax.errorbar(n_bins, 1000*np.array(a1), yerr=1000*np.array(sig_a1), label=r'$a_1$
 ax.errorbar(n_bins, 1000*np.array(a2), yerr=1000*np.array(sig_a2), label=r'$a_2$')
 ax.plot(n_bins, np.zeros_like(n_bins), 'k--')
 #ax.set_xlabel(r'$N_{\rm bins}$')
+plt.xlim((0.9*min(n_bins), 1.1*max(n_bins)))
 ax.set_ylabel(r'$10^{3} a$')
 
 # Plot c vs. n_bins
@@ -119,6 +121,7 @@ ax.errorbar(n_bins, 1000*np.array(c1), yerr=1000*np.array(sig_c1), label=r'$c_1$
 ax.errorbar(n_bins, 1000*np.array(c2), yerr=1000*np.array(sig_c2), label=r'$c_2$')
 ax.plot(n_bins, np.zeros_like(n_bins), 'k--')
 ax.set_xlabel(r'$N_{\rm bins}$')
+plt.xlim((0.9*min(n_bins), 1.1*max(n_bins)))
 ax.set_ylabel(r'$10^{3} c$')
 
 # Plot <g> vs. n_bins
@@ -128,6 +131,7 @@ ax.plot(n_bins, 1000*np.array(mean_g2), 'bo', label=r'$\langle\gamma_2\rangle$')
 ax.plot(n_bins, 1000*np.mean(g1_true)*np.ones_like(n_bins), 'r--')
 ax.plot(n_bins, 1000*np.mean(g2_true)*np.ones_like(n_bins), 'b--')
 #ax.set_xlabel(r'$N_{\rm bins}$')
+plt.xlim((0.9*min(n_bins), 1.1*max(n_bins)))
 ax.set_ylabel(r'$10^3 \langle\gamma\rangle$')
 
 # Plot sigma_g vs. n_bins
@@ -135,6 +139,7 @@ ax = fig.add_subplot(324)
 ax.plot(n_bins, 1000*np.array(sig_g1), 'rx', label=r'$\langle\sigma_{\gamma,1}\rangle$')
 ax.plot(n_bins, 1000*np.array(sig_g2), 'bo', label=r'$\langle\sigma_{\gamma,2}\rangle$')
 ax.set_xlabel(r'$N_{\rm bins}$')
+plt.xlim((0.9*min(n_bins), 1.1*max(n_bins)))
 ax.set_ylabel(r'$10^3 \sigma_\gamma$')
 
 plt.tight_layout()
