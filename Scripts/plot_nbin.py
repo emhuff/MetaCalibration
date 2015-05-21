@@ -9,13 +9,15 @@ def shear_model(x, m, a, c):
     return m*x[0,:] + a*x[1,:] + c*x[2,:]
     
 
-truthfile = 'cgc-noaber-truthtable.txt'
+truthfile = 'cgc-truthtable.txt'
 
-n_bins = [25, 50, 75, 85, 100, 125, 150, 200]
-filepref = 'outputs/output-cgc-noaber-nosymm-'
+n_bins = [25, 50, 75, 85, 100, 125, 150]
+filepref = 'outputs/output-cgc-nosymm-'
 filesuff = '.dat'
 rootdir = './' # to be passed to shear_ensemble_est.py
-mc_type = 'noaber-regauss' # to be passed to shear_ensemble_est.py
+mc_type = 'regauss' # to be passed to shear_ensemble_est.py
+outpref = 'nbins-'
+logl_cut = -1000.
 
 mean_g1 = []
 mean_g2 = []
@@ -55,6 +57,8 @@ for n in n_bins:
     g2_var = dat[6,:]
     psf_e1 = dat[7,:]
     psf_e2 = dat[8,:]
+    logl1 = dat[9,:]
+    logl2 = dat[10,:]
 
     # read in truth table
     dat = np.loadtxt(truthfile).transpose()
@@ -64,6 +68,20 @@ for n in n_bins:
 
     if not np.array_equal(field_id, field_id_truth):
         raise RuntimeError('Subfield indices do not match!')
+
+    to_save_1 = logl1 > logl_cut
+    g1_opt = g1_opt[to_save_1]
+    g1_var = g1_var[to_save_1]
+    psf_e1 = psf_e1[to_save_1]
+    g1_true = g1_true[to_save_1]
+
+    to_save_2 = logl2 > logl_cut
+    g2_opt = g2_opt[to_save_2]
+    g2_var = g2_var[to_save_2]
+    psf_e2 = psf_e2[to_save_2]
+    g2_true = g2_true[to_save_2]
+
+    print "Using ",len(g1_true),' and ',len(g2_true),' for g1 and g2'
 
     # compute and store <gamma>
     mean_g1.append(np.mean(g1_opt))
@@ -88,7 +106,7 @@ for n in n_bins:
     sig_c1.append(np.sqrt(covar_1[2][2]))
     A = np.column_stack([g2_true, psf_e2, np.ones_like(psf_e2)]).transpose()
     B = g2_opt - g2_true
-    ret_val, covar_2 = curve_fit(shear_model, A, B, sigma=np.sqrt(g1_var))
+    ret_val, covar_2 = curve_fit(shear_model, A, B, sigma=np.sqrt(g2_var))
     m2.append(ret_val[0])
     a2.append(ret_val[1])
     c2.append(ret_val[2])
@@ -143,4 +161,4 @@ plt.xlim((0.9*min(n_bins), 1.1*max(n_bins)))
 ax.set_ylabel(r'$10^3 \sigma_\gamma$')
 
 plt.tight_layout()
-plt.savefig('nbins.png')
+plt.savefig(outpref+mc_type+'.png')
