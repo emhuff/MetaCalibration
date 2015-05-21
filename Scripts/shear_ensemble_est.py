@@ -225,7 +225,7 @@ def main(args):
     makePlots(field_id=field_id, g1=g1raw, g2=g2raw, truthFile = 'cgc-truthtable.txt', figName=mc_type+'-raw-shear_plots')
     makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
               truthFile = 'cgc-truthtable.txt',figName=mc_type+'-opt-shear_plots')
-    stop
+
 
 if __name__ == "__main__":
     import pdb, traceback
