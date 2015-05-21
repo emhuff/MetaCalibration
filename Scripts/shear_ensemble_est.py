@@ -107,6 +107,15 @@ def buildPrior(catalogs=None, nbins=100, bins = None):
  
     return bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg
 
+def multinomial_logL(obs_hist= None, truth_prob = None):
+    # Make liberal use of Stirling's approx.
+    Ntot = np.sum(obs_hist)
+    log_Ntot_fac = Ntot * np.log(Ntot) - Ntot
+    log_Ni_fac = np.sum( obs_hist * np.log(obs_hist) - obs_hist)
+    log_prob = np.sum( obs_hist * np.log(truth_prob))
+    like = log_Ntot_fac - log_Ni_fac + log_prob
+    return like
+
 
 def linear_estimator(data = None, null = None, deriv = None, cinv = None):
     if cinv is None:
@@ -134,17 +143,23 @@ def doInference(catalogs=None, nbins=None):
     field_id = np.zeros(len(catalogs))
     psf_e1 = np.zeros(len(catalogs))
     psf_e2 = np.zeros(len(catalogs))
+    field_e1_logL = np.zeros(len(catalogs) )
+    field_e2_logL = np.zeros(len(catalogs) )
     
     covar1_scaled = - np.outer( e1_prior_hist, e1_prior_hist) * ( np.ones( (e1_prior_hist.size, e1_prior_hist.size) ) - np.diag(np.ones(e1_prior_hist.size) ) ) + np.diag( e1_prior_hist * (1 - e1_prior_hist) )
-    covar2_scaled = - np.outer( e2_prior_hist, e2_prior_hist) * ( np.ones( (e2_prior_hist.size, e2_prior_hist.size) ) - np.diag(np.ones(e2_prior_hist.size) ) ) + np.diag( e2_prior_hist * (1 - e2_prior_hist) )    
+    covar2_scaled = - np.outer( e2_prior_hist, e2_prior_hist) * ( np.ones( (e2_prior_hist.size, e2_prior_hist.size) ) - np.diag(np.ones(e2_prior_hist.size) ) ) + np.diag( e2_prior_hist * (1 - e2_prior_hist) )
+    
     for catalog,i in zip(catalogs, xrange(len(catalogs) )):
-
-
         
         this_e1_hist, _ = np.histogram(catalog.g1 - catalog.c1 - catalog.a1*catalog.psf_e1 , bins = bin_edges )
         this_e1_hist = this_e1_hist * 1./catalog.size
         this_e2_hist, _ = np.histogram(catalog.g2 - catalog.c2 - catalog.a2*catalog.psf_e2, bins = bin_edges )
         this_e2_hist = this_e2_hist * 1./catalog.size
+
+        # Calculate the log-likelihood that this field was drawn from the shape distribution.
+        field_e1_logL[i] = multinomial_logL(obs_hist= this_e1_hist * catalog.size, truth_prob = e1_prior_hist)
+        field_e2_logL[i] = multinomial_logL(obs_hist= this_e2_hist * catalog.size, truth_prob = e2_prior_hist)
+        
         # covar_hist = N_obj  * covar; but we divide hist by N_obj, so divide covar_hist by N_obj*N_obj
         this_covar1 = covar1_scaled * 1./catalog.size
         this_covar2 = covar2_scaled * 1./catalog.size
@@ -174,21 +189,25 @@ def doInference(catalogs=None, nbins=None):
         psf_e2[i] = catalog[0]['psf_e2']
 
 
-    return field_id, gamma1_raw, gamma2_raw, gamma1_opt, gamma2_opt, gamma1_var, gamma2_var, psf_e1, psf_e2
+    return field_id, gamma1_raw, gamma2_raw, gamma1_opt, gamma2_opt, gamma1_var, gamma2_var, psf_e1, psf_e2, field_e1_logL, field_e2_logL
 
 
 def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None,
-              psf_e1 = None, psf_e2 = None, truthFile = 'cgc-truthtable.txt', figName= None ):
+              psf_e1 = None, psf_e2 = None, e1_logL = None, e2_logL = None,
+              truthFile = 'cgc-truthtable.txt', figName= None ):
     truthTable = np.loadtxt(truthFile, dtype = [('field_id',np.int), ('g1',np.double), ('g2',np.double ) ])
     
     obsTable = np.empty(field_id.size, [('field_id',np.int), ('g1',np.double), ('g2',np.double ),
                                         ('err1',np.double),('err2',np.double),
-                                        ('psf_e1',np.double),('psf_e2',np.double)] )
+                                        ('psf_e1',np.double),('psf_e2',np.double),
+                                        ('e1_logL',np.double),('e2_logL',np.double)])
     obsTable['field_id'] = field_id
     obsTable['g1'] = g1
     obsTable['g2'] = g2
     obsTable['psf_e1'] = psf_e1
     obsTable['psf_e2'] = psf_e2
+    obsTable['e1_logL'] = e1_logL
+    obsTable['e2_logL'] = e2_logL
     
     if (err1 is not None) and (err2 is not None):
         obsTable['err1'] = err1
@@ -222,7 +241,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None,
         ax4.set_ylim([-0.02,0.02])
         fig.savefig(figName)
     else:
-        fig,((ax1,ax2), (ax3,ax4), (ax5, ax6)) = plt.subplots( nrows=3,ncols=2,figsize=(14,21) )
+        fig,((ax1,ax2), (ax3,ax4), (ax5, ax6), (ax7,ax8)) = plt.subplots( nrows=4,ncols=2,figsize=(14,28) )
         ax1.errorbar(truthTable['g1'],obsTable['g1'],obsTable['err1'],linestyle='.')
         ax1.plot(truthTable['g1'],truthTable['g1'],linestyle='--',color='red')
         ax1.set_title('g1')
@@ -240,18 +259,30 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None,
         ax4.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')        
         ax4.set_ylim([-shear_range, shear_range])
 
-        ax5.plot(obsTable['psf_e1'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
-        ax5.axhline(0.,linestyle='--',color='red')
-        ax5.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')
-        ax5.set_xlim([-0.04,0.04])
-        ax5.set_ylim([-shear_range, shear_range])
-        ax5.set_title('psf trend (e1)')
-        ax6.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
-        ax6.axhline(0.,linestyle='--',color='red')
-        ax6.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')
-        ax6.set_title('psf trend (e2)')
-        ax6.set_xlim([-0.04,0.04])
-        ax6.set_ylim([-shear_range, shear_range])
+        ax5.plot(obsTable['e1_logL'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
+        ax5.set_xlabel('multinomial log likelihood')
+        ax5.set_ylabel('shear error (e1)')
+        ax5.set_xscale('symlog')
+        ax5.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
+        
+        ax6.plot(obsTable['e2_logL'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
+        ax6.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
+        ax6.set_xlabel('multinomial log likelihood')
+        ax6.set_ylabel('shear error (e2)')
+        ax6.set_xscale('symlog')
+        
+        ax7.plot(obsTable['psf_e1'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
+        ax7.axhline(0.,linestyle='--',color='red')
+        ax7.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
+        ax7.set_xlim([-0.04,0.04])
+        ax7.set_ylim([-shear_range, shear_range])
+        ax7.set_title('psf trend (e1)')
+        ax8.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
+        ax8.axhline(0.,linestyle='--',color='red')
+        ax8.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
+        ax8.set_title('psf trend (e2)')
+        ax8.set_xlim([-0.04,0.04])
+        ax8.set_ylim([-shear_range, shear_range])
         fig.savefig(figName)
 
         
@@ -274,7 +305,7 @@ def main(argv):
                         help="path to MetaCalibration output catalogs")
     parser.add_argument("--mc_type", dest="mc_type", type=str, default="regauss",
                         choices = mc_choices, help="metcalibration catalog type to use")
-    parser.add_argument("-n", "--nbins", dest = "nbins", type = int, default= 100,
+    parser.add_argument("-n", "--nbins", dest = "nbins", type = int, default= 80,
                         help = "number of bins to use in histogram estimator.")
     parser.add_argument("-o", "--outfile", dest = "outfile", type = str, default = "tmp_outfile.txt",
                         help = "destination for output per-field shear catalogs.")
@@ -289,15 +320,15 @@ def main(argv):
     print 'Using %i bins for inference'% (nbins)
     catalogs, truthfile = getAllCatalogs(path=path, mc_type=mc_type)
     print 'Got %d catalogs, doing inference'%len(catalogs)
-    field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2 = \
+    field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL = \
         doInference(catalogs=catalogs, nbins=nbins)
-    print 'Writing field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2 to file %s'%outfile
-    out_data = np.column_stack((field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2))
-    np.savetxt(outfile, out_data, fmt='%d %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
+    print 'Writing field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL to file %s'%outfile
+    out_data = np.column_stack((field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL))
+    np.savetxt(outfile, out_data, fmt='%d %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
     if args.doplot:
         print "Making plots..."
         makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
-                  psf_e1 = psf_e1, psf_e2 = psf_e2,
+                  psf_e1 = psf_e1, psf_e2 = psf_e2, e1_logL = e1_logL, e2_logL = e2_logL,
                   truthFile = truthfile,figName=mc_type+'-opt-shear_plots')
         print "wrote plots to "+mc_type+'-opt-shear_plots.png'
 
