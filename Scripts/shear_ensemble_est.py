@@ -260,12 +260,12 @@ def main(args):
     print 'Got %d catalogs, doing inference'%len(catalogs)
     field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2 = \
         doInference(catalogs=catalogs, nbins=nbins)
-    print 'Writing field_id, g1raw, g2raw, g1opt, g2opt, g1var,g2var to file %s'%outfile
-    out_data = np.column_stack((field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var))
-    np.savetxt(outfile, out_data, fmt='%d %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
-    makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
-              psf_e1 = psf_e1, psf_e2 = psf_e2,
-              truthFile = truthFile,figName=mc_type+'-opt-shear_plots')
+    print 'Writing field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2 to file %s'%outfile
+    out_data = np.column_stack((field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2))
+    np.savetxt(outfile, out_data, fmt='%d %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
+    #makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
+    #          psf_e1 = psf_e1, psf_e2 = psf_e2,
+    #          truthFile = truthFile,figName=mc_type+'-opt-shear_plots')
 
 
 if __name__ == "__main__":
