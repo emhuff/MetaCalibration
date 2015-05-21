@@ -36,7 +36,7 @@ def getAllCatalogs( path = '../Great3/', mc_type = None ):
     return catalogs
 
 
-def buildPrior(catalogs = None, nbins = 100):
+def buildPrior(catalogs=None, nbins=100):
     # Get a big master list of all the ellipticities in all fields.
     # Sadly you cannot retain column identity when using hstack, so we have to do the manipulations
     # for each catalog to get a list of e1 arrays to stack.
@@ -104,10 +104,11 @@ def linear_estimator(data = None, null = None, deriv = None, cinv = None):
         return est, var
 
     
-def doInference(catalogs= None):
+def doInference(catalogs=None, nbins=None):
 
     print '  About to build prior...'
-    bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg = buildPrior(catalogs)
+    bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg = \
+        buildPrior(catalogs, nbins=nbins)
     print '  Done building prior, now doing rest of inference.'
     gamma1_raw = np.zeros(len(catalogs))
     gamma2_raw = np.zeros(len(catalogs))
@@ -145,7 +146,7 @@ def doInference(catalogs= None):
         gamma1_var[i] = this_g1_var
         gamma2_var[i] = this_g2_var
 
-        field_id[i] = catalog[0]['id'] / 100000
+        field_id[i] = catalog[0]['id'] / 1000000
         psf_e1[i] = catalog[0]['psf_e1']
         psf_e2[i] = catalog[0]['psf_e2']
 
@@ -236,14 +237,20 @@ def main(args):
     # example) just specify outfile or just specify mc_type.  But it'll do for now.
     path = '../Great3/'
     mc_type = 'regauss'
-    #truthFile = 'cgc-noaber-truthtable.txt'
-    truthFile = 'cgc-truthtable.txt'
+    truthFile = 'cgc-noaber-truthtable.txt'
+    #truthFile = 'cgc-truthtable.txt'
     outfile = 'tmp_outfile.txt'
+    nbins = 100
     if len(args) > 1:
-        if len(args) > 4:
+        if len(args) > 5:
             raise RuntimeError("I do not know how to handle that many arguments.")
+        elif len(args) == 5:
+            nbins = args[4]
+            outfile = args[3]
+            mc_type = args[2]
         elif len(args) == 4:
             outfile = args[3]
+            mc_type = args[2]
         elif len(args) == 3:
             mc_type = args[2]
         path = args[1]
@@ -251,10 +258,11 @@ def main(args):
     print 'Getting catalogs from path %s and mc_type %s'%(path, mc_type)
     catalogs = getAllCatalogs(path=path, mc_type=mc_type)
     print 'Got %d catalogs, doing inference'%len(catalogs)
-    field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2 = doInference(catalogs= catalogs)
+    field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2 = \
+        doInference(catalogs=catalogs, nbins=nbins)
     print 'Writing field_id, g1raw, g2raw, g1opt, g2opt, g1var,g2var to file %s'%outfile
     out_data = np.column_stack((field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var))
-    np.savetxt(outfile, out_data, fmt='%i, %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
+    np.savetxt(outfile, out_data, fmt='%d %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
     makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
               psf_e1 = psf_e1, psf_e2 = psf_e2,
               truthFile = truthFile,figName=mc_type+'-opt-shear_plots')
