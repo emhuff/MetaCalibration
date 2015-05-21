@@ -248,18 +248,20 @@ def main(argv):
 
 
     import argparse
-    #usage = "usage: %prog [options] "
+
     description = """Analyze MetaCalibration outputs from Great3 and Great3++ simulations."""
     mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym', 'noaber-regauss']
-    parser = argparse.ArgumentParser(description=description)#, usage=usage)
+    # Note: The above line needs to be consistent with the choices in getAllCatalogs.
+    
+    parser = argparse.ArgumentParser(description=description)
     parser.add_argument("--path", dest="path", type=str, default="../Great3/",
-                      help="path to MetaCalibration output catalogs")
-    parser.add_argument("-m", "--mc_type", dest="mc_type", type=str, default="regauss",
-                      choices = mc_choices, help="path to MetaCalibration output catalogs")
+                        help="path to MetaCalibration output catalogs")
+    parser.add_argument("--mc_type", dest="mc_type", type=str, default="regauss",
+                        choices = mc_choices, help="metcalibration catalog type to use")
     parser.add_argument("-n", "--nbins", dest = "nbins", type = int, default= 100,
-                      help = "number of bins to use in histogram estimator.")
+                        help = "number of bins to use in histogram estimator.")
     parser.add_argument("-o", "--outfile", dest = "outfile", type = str, default = "tmp_outfile.txt",
-                      help = "destination for output per-field shear catalogs.")
+                        help = "destination for output per-field shear catalogs.")
     args = parser.parse_args(argv[1:])
     
     path = args.path
