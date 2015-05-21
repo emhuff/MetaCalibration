@@ -7,7 +7,7 @@ import subprocess
 truthfile = 'cgc-noaber-truthtable.txt'
 
 n_bins = [25, 50, 75, 85, 100, 150, 200]
-filepref = 'output-cgc-noaber-nosymm-'
+filepref = 'outputs/output-cgc-noaber-nosymm-'
 filesuff = '.dat'
 rootdir = './' # to be passed to shear_ensemble_est.py
 mc_type = 'noaber-regauss' # to be passed to shear_ensemble_est.py
