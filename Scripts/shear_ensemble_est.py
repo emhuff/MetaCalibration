@@ -113,8 +113,11 @@ def doInference(catalogs= None):
     gamma2_opt = np.zeros(len(catalogs))
     gamma1_var = np.zeros(len(catalogs))
     gamma2_var = np.zeros(len(catalogs))
+    
     field_id = np.zeros(len(catalogs))
-
+    psf_e1 = np.zeros(len(catalogs))
+    psf_e2 = np.zeros(len(catalogs))
+    
     covar1_scaled = - np.outer( e1_prior_hist, e1_prior_hist) * ( np.ones( (e1_prior_hist.size, e1_prior_hist.size) ) - np.diag(np.ones(e1_prior_hist.size) ) ) + np.diag( e1_prior_hist * (1 - e1_prior_hist) )
     covar2_scaled = - np.outer( e2_prior_hist, e2_prior_hist) * ( np.ones( (e2_prior_hist.size, e2_prior_hist.size) ) - np.diag(np.ones(e2_prior_hist.size) ) ) + np.diag( e2_prior_hist * (1 - e2_prior_hist) )    
     for catalog,i in zip(catalogs, xrange(len(catalogs) )):
@@ -128,7 +131,7 @@ def doInference(catalogs= None):
         this_covar2 = covar2_scaled * 1./catalog.size
         this_cinv1 = np.linalg.pinv(this_covar1)
         this_cinv2 = np.linalg.pinv(this_covar2)
-        field_id[i] = catalog[0]['id'] / 100000
+
         gamma1_raw[i] = linear_estimator(data=this_e1_hist, null=e1_prior_hist, deriv=de1_dg)
         gamma2_raw[i] = linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv=de2_dg) 
         this_g1_opt, this_g1_var = \
@@ -140,16 +143,27 @@ def doInference(catalogs= None):
         gamma1_var[i] = this_g1_var
         gamma2_var[i] = this_g2_var
 
-    return field_id, gamma1_raw, gamma2_raw, gamma1_opt, gamma2_opt, gamma1_var, gamma2_var
+        field_id[i] = catalog[0]['id'] / 100000
+        psf_e1[i] = catalog[0]['psf_e1']
+        psf_e2[i] = catalog[0]['psf_e2']
 
 
-def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, truthFile = 'cgc-truthtable.txt', figName= None ):
+    return field_id, gamma1_raw, gamma2_raw, gamma1_opt, gamma2_opt, gamma1_var, gamma2_var, psf_e1, psf_e2
+
+
+def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None,
+              psf_e1 = None, psf_e2 = None, truthFile = 'cgc-truthtable.txt', figName= None ):
     truthTable = np.loadtxt(truthFile, dtype = [('field_id',np.int), ('g1',np.double), ('g2',np.double ) ])
     
-    obsTable = np.empty(field_id.size, [('field_id',np.int), ('g1',np.double), ('g2',np.double ), ('err1',np.double),('err2',np.double) ] )
+    obsTable = np.empty(field_id.size, [('field_id',np.int), ('g1',np.double), ('g2',np.double ),
+                                        ('err1',np.double),('err2',np.double),
+                                        ('psf_e1',np.double),('psf_e2',np.double)] )
     obsTable['field_id'] = field_id
     obsTable['g1'] = g1
     obsTable['g2'] = g2
+    obsTable['psf_e1'] = psf_e1
+    obsTable['psf_e2'] = psf_e2
+    
     if (err1 is not None) and (err2 is not None):
         obsTable['err1'] = err1
         obsTable['err2'] = err2
@@ -179,7 +193,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, truthFi
         ax4.set_ylim([-0.02,0.02])
         fig.savefig(figName)
     else:
-        fig,((ax1,ax2), (ax3,ax4)) = plt.subplots( nrows=2,ncols=2,figsize=(14,21) )
+        fig,((ax1,ax2), (ax3,ax4), (ax5, ax6)) = plt.subplots( nrows=3,ncols=2,figsize=(14,21) )
         ax1.errorbar(truthTable['g1'],obsTable['g1'],obsTable['err1'],linestyle='.')
         ax1.plot(truthTable['g1'],truthTable['g1'],linestyle='--',color='red')
         ax1.set_title('g1')
@@ -196,8 +210,21 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, truthFi
         ax4.axhline(0.,linestyle='--',color='red')
         ax4.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')        
         ax4.set_ylim([-0.02,0.02])
+
+        ax5.plot(obsTable['psf_e1'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
+        ax5.axhline(0.,linestyle='--',color='red')
+        ax5.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')
+        ax5.set_xlim([-0.1,0.1])
+        ax6.set_ylim([-0.02,0.02])
+        ax5.set_title('psf trend (e1)')
+        ax6.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
+        ax6.axhline(0.,linestyle='--',color='red')
+        ax6.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')
+        ax6.set_title('psf trend (e2)')
+        ax6.set_xlim([-0.1,0.1])
+        ax6.set_ylim([-0.02,0.02])
         fig.savefig(figName)
-        stop
+
         
 
 def main(args):
@@ -220,12 +247,12 @@ def main(args):
     print 'Getting catalogs from path %s and mc_type %s'%(path, mc_type)
     catalogs = getAllCatalogs(path=path, mc_type=mc_type)
     print 'Got %d catalogs, doing inference'%len(catalogs)
-    field_id, g1raw, g2raw, g1opt, g2opt, g1var,g2var = doInference(catalogs= catalogs)
+    field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2 = doInference(catalogs= catalogs)
     print 'Writing field_id, g1raw, g2raw, g1opt, g2opt, g1var,g2var to file %s'%outfile
     out_data = np.column_stack((field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var))
     np.savetxt(outfile, out_data, fmt='%i, %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
-    makePlots(field_id=field_id, g1=g1raw, g2=g2raw, truthFile = 'cgc-truthtable.txt', figName=mc_type+'-raw-shear_plots')
     makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
+              psf_e1 = psf_e1, psf_e2 = psf_e2,
               truthFile = 'cgc-truthtable.txt',figName=mc_type+'-opt-shear_plots')
 
 
