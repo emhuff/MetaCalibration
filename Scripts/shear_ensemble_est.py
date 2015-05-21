@@ -12,25 +12,25 @@ def getAllCatalogs( path = '../Great3/', mc_type = None ):
 
     if mc_type=='regauss':
         path = path+'Outputs-Regauss/cgc_metacal_regauss_fix*.fits'
-        truthFile = 'cgc-noaber-truthtable.txt'
+        truthFile = 'cgc-truthtable.txt'
     elif mc_type=='regauss-sym':
         path = path+'Outputs-Regauss-SymNoise/cgc_metacal_symm*.fits'
-        truthFile = 'cgc-noaber-truthtable.txt'
+        truthFile = 'cgc-truthtable.txt'
     elif mc_type=='ksb':
         path = path+'Outputs-KSB/output_catalog*.fits'
-        truthFile = 'cgc-noaber-truthtable.txt'
+        truthFile = 'cgc-truthtable.txt'
     elif mc_type=='none-regauss':
         path = path+'Outputs-CGN-Regauss/cgc_metacal_moments*.fits'
-        truthFile = 'cgc-noaber-truthtable.txt'
+        truthFile = 'cgc-truthtable.txt'
     elif mc_type=='moments':
         path = path+'Outputs-Moments/cgc_metacal_moments*.fits'
-        truthFile = 'cgc-noaber-truthtable.txt'
+        truthFile = 'cgc-truthtable.txt'
     elif mc_type=='noaber-regauss-sym':
         path = path+'Outputs-Regauss-NoAber-SymNoise/cgc_noaber_metacal_symm*.fits'
-        truthFile = 'cgc-truthtable.txt'
+        truthFile = 'cgc-noaber-truthtable.txt'
     elif mc_type=='noaber-regauss':
         path = path+'Outputs-Regauss-NoAber/cgc_noaber_metacal*.fits'
-        truthFile = 'cgc-truthtable.txt'
+        truthFile = 'cgc-noaber-truthtable.txt'
     else:
         raise RuntimeError('Unrecognized mc_type: %s'%mc_type)
 
@@ -46,7 +46,8 @@ def getAllCatalogs( path = '../Great3/', mc_type = None ):
     return catalogs, truthFile
 
 
-def buildPrior(catalogs=None, nbins=100):
+
+def buildPrior(catalogs=None, nbins=100, bins = None):
     # Get a big master list of all the ellipticities in all fields.
     # Sadly you cannot retain column identity when using hstack, so we have to do the manipulations
     # for each catalog to get a list of e1 arrays to stack.
@@ -69,13 +70,16 @@ def buildPrior(catalogs=None, nbins=100):
 
     # Define bins.  np.percentile cannot take a list of percentile levels, so we have to stupidly
     # loop over the percentile levels we want.
-    percentile_levels = np.linspace(0, 100, nbins)
-    bin_edges = []
-    for percentile_level in percentile_levels:
-        bin_edges.append(np.percentile(all_e, percentile_level))
-    bin_edges = np.array(bin_edges)
-    bin_edges[0] = bin_edges[0] - 1.1*np.abs(bin_edges[0] )
-    bin_edges[-1] = bin_edges[-1] + 1.1*np.abs(bin_edges[-1] )
+    if bins is None:
+        percentile_levels = np.linspace(0, 100, nbins)
+        bin_edges = []
+        for percentile_level in percentile_levels:
+            bin_edges.append(np.percentile(all_e, percentile_level))
+        bin_edges = np.array(bin_edges)
+        bin_edges[0] = bin_edges[0] - 1.1*np.abs(bin_edges[0] )
+        bin_edges[-1] = bin_edges[-1] + 1.1*np.abs(bin_edges[-1] )
+    else:
+        bin_edges = bins
 
     # Compute priors.
     e1_prior_hist, _ = np.histogram(e1prior, bins = bin_edges)
@@ -134,6 +138,8 @@ def doInference(catalogs=None, nbins=None):
     covar1_scaled = - np.outer( e1_prior_hist, e1_prior_hist) * ( np.ones( (e1_prior_hist.size, e1_prior_hist.size) ) - np.diag(np.ones(e1_prior_hist.size) ) ) + np.diag( e1_prior_hist * (1 - e1_prior_hist) )
     covar2_scaled = - np.outer( e2_prior_hist, e2_prior_hist) * ( np.ones( (e2_prior_hist.size, e2_prior_hist.size) ) - np.diag(np.ones(e2_prior_hist.size) ) ) + np.diag( e2_prior_hist * (1 - e2_prior_hist) )    
     for catalog,i in zip(catalogs, xrange(len(catalogs) )):
+
+
         
         this_e1_hist, _ = np.histogram(catalog.g1 - catalog.c1 - catalog.a1*catalog.psf_e1 , bins = bin_edges )
         this_e1_hist = this_e1_hist * 1./catalog.size
@@ -142,15 +148,22 @@ def doInference(catalogs=None, nbins=None):
         # covar_hist = N_obj  * covar; but we divide hist by N_obj, so divide covar_hist by N_obj*N_obj
         this_covar1 = covar1_scaled * 1./catalog.size
         this_covar2 = covar2_scaled * 1./catalog.size
-        this_cinv1 = np.linalg.pinv(this_covar1)
-        this_cinv2 = np.linalg.pinv(this_covar2)
+    
+        # Try making a covariance matrix from just this field?
+        this_field_covar1 = ( - np.outer( this_e1_hist, this_e1_hist) * ( np.ones( (this_e1_hist.size, this_e1_hist.size) ) - np.diag(np.ones(this_e1_hist.size) ) ) + np.diag( this_e1_hist * (1 - this_e1_hist) ) ) / catalog.size
+        this_field_covar2 =  (- np.outer( this_e2_hist, this_e2_hist) * ( np.ones( (this_e2_hist.size, this_e2_hist.size) ) - np.diag(np.ones(this_e2_hist.size) ) ) + np.diag( this_e2_hist * (1 - this_e2_hist) ) ) / catalog.size
+        this_cinv1 = np.linalg.pinv(this_field_covar1)
+        this_cinv2 = np.linalg.pinv(this_field_covar2)
+
+        # Get derivatives for this shear field.
+        #_, _, _, this_de1_dg, this_de2_dg = buildPrior([catalog], nbins=nbins, bins = bin_edges)
 
         gamma1_raw[i] = linear_estimator(data=this_e1_hist, null=e1_prior_hist, deriv=de1_dg)
         gamma2_raw[i] = linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv=de2_dg) 
         this_g1_opt, this_g1_var = \
-            linear_estimator(data=this_e1_hist, null=e1_prior_hist, deriv=de1_dg, cinv=this_cinv1)
+            linear_estimator(data=this_e1_hist, null=e1_prior_hist, deriv= de1_dg, cinv=this_cinv1)
         this_g2_opt, this_g2_var = \
-            linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv=de2_dg, cinv=this_cinv2) 
+            linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv= de2_dg, cinv=this_cinv2) 
         gamma1_opt[i] = this_g1_opt
         gamma2_opt[i] = this_g2_opt
         gamma1_var[i] = this_g1_var
@@ -183,10 +196,13 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None,
         use_errors = True
     else:
         use_errors = False
-    
+
+
     truthTable.sort(order='field_id')
     obsTable.sort(order='field_id')
+    shear_range = 2*( np.percentile( np.concatenate( (g1, g2) ), 75) - np.percentile( np.concatenate( (g1, g2) ), 50))
 
+    
     import matplotlib.pyplot as plt
     if not use_errors:
         fig,((ax1,ax2), (ax3,ax4)) = plt.subplots( nrows=2,ncols=2,figsize=(14,21) )
@@ -218,24 +234,24 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None,
         ax3.plot(truthTable['g1'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
         ax3.axhline(0.,linestyle='--',color='red')
         ax3.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')
-        ax3.set_ylim([-0.02,0.02])
+        ax3.set_ylim([-shear_range, shear_range])
         ax4.plot(truthTable['g2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
         ax4.axhline(0.,linestyle='--',color='red')
         ax4.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')        
-        ax4.set_ylim([-0.02,0.02])
+        ax4.set_ylim([-shear_range, shear_range])
 
         ax5.plot(obsTable['psf_e1'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
         ax5.axhline(0.,linestyle='--',color='red')
         ax5.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')
-        ax5.set_xlim([-0.1,0.1])
-        ax5.set_ylim([-0.02,0.02])
+        ax5.set_xlim([-0.04,0.04])
+        ax5.set_ylim([-shear_range, shear_range])
         ax5.set_title('psf trend (e1)')
         ax6.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
         ax6.axhline(0.,linestyle='--',color='red')
         ax6.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')
         ax6.set_title('psf trend (e2)')
-        ax6.set_xlim([-0.05,0.05])
-        ax6.set_ylim([-0.02,0.02])
+        ax6.set_xlim([-0.04,0.04])
+        ax6.set_ylim([-shear_range, shear_range])
         fig.savefig(figName)
 
         
@@ -262,13 +278,13 @@ def main(argv):
                         help = "number of bins to use in histogram estimator.")
     parser.add_argument("-o", "--outfile", dest = "outfile", type = str, default = "tmp_outfile.txt",
                         help = "destination for output per-field shear catalogs.")
+    parser.add_argument("-dp", "--doplot", dest = "doplot", action="store_true")
     args = parser.parse_args(argv[1:])
     
     path = args.path
     mc_type = args.mc_type
     nbins = args.nbins
     outfile = args.outfile
-
     print 'Getting catalogs from path %s and mc_type %s'%(path, mc_type)
     print 'Using %i bins for inference'% (nbins)
     catalogs, truthfile = getAllCatalogs(path=path, mc_type=mc_type)
@@ -278,9 +294,12 @@ def main(argv):
     print 'Writing field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2 to file %s'%outfile
     out_data = np.column_stack((field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2))
     np.savetxt(outfile, out_data, fmt='%d %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
-    #makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
-    #          psf_e1 = psf_e1, psf_e2 = psf_e2,
-    #          truthFile = truthFile,figName=mc_type+'-opt-shear_plots')
+    if args.doplot:
+        print "Making plots..."
+        makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
+                  psf_e1 = psf_e1, psf_e2 = psf_e2,
+                  truthFile = truthfile,figName=mc_type+'-opt-shear_plots')
+        print "wrote plots to "+mc_type+'-opt-shear_plots.png'
 
 
 if __name__ == "__main__":
