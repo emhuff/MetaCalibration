@@ -8,23 +8,33 @@ import glob
 from astropy.io import fits
 
 def getAllCatalogs( path = '../Great3/', mc_type = None ):
-    
+
+
     if mc_type=='regauss':
         path = path+'Outputs-Regauss/cgc_metacal_regauss_fix*.fits'
+        truthFile = 'cgc-noaber-truthtable.txt'
     elif mc_type=='regauss-sym':
         path = path+'Outputs-Regauss-SymNoise/cgc_metacal_symm*.fits'
+        truthFile = 'cgc-noaber-truthtable.txt'
     elif mc_type=='ksb':
         path = path+'Outputs-KSB/output_catalog*.fits'
+        truthFile = 'cgc-noaber-truthtable.txt'
     elif mc_type=='none-regauss':
         path = path+'Outputs-CGN-Regauss/cgc_metacal_moments*.fits'
+        truthFile = 'cgc-noaber-truthtable.txt'
     elif mc_type=='moments':
         path = path+'Outputs-Moments/cgc_metacal_moments*.fits'
+        truthFile = 'cgc-noaber-truthtable.txt'
     elif mc_type=='noaber-regauss-sym':
         path = path+'Outputs-Regauss-NoAber-SymNoise/cgc_noaber_metacal_symm*.fits'
+        truthFile = 'cgc-truthtable.txt'
     elif mc_type=='noaber-regauss':
         path = path+'Outputs-Regauss-NoAber/cgc_noaber_metacal*.fits'
+        truthFile = 'cgc-truthtable.txt'
     else:
         raise RuntimeError('Unrecognized mc_type: %s'%mc_type)
+
+    
 
     catFiles = glob.glob(path)
     if len(catFiles) == 0:
@@ -33,7 +43,7 @@ def getAllCatalogs( path = '../Great3/', mc_type = None ):
     for thisFile in catFiles:
         catalogs.append( fits.getdata(thisFile) )
 
-    return catalogs
+    return catalogs, truthFile
 
 
 def buildPrior(catalogs=None, nbins=100):
@@ -230,33 +240,36 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None,
 
         
 
-def main(args):
+def main(argv):
 
     # Set defaults and parse args.  This is kind of a stupid way to do it, since right now you can
     # specify either path, or path AND mc_type, or path AND mc_type AND outfile, but you can't (for
     # example) just specify outfile or just specify mc_type.  But it'll do for now.
-    path = '../Great3/'
-    mc_type = 'regauss'
-    truthFile = 'cgc-noaber-truthtable.txt'
-    #truthFile = 'cgc-truthtable.txt'
-    outfile = 'tmp_outfile.txt'
-    nbins = 100
-    if len(args) > 1:
-        if len(args) > 5:
-            raise RuntimeError("I do not know how to handle that many arguments.")
-        elif len(args) == 5:
-            nbins = args[4]
-            outfile = args[3]
-            mc_type = args[2]
-        elif len(args) == 4:
-            outfile = args[3]
-            mc_type = args[2]
-        elif len(args) == 3:
-            mc_type = args[2]
-        path = args[1]
+
+
+    import argparse
+    #usage = "usage: %prog [options] "
+    description = """Analyze MetaCalibration outputs from Great3 and Great3++ simulations."""
+    mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym', 'noaber-regauss']
+    parser = argparse.ArgumentParser(description=description)#, usage=usage)
+    parser.add_argument("--path", dest="path", type=str, default="../Great3/",
+                      help="path to MetaCalibration output catalogs")
+    parser.add_argument("-m", "--mc_type", dest="mc_type", type=str, default="regauss",
+                      choices = mc_choices, help="path to MetaCalibration output catalogs")
+    parser.add_argument("-n", "--nbins", dest = "nbins", type = int, default= 100,
+                      help = "number of bins to use in histogram estimator.")
+    parser.add_argument("-o", "--outfile", dest = "outfile", type = str, default = "tmp_outfile.txt",
+                      help = "destination for output per-field shear catalogs.")
+    args = parser.parse_args(argv[1:])
+    
+    path = args.path
+    mc_type = args.mc_type
+    nbins = args.nbins
+    outfile = args.outfile
 
     print 'Getting catalogs from path %s and mc_type %s'%(path, mc_type)
-    catalogs = getAllCatalogs(path=path, mc_type=mc_type)
+    print 'Using %i bins for inference'% (nbins)
+    catalogs, truthfile = getAllCatalogs(path=path, mc_type=mc_type)
     print 'Got %d catalogs, doing inference'%len(catalogs)
     field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2 = \
         doInference(catalogs=catalogs, nbins=nbins)
