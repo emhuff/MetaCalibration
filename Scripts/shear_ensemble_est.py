@@ -188,14 +188,16 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, truthFi
         ax2.set_title('g2')
 
     
-        ax3.errorbar(truthTable['g1'], obsTable['g1'] - truthTable['g1'],obsTable['err1'],linestyle='.')
+        ax3.plot(truthTable['g1'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
         ax3.axhline(0.,linestyle='--',color='red')
+        ax3.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')
         ax3.set_ylim([-0.02,0.02])
-        ax4.errorbar(truthTable['g2'], obsTable['g2'] - truthTable['g2'],obsTable['err1'],linestyle='.')
+        ax4.plot(truthTable['g2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
         ax4.axhline(0.,linestyle='--',color='red')
+        ax4.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')        
         ax4.set_ylim([-0.02,0.02])
         fig.savefig(figName)
-        
+        stop
         
 
 def main(args):
