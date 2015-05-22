@@ -25,7 +25,7 @@ else:
     true_mean_g2 = -0.00269821215
 
 n_bins = np.arange(30,151,12)
-percentile_vals = [0, 0.1]
+percentile_vals = [0, 0]
 n_logl_vals = 2
 filepref = 'outputs/output-rgc-noaber'
 filesuff = '.dat'
@@ -85,7 +85,10 @@ for n_indx, n in enumerate(n_bins):
             logl_cutoff_min = np.percentile(logl, percentile_vals[0])
         else:
             logl_cutoff_min = -1.e7
-        logl_cutoff_max = np.percentile(logl, percentile_vals[1])
+        if percentile_vals[1] > 0.:
+            logl_cutoff_max = np.percentile(logl, percentile_vals[1])
+        else:
+            logl_cutoff_max = -1.e6
         logl_cutoffs = np.linspace(logl_cutoff_min, logl_cutoff_max, n_logl_vals)
 
     # read in truth table
