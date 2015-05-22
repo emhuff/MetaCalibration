@@ -19,36 +19,37 @@ else:
 
 # Truth info: either a table, or mean shears across the field
 if use_truth:
-    truthfile = 'cgc-truthtable.txt'
+    truthfile = 'rgc-noaber-truthtable.txt'
 else:
     true_mean_g1 = 0.00066805100000000002 
     true_mean_g2 = -0.00269821215
 
-n_bins = [25, 50, 60, 70, 75, 85, 100, 125, 150]
-percentile_vals = [0.5, 1., 2., 3., 4., 5., 6., 8., 10., 12., 14., 16., 20.]
+n_bins = np.arange(30,150,8)
+percentile_vals = [0.5, 20.]
+n_logl_vals = 8
 filepref = 'outputs/output-rgc-noaber'
 filesuff = '.dat'
-rootdir = '../Great3/' # to be passed to shear_ensemble_est.py
+rootdir = './' # to be passed to shear_ensemble_est.py
 mc_type = 'rgc-noaber-regauss' # to be passed to shear_ensemble_est.py
 outpref = 'outputs/'+mc_type+'-'
 
-mean_g1 = np.zeros((len(n_bins), len(percentile_vals)))
-mean_g2 = np.zeros((len(n_bins), len(percentile_vals)))
-sig_g1 = np.zeros((len(n_bins), len(percentile_vals)))
-sig_g2 = np.zeros((len(n_bins), len(percentile_vals)))
+mean_g1 = np.zeros((len(n_bins), n_logl_vals))
+mean_g2 = np.zeros((len(n_bins), n_logl_vals))
+sig_g1 = np.zeros((len(n_bins), n_logl_vals))
+sig_g2 = np.zeros((len(n_bins), n_logl_vals))
 if use_truth:
-    m1 = np.zeros((len(n_bins), len(percentile_vals)))
-    m2 = np.zeros((len(n_bins), len(percentile_vals)))
-    sig_m1 = np.zeros((len(n_bins), len(percentile_vals)))
-    sig_m2 = np.zeros((len(n_bins), len(percentile_vals)))
-    a1 = np.zeros((len(n_bins), len(percentile_vals)))
-    a2 = np.zeros((len(n_bins), len(percentile_vals)))
-    sig_a1 = np.zeros((len(n_bins), len(percentile_vals)))
-    sig_a2 = np.zeros((len(n_bins), len(percentile_vals)))
-    c1 = np.zeros((len(n_bins), len(percentile_vals)))
-    c2 = np.zeros((len(n_bins), len(percentile_vals)))
-    sig_c1 = np.zeros((len(n_bins), len(percentile_vals)))
-    sig_c2 = np.zeros((len(n_bins), len(percentile_vals)))
+    m1 = np.zeros((len(n_bins), n_logl_vals))
+    m2 = np.zeros((len(n_bins), n_logl_vals))
+    sig_m1 = np.zeros((len(n_bins), n_logl_vals))
+    sig_m2 = np.zeros((len(n_bins), n_logl_vals))
+    a1 = np.zeros((len(n_bins), n_logl_vals))
+    a2 = np.zeros((len(n_bins), n_logl_vals))
+    sig_a1 = np.zeros((len(n_bins), n_logl_vals))
+    sig_a2 = np.zeros((len(n_bins), n_logl_vals))
+    c1 = np.zeros((len(n_bins), n_logl_vals))
+    c2 = np.zeros((len(n_bins), n_logl_vals))
+    sig_c1 = np.zeros((len(n_bins), n_logl_vals))
+    sig_c2 = np.zeros((len(n_bins), n_logl_vals))
 
 for n_indx, n in enumerate(n_bins):
     # construct filename
@@ -80,9 +81,9 @@ for n_indx, n in enumerate(n_bins):
     if 'logl_cutoffs' not in locals():
         # concatenate the list of log likelihoods for both components
         logl = np.concatenate((logl1, logl2))
-        logl_cutoffs = []
-        for perc in percentile_vals:
-            logl_cutoffs.append(np.percentile(logl, perc))
+        logl_cutoff_min = np.percentile(logl, percentile_vals[0])
+        logl_cutoff_max = np.percentile(logl, percentile_vals[1])
+        logl_cutoffs = np.linspace(logl_cutoff_min, logl_cutoff_max, n_logl_vals)
 
     # read in truth table
     if use_truth:
