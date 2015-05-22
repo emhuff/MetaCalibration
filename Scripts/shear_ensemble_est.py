@@ -37,7 +37,6 @@ def getAllCatalogs( path = '../Great3/', mc_type = None ):
     elif mc_type == 'real-regauss':
         path = path+'Outputs-Real-NoAber-Regauss/rgc_noaber_metacal*'
         truthFile = 'rgc-noaber-dummytable.txt' 
-
     else:
         raise RuntimeError('Unrecognized mc_type: %s'%mc_type)
 
