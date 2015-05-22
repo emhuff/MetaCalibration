@@ -3,13 +3,26 @@ import numpy as np
 import os
 import subprocess
 from scipy.optimize import curve_fit
+import sys
 
 def shear_model(x, m, a, c):
     # x should be 3 x N, where 0=gtrue, 1=epsf, 2=const
     return m*x[0,:] + a*x[1,:] + c*x[2,:]
     
+if len(sys.argv) != 1:
+    # This will be either 0 for False or 1 for True.
+    # So if 0 then it won't use a truth table, but you should fill in the true mean shear below.
+    # If 1 (or left blank) then it will use a truth table, given as a filename below.
+    use_truth = bool(int(sys.argv[1]))
+else:
+    use_truth = True
 
-truthfile = 'cgc-truthtable.txt'
+# Truth info: either a table, or mean shears across the field
+if use_truth:
+    truthfile = 'cgc-truthtable.txt'
+else:
+    true_mean_g1 = -0.00069750141117027025
+    true_mean_g2 = 0.002724380587579428
 
 n_bins = [25, 50, 60, 70, 75, 85, 100, 125, 150]
 percentile_vals = [0.5, 1., 2., 3., 4., 5., 6., 8., 10., 12., 14., 16., 20.]
@@ -23,18 +36,19 @@ mean_g1 = np.zeros((len(n_bins), len(percentile_vals)))
 mean_g2 = np.zeros((len(n_bins), len(percentile_vals)))
 sig_g1 = np.zeros((len(n_bins), len(percentile_vals)))
 sig_g2 = np.zeros((len(n_bins), len(percentile_vals)))
-m1 = np.zeros((len(n_bins), len(percentile_vals)))
-m2 = np.zeros((len(n_bins), len(percentile_vals)))
-sig_m1 = np.zeros((len(n_bins), len(percentile_vals)))
-sig_m2 = np.zeros((len(n_bins), len(percentile_vals)))
-a1 = np.zeros((len(n_bins), len(percentile_vals)))
-a2 = np.zeros((len(n_bins), len(percentile_vals)))
-sig_a1 = np.zeros((len(n_bins), len(percentile_vals)))
-sig_a2 = np.zeros((len(n_bins), len(percentile_vals)))
-c1 = np.zeros((len(n_bins), len(percentile_vals)))
-c2 = np.zeros((len(n_bins), len(percentile_vals)))
-sig_c1 = np.zeros((len(n_bins), len(percentile_vals)))
-sig_c2 = np.zeros((len(n_bins), len(percentile_vals)))
+if use_truth:
+    m1 = np.zeros((len(n_bins), len(percentile_vals)))
+    m2 = np.zeros((len(n_bins), len(percentile_vals)))
+    sig_m1 = np.zeros((len(n_bins), len(percentile_vals)))
+    sig_m2 = np.zeros((len(n_bins), len(percentile_vals)))
+    a1 = np.zeros((len(n_bins), len(percentile_vals)))
+    a2 = np.zeros((len(n_bins), len(percentile_vals)))
+    sig_a1 = np.zeros((len(n_bins), len(percentile_vals)))
+    sig_a2 = np.zeros((len(n_bins), len(percentile_vals)))
+    c1 = np.zeros((len(n_bins), len(percentile_vals)))
+    c2 = np.zeros((len(n_bins), len(percentile_vals)))
+    sig_c1 = np.zeros((len(n_bins), len(percentile_vals)))
+    sig_c2 = np.zeros((len(n_bins), len(percentile_vals)))
 
 for n_indx, n in enumerate(n_bins):
     # construct filename
@@ -70,13 +84,14 @@ for n_indx, n in enumerate(n_bins):
             logl_cutoffs.append(np.percentile(logl, perc))
 
     # read in truth table
-    dat = np.loadtxt(truthfile).transpose()
-    field_id_truth = dat[0,:]
-    g1_true = dat[1,:]
-    g2_true = dat[2,:]
+    if use_truth:
+        dat = np.loadtxt(truthfile).transpose()
+        field_id_truth = dat[0,:]
+        g1_true = dat[1,:]
+        g2_true = dat[2,:]
 
-    if not np.array_equal(field_id, field_id_truth):
-        raise RuntimeError('Subfield indices do not match!')
+        if not np.array_equal(field_id, field_id_truth):
+            raise RuntimeError('Subfield indices do not match!')
 
     for logl_indx, logl_cut in enumerate(logl_cutoffs):
         print "Log likelihood cutoff: ",logl_cut
@@ -84,15 +99,17 @@ for n_indx, n in enumerate(n_bins):
         use_g1_opt = g1_opt[to_save_1]
         use_g1_var = g1_var[to_save_1]
         use_psf_e1 = psf_e1[to_save_1]
-        use_g1_true = g1_true[to_save_1]
+        if use_truth:
+            use_g1_true = g1_true[to_save_1]
 
         to_save_2 = logl2 > logl_cut
         use_g2_opt = g2_opt[to_save_2]
         use_g2_var = g2_var[to_save_2]
         use_psf_e2 = psf_e2[to_save_2]
-        use_g2_true = g2_true[to_save_2]
+        if use_truth:
+            use_g2_true = g2_true[to_save_2]
 
-        print "Using ",len(use_g1_true),' and ',len(use_g2_true),' for g1 and g2'
+        print "Using ",len(use_g1_opt),' and ',len(use_g2_opt),' for g1 and g2'
 
         # compute and store <gamma>
         mean_g1[n_indx][logl_indx]=np.mean(use_g1_opt)
@@ -102,28 +119,29 @@ for n_indx, n in enumerate(n_bins):
         sig_g1[n_indx][logl_indx]=np.mean(np.sqrt(use_g1_var))
         sig_g2[n_indx][logl_indx]=np.mean(np.sqrt(use_g2_var))
 
-        # compute (roughly) and store m, a
-        # Our equation is g_obs - g_true = m*g_true + a*e_psf
-        # Our "A" matrix that lstsq wants should be like this:
-        A = np.column_stack([use_g1_true, use_psf_e1, np.ones_like(use_psf_e1)]).transpose()
-        # And the B vector is just the LHS
-        B = use_g1_opt - use_g1_true
-        ret_val, covar_1 = curve_fit(shear_model, A, B, sigma=np.sqrt(use_g1_var))
-        m1[n_indx][logl_indx]=ret_val[0]
-        a1[n_indx][logl_indx]=ret_val[1]
-        c1[n_indx][logl_indx]=ret_val[2]
-        sig_m1[n_indx][logl_indx]=np.sqrt(covar_1[0][0])
-        sig_a1[n_indx][logl_indx]=np.sqrt(covar_1[1][1])
-        sig_c1[n_indx][logl_indx]=np.sqrt(covar_1[2][2])
-        A = np.column_stack([use_g2_true, use_psf_e2, np.ones_like(use_psf_e2)]).transpose()
-        B = use_g2_opt - use_g2_true
-        ret_val, covar_2 = curve_fit(shear_model, A, B, sigma=np.sqrt(use_g2_var))
-        m2[n_indx][logl_indx]=ret_val[0]
-        a2[n_indx][logl_indx]=ret_val[1]
-        c2[n_indx][logl_indx]=ret_val[2]
-        sig_m2[n_indx][logl_indx]=np.sqrt(covar_2[0][0])
-        sig_a2[n_indx][logl_indx]=np.sqrt(covar_2[1][1])
-        sig_c2[n_indx][logl_indx]=np.sqrt(covar_2[2][2])
+        if use_truth:
+            # compute (roughly) and store m, a
+            # Our equation is g_obs - g_true = m*g_true + a*e_psf
+            # Our "A" matrix that lstsq wants should be like this:
+            A = np.column_stack([use_g1_true, use_psf_e1, np.ones_like(use_psf_e1)]).transpose()
+            # And the B vector is just the LHS
+            B = use_g1_opt - use_g1_true
+            ret_val, covar_1 = curve_fit(shear_model, A, B, sigma=np.sqrt(use_g1_var))
+            m1[n_indx][logl_indx]=ret_val[0]
+            a1[n_indx][logl_indx]=ret_val[1]
+            c1[n_indx][logl_indx]=ret_val[2]
+            sig_m1[n_indx][logl_indx]=np.sqrt(covar_1[0][0])
+            sig_a1[n_indx][logl_indx]=np.sqrt(covar_1[1][1])
+            sig_c1[n_indx][logl_indx]=np.sqrt(covar_1[2][2])
+            A = np.column_stack([use_g2_true, use_psf_e2, np.ones_like(use_psf_e2)]).transpose()
+            B = use_g2_opt - use_g2_true
+            ret_val, covar_2 = curve_fit(shear_model, A, B, sigma=np.sqrt(use_g2_var))
+            m2[n_indx][logl_indx]=ret_val[0]
+            a2[n_indx][logl_indx]=ret_val[1]
+            c2[n_indx][logl_indx]=ret_val[2]
+            sig_m2[n_indx][logl_indx]=np.sqrt(covar_2[0][0])
+            sig_a2[n_indx][logl_indx]=np.sqrt(covar_2[1][1])
+            sig_c2[n_indx][logl_indx]=np.sqrt(covar_2[2][2])
 
 if 0:
     # Plot m vs. n_bins
@@ -176,41 +194,57 @@ if 0:
     plt.savefig(outpref+mc_type+'.png')
 
 else:
-    # make 2d plot of <shear residual> vs. n, logL
-    fig = plt.figure()
-    vmax = max(np.max(c1), -np.min(c1))
-    plt.imshow(c1.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
-               interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
-    plt.colorbar()
-    plt.savefig('mean_g1_2d.png')
-    fig = plt.figure()
-    plt.imshow(c2.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
-               interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
-    plt.colorbar()
-    plt.savefig('mean_g2_2d.png')
+    if use_truth:
+        # make 2d plot of <shear residual> vs. n, logL
+        fig = plt.figure()
+        vmax = max(np.max(c1), -np.min(c1))
+        plt.imshow(c1.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
+                   interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
+        plt.colorbar()
+        plt.savefig('mean_c1_2d.png')
+        fig = plt.figure()
+        plt.imshow(c2.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
+                   interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
+        plt.colorbar()
+        plt.savefig('mean_c2_2d.png')
 
-    # make 2d plot of m vs. n, logL
-    fig = plt.figure()
-    vmax = max(np.max(m1), -np.min(m1))
-    plt.imshow(m1.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
-               interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
-    plt.colorbar()
-    plt.savefig('mean_m1_2d.png')
-    fig = plt.figure()
-    plt.imshow(m2.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
-               interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
-    plt.colorbar()
-    plt.savefig('mean_m2_2d.png')
+        # make 2d plot of m vs. n, logL
+        fig = plt.figure()
+        vmax = max(np.max(m1), -np.min(m1))
+        plt.imshow(m1.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
+                   interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
+        plt.colorbar()
+        plt.savefig('mean_m1_2d.png')
+        fig = plt.figure()
+        plt.imshow(m2.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
+                   interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
+        plt.colorbar()
+        plt.savefig('mean_m2_2d.png')
 
-    # make 2d plot of a vs. n, logL
-    fig = plt.figure()
-    vmax = max(np.max(m1), -np.min(m1))
-    plt.imshow(a1.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
-               interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
-    plt.colorbar()
-    plt.savefig('mean_a1_2d.png')
-    fig = plt.figure()
-    plt.imshow(a2.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
-               interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
-    plt.colorbar()
-    plt.savefig('mean_a2_2d.png')
+        # make 2d plot of a vs. n, logL
+        fig = plt.figure()
+        vmax = max(np.max(m1), -np.min(m1))
+        plt.imshow(a1.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
+                   interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
+        plt.colorbar()
+        plt.savefig('mean_a1_2d.png')
+        fig = plt.figure()
+        plt.imshow(a2.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
+                   interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
+        plt.colorbar()
+        plt.savefig('mean_a2_2d.png')
+    else:
+        # just make plot of shear residual vs. n, logL
+        mean_g1 -= true_mean_g1
+        mean_g2 -= true_mean_g2
+        fig = plt.figure()
+        vmax = max(np.max(mean_g1), -np.min(mean_g1))
+        plt.imshow(mean_g1.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
+                   interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
+        plt.colorbar()
+        plt.savefig('mean_g1_2d.png')
+        fig = plt.figure()
+        plt.imshow(mean_g2.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
+                   interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
+        plt.colorbar()
+        plt.savefig('mean_g2_2d.png')
