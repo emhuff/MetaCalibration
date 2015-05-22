@@ -1,0 +1,167 @@
+\documentclass[iop]{emulateapj}
+
+\usepackage{amsmath,amssymb}
+\usepackage{color}
+\usepackage{natbib}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{ulem}
+\usepackage[draft]{todonotes}
+
+\newcommand\toplot[1]{\todo[color=green, inline, size=\small]{Plot: #1}}
+\newcommand\towrite[1]{\todo[color=yellow, inline, size=\small]{Write: #1}}
+\newcommand\todorm[1]{\todo[color=cyan, inline, size=\small]{To do: #1}}
+
+\citestyle{aa}
+
+\shorttitle{Meta-Calibration} \shortauthors{Huff and Mandelbaum}
+
+\begin{document}
+\title{How to Eliminate Multiplicative Shear Biases}
+\author{Eric M. Huff\altaffilmark{1}}
+\author{Rachel Mandelbaum\altaffilmark{2}}
+
+\altaffiltext{1}{Center for Cosmology and Astroparticle Physics, 
+Department of Physics, The Ohio State University, OH 43210, USA}
+\altaffiltext{2}{McWilliams Center for Cosmology, Department of Physics, Carnegie Mellon University,
+  5000 Forbes Avenue, Pittsburgh, PA 15213, USA}
+
+\keywords{cosmology: observations --- gravitational lensing: weak ---
+  methods: observational}
+
+\begin{abstract}
+\towrite{Pithy yet exciting abstract.  Mention public code.}
+\end{abstract}
+
+\maketitle
+
+\todorm{discuss title.  I do not like the above, because (a) this is about a lot more than
+  multiplicative bias, (b) there are lots of ways to ``eliminate'' biases that are less appealing.
+  (Technically, you remove them if you make a fake dataset and test for calibration biases.  You
+  just might not remove them very well.)  How about ``MetaCalibration: direct self-calibration of
+  weak lensing shear biases''?}
+\todorm{make writing assignments for each section.}
+
+\section{Introduction}
+
+\towrite{Weak lensing is awesome, but systematic errors in shear estimates are a long-standing
+  problem in which much progress has been made in the past 2 decades.  Algorithms are not
+  demonstrably ready for stage-IV data, and often must rely on external simulations for
+  calibration.  This is unsatisfying because INSERT REASONS.  We propose a method for
+  self-calibrating multiplicative biases, additive biases, and selection biases directly from the
+  data through constrained re-simulation of the dataset.  This automatically uses the right galaxy
+  population and PSF to describe the survey.  Isn't that cool?}
+
+\section{Method}
+
+\towrite{Brief conceptual description.  Need for a good model of what biases depend on.}
+
+\subsection{Resimulation}
+
+\towrite{thorough description of the resimulation aspect of this.  Need to talk about noise
+  asymmetry, the expected impact, what one could do about this.}
+
+\subsection{Shear inference}
+
+\towrite{thorough description of the shear inference aspect of this}
+
+\subsection{Outlier rejection}
+
+\towrite{Consequence of using global prior, how to do rejection without accessing truth data.
+  Comment on variances for outliers not being helpful.}
+
+\subsection{Setting adjustable parameters of the method}
+
+\towrite{Talk about likelihood cutoff, number of bins.  Explain how to set them without using the
+  truth table, which is important for being able to use this in real life.  Do we have an
+  understanding of the biases that result from using wrong $N_\text{bins}$?}
+
+\section{Shear estimation methods}
+
+\towrite{Since MetaCalibration can wrap essentially any per-object shear estimation method, we
+  should valid it on more than one.  We will use re-Gaussianization and KSB.  For fun, we will also
+  check how it does with uncorrected moments: can MetaCalibration due the entire PSF correction?
+  It's not clear that the linear model should hold, but let's try anyway!  This is kind of an
+  extreme case.}
+
+\section{Test datasets}
+
+\towrite{brief-ish description of GREAT3 sims and sim framework.  Basically, give enough info to
+  show what's going on and convince the reader that this is a non-trivially complicated dataset in
+  terms of the PSFs and galaxy samples.  Also note difference from real life in terms of expected
+  mean shear, since that'll be important later.}
+
+\section{Results}
+
+\towrite{brief outline of results presentation goes here}
+\todorm{decide if there are more calculations we want to do.  Example: should we make a larger
+  simulated dataset to drive down our errors on $m$, $a$, $c$?}
+
+\subsection{GREAT3 CGC}
+
+\toplot{Mean residual shear across the field as a function of number of bins, likelihood cutoff.}
+\towrite{Discuss findings for number of bins, likelihood cutoff.}  
+\toplot{Multiplicative, additive biases for number of bins, likelihood cutoff.  Highlight the point
+  that was chosen in the previous plot.}
+\towrite{Give $m_{1,2}$, $a_{1,2}$, $c_{1,2}$ for the chosen
+  settings in the text, with errorbars.  Compare with $m_{1,2}$, $a_{1,2}$ for re-Gaussianization
+  from GREAT3 leaderboard to assert that this has done a lot of the work for us.}
+\towrite{Comment on outliers.  What fraction, how does that correlate with the PSF properties.  This
+  will motivate next subsection.}
+
+\subsection{GREAT3 CGC without optical aberrations}
+
+\toplot{Mean residual shear across the field as a function of number of bins, likelihood cutoff.}
+\towrite{Discuss findings for number of bins, likelihood cutoff.}  
+\toplot{Multiplicative, additive biases for number of bins, likelihood cutoff.  Highlight the point
+  that was chosen in the previous plot.}
+\towrite{Give $m_{1,2}$, $a_{1,2}$, $c_{1,2}$ for the chosen
+  settings in the text, with errorbars.  Comment on reduced outlier fraction, and why we think
+  aberrations might have caused this.  (Model failure?)}
+\todorm{Anything else to do on this?  Should we make a CGC that has some non-negligible set of
+  aberrations that is present in each field?}
+
+\subsection{Other shear estimation methods}
+
+\todorm{Put together KSB results for CGC, RGC?  Would be good to do both.}
+\toplot{Some relevant KSB plots.}
+\towrite{Comment on KSB results.}
+\todorm{Put together moments results for CGC, RGC?  Would be good to do both.}
+\toplot{Some relevant moments plots.}
+\towrite{Comment on moments results.}
+
+\subsection{Noise symmetry}
+
+\towrite{Explain what happens when we symmetrize the noise.  It gets a lot noisier, which is not
+  quite expected.}
+\todorm{Consider whether more investigation is needed on this.  Can we explain (e.g., using Chris's
+  calculations) why it seems to be too small to matter?}
+
+\section{Applicability to existing data}
+
+\towrite{This is constant shear.  Could this be used for g-g lensing? Discuss limitations.}
+\towrite{What is needed for variable shear?}
+\towrite{Further extensions: selection bias?}
+\towrite{Comment on data processing and image processing requirements, compared to other ways of
+  calibrating shears (e.g., making loads of external sims).  Can we do some stupid optimization,
+  e.g., use a subset of the survey (chosen at random)?}
+
+\section{Discussion and conclusions}
+
+\towrite{We win.}
+
+\section*{Acknowledgments}
+
+\towrite{Funding acknowledgments, discussions.}
+
+\bibliographystyle{apj}
+\bibliography{bibliography}
+
+\appendix
+
+\section{Publicly available implementation}
+
+\towrite{Implementation details here.}
+\todorm{Clean up enough that we can make it public!}
+
+\end{document}
