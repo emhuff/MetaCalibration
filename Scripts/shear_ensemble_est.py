@@ -31,10 +31,10 @@ def getAllCatalogs( path = '../Great3/', mc_type = None ):
     elif mc_type=='noaber-regauss':
         path = path+'Outputs-Regauss-NoAber/cgc_noaber_metacal*.fits'
         truthFile = 'cgc-noaber-truthtable.txt'
-    elif mc_type == 'real-regauss':
+    elif mc_type == 'rgc-regauss':
         path = path+'Outputs-Real-Regauss/rgc_metacal-*'
         truthFile = 'rgc-dummytable.txt'
-    elif mc_type == 'real-regauss':
+    elif mc_type == 'rgc-noaber-regauss':
         path = path+'Outputs-Real-NoAber-Regauss/rgc_noaber_metacal*'
         truthFile = 'rgc-noaber-dummytable.txt' 
     else:
@@ -303,7 +303,7 @@ def main(argv):
     import argparse
 
     description = """Analyze MetaCalibration outputs from Great3 and Great3++ simulations."""
-    mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym', 'noaber-regauss']
+    mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym', 'noaber-regauss','rgc-regauss','rgc-noaber-regauss']
     # Note: The above line needs to be consistent with the choices in getAllCatalogs.
     
     parser = argparse.ArgumentParser(description=description)
