@@ -21,15 +21,15 @@ else:
 if use_truth:
     truthfile = 'cgc-truthtable.txt'
 else:
-    true_mean_g1 = -0.0027895457500000005 
-    true_mean_g2 = 0.0015939298500000005
+    true_mean_g1 = 0.00066805100000000002 
+    true_mean_g2 = -0.00269821215
 
 n_bins = [25, 50, 60, 70, 75, 85, 100, 125, 150]
 percentile_vals = [0.5, 1., 2., 3., 4., 5., 6., 8., 10., 12., 14., 16., 20.]
-filepref = 'outputs/output-rgc-'
+filepref = 'outputs/output-rgc-noaber'
 filesuff = '.dat'
 rootdir = '../Great3/' # to be passed to shear_ensemble_est.py
-mc_type = 'rgc-regauss' # to be passed to shear_ensemble_est.py
+mc_type = 'rgc-noaber-regauss' # to be passed to shear_ensemble_est.py
 outpref = 'outputs/'+mc_type+'-'
 
 mean_g1 = np.zeros((len(n_bins), len(percentile_vals)))
@@ -58,6 +58,7 @@ for n_indx, n in enumerate(n_bins):
     if not os.path.exists(filename):
         print 'Generating file %s'%filename
         tmp_command = 'python shear_ensemble_est.py --path %s --mc_type %s -o %s -n %d'%(rootdir,mc_type,filename,n)
+        print tmp_command
         p = subprocess.Popen(tmp_command, shell=True, close_fds=True)
         p.wait()
         print 'Done running inference'

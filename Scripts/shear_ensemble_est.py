@@ -186,9 +186,9 @@ def doInference(catalogs=None, nbins=None):
         gamma1_var[i] = this_g1_var
         gamma2_var[i] = this_g2_var
 
-        e1_hist_desheared, _ = np.histogram(catalog.g1 - catalog.r1 * this_g1_opt - catalog.c1 - catalog.a1*catalog.psf_e1 , bins = bin_edges )
+        e1_hist_desheared, _ = np.histogram(catalog.g1 - catalog.R1 * this_g1_opt - catalog.c1 - catalog.a1*catalog.psf_e1 , bins = bin_edges )
         e1_hist_desheared = e1_hist_desheared * 1./catalog.size
-        e2_hist_desheared, _ = np.histogram(catalog.g2 - catalog.r2 * this_g2_opt - catalog.c2 - catalog.a2*catalog.psf_e2, bins = bin_edges )
+        e2_hist_desheared, _ = np.histogram(catalog.g2 - catalog.R2 * this_g2_opt - catalog.c2 - catalog.a2*catalog.psf_e2, bins = bin_edges )
         e2_hist_desheared = e2_hist_desheared * 1./catalog.size
         
 
