@@ -21,15 +21,15 @@ else:
 if use_truth:
     truthfile = 'cgc-truthtable.txt'
 else:
-    true_mean_g1 = -0.00069750141117027025
-    true_mean_g2 = 0.002724380587579428
+    true_mean_g1 = -0.0027895457500000005 
+    true_mean_g2 = 0.0015939298500000005
 
 n_bins = [25, 50, 60, 70, 75, 85, 100, 125, 150]
 percentile_vals = [0.5, 1., 2., 3., 4., 5., 6., 8., 10., 12., 14., 16., 20.]
-filepref = 'outputs/output-cgc-nosymm-'
+filepref = 'outputs/output-rgc-'
 filesuff = '.dat'
-rootdir = './' # to be passed to shear_ensemble_est.py
-mc_type = 'regauss' # to be passed to shear_ensemble_est.py
+rootdir = '../Great3/' # to be passed to shear_ensemble_est.py
+mc_type = 'rgc-regauss' # to be passed to shear_ensemble_est.py
 outpref = 'outputs/'+mc_type+'-'
 
 mean_g1 = np.zeros((len(n_bins), len(percentile_vals)))

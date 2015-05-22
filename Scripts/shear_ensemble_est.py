@@ -161,10 +161,6 @@ def doInference(catalogs=None, nbins=None):
         this_e1_hist = this_e1_hist * 1./catalog.size
         this_e2_hist, _ = np.histogram(catalog.g2 - catalog.c2 - catalog.a2*catalog.psf_e2, bins = bin_edges )
         this_e2_hist = this_e2_hist * 1./catalog.size
-
-        # Calculate the log-likelihood that this field was drawn from the shape distribution.
-        field_e1_logL[i] = multinomial_logL(obs_hist= this_e1_hist * catalog.size, truth_prob = e1_prior_hist)
-        field_e2_logL[i] = multinomial_logL(obs_hist= this_e2_hist * catalog.size, truth_prob = e2_prior_hist)
         
         # covar_hist = N_obj  * covar; but we divide hist by N_obj, so divide covar_hist by N_obj*N_obj
         this_covar1 = covar1_scaled * 1./catalog.size
@@ -189,6 +185,18 @@ def doInference(catalogs=None, nbins=None):
         gamma2_opt[i] = this_g2_opt
         gamma1_var[i] = this_g1_var
         gamma2_var[i] = this_g2_var
+
+        e1_hist_desheared, _ = np.histogram(catalog.g1 - catalog.r1 * this_g1_opt - catalog.c1 - catalog.a1*catalog.psf_e1 , bins = bin_edges )
+        e1_hist_desheared = e1_hist_desheared * 1./catalog.size
+        e2_hist_desheared, _ = np.histogram(catalog.g2 - catalog.r2 * this_g2_opt - catalog.c2 - catalog.a2*catalog.psf_e2, bins = bin_edges )
+        e2_hist_desheared = e2_hist_desheared * 1./catalog.size
+        
+
+        # Calculate the log-likelihood that this field was drawn from the shape distribution.
+        field_e1_logL[i] = multinomial_logL(obs_hist= e1_hist_desheared * catalog.size, truth_prob = e1_prior_hist)
+        field_e2_logL[i] = multinomial_logL(obs_hist= e2_hist_desheared * catalog.size, truth_prob = e2_prior_hist)
+
+        
 
         field_id[i] = catalog[0]['id'] / 1000000
         psf_e1[i] = catalog[0]['psf_e1']
