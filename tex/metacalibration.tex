@@ -151,14 +151,17 @@ and it has variance
 
 This method for shear inference has as its tunable parameter only the histogram binning scheme, about which more below. Once we've chosen a suitable scheme, we then bin the prior into equal-number bins and calculate its shear derivative using equation \ref{eqn:edist_model}\footnote{We add a small shear $\vec{\gamma}$, then rebin.}. We calculate a shape histogram with these bins for each separate field, and evaluate equations~\ref{eqn:hist_est} and \ref{eqn:hist_est_var}.
 
-If we have a poor model for the unlensed histogram, $h_{\rm fid}$, then the results will be biased. We can evaulate the distance from each field to the unlensed prior using equation~\ref{eqn:multnomial}, taking the probabilities $q_i$ from the unlensed prior and the histogram amplitudes from the current field, {\it after correcting for the estimated shear}. This likelihood is then used as an objective criterion for the quality of the inference.
+If we have a poor model for the unlensed histogram, $h_{\rm fid}$, then the results will be biased. We can evaulate the distance from each field to the unlensed prior using equation~\ref{eqn:multnomial}, taking the probabilities $q_i$ from the unlensed prior and the histogram amplitudes from the current field, {\it after correcting for the estimated shear}. If the shear response measured for the unlensed prior is correct, then the performance of the estimator will depend only on the similarity of the prior t the measurement field. The likelihood can then be used as an objective criterion for the quality of the inference. 
 
 \section{Results}
 
-MetaCalibration performs well with all of the shear measurement methods tested. The regauss, KSB, linear, and moments measurements are all successfully calibrated, with multiplicative and additive biases removed, and psf ellipticity correlations nulled. The principal difference between methods appears to be the scatter around trend -- several times higher for KSB than for re-gaussianization, for example.
 
-The Python scripts that implement MetaCalibration as described here require $\sim1$s per galaxy image, and we have not thoroughly explored the possibilities for optimization. For Stage-IV Dark Energy lensing survey catalogs, with $\sim10^9$ distinct galaxy images, this is expensive but not prohibitive relative to the computing resources currently allocated to these projects.
 
+MetaCalibration performs well with all of the shear measurement methods tested. The regauss, KSB, linear, and moments measurements are all successfully calibrated, with multiplicative and additive biases removed, and psf ellipticity correlations nulled. The principal difference between methods appears to be the scatter around trend -- several times higher for KSB and linear mmoments than for re-gaussianization, for example.
+
+The Python scripts that implement MetaCalibration as described here require $\sim1$s per galaxy image, but we have not thoroughly explored the possibilities for optimization. For Stage-IV Dark Energy lensing survey catalogs, with $\sim10^9$ distinct galaxy images, this is expensive but not prohibitive relative to the computing resources currently allocated to these projects.
+
+\subsection{}
 
 
 
