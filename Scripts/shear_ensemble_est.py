@@ -32,10 +32,10 @@ def getAllCatalogs( path = '../Great3/', mc_type = None ):
         path = path+'Outputs-Regauss-NoAber/cgc_noaber_metacal*.fits'
         truthFile = 'cgc-noaber-truthtable.txt'
     elif mc_type == 'rgc-regauss':
-        path = path+'Outputs-Real-Regauss/rgc_metacal-*'
+        path = path+'Outputs-Real-Regauss/rgc_metacal-*.fits'
         truthFile = 'rgc-dummytable.txt'
     elif mc_type == 'rgc-noaber-regauss':
-        path = path+'Outputs-Real-NoAber-Regauss/rgc_noaber_metacal*'
+        path = path+'Outputs-Real-NoAber-Regauss/rgc_noaber_metacal*.fits'
         truthFile = 'rgc-noaber-dummytable.txt' 
     else:
         raise RuntimeError('Unrecognized mc_type: %s'%mc_type)
@@ -309,7 +309,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("--path", dest="path", type=str, default="../Great3/",
                         help="path to MetaCalibration output catalogs")
-    parser.add_argument("--mc_type", dest="mc_type", type=str, default="regauss",
+    parser.add_argument("-mc","--mc_type", dest="mc_type", type=str, default="regauss",
                         choices = mc_choices, help="metcalibration catalog type to use")
     parser.add_argument("-n", "--nbins", dest = "nbins", type = int, default= 80,
                         help = "number of bins to use in histogram estimator.")
