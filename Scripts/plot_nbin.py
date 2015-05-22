@@ -25,8 +25,8 @@ else:
     true_mean_g2 = -0.00269821215
 
 n_bins = np.arange(30,151,12)
-percentile_vals = [0.5, 20.]
-n_logl_vals = 8
+percentile_vals = [0, 0.1]
+n_logl_vals = 2
 filepref = 'outputs/output-rgc-noaber'
 filesuff = '.dat'
 rootdir = './' # to be passed to shear_ensemble_est.py
@@ -81,7 +81,10 @@ for n_indx, n in enumerate(n_bins):
     if 'logl_cutoffs' not in locals():
         # concatenate the list of log likelihoods for both components
         logl = np.concatenate((logl1, logl2))
-        logl_cutoff_min = np.percentile(logl, percentile_vals[0])
+        if percentile_vals[0] > 0.:
+            logl_cutoff_min = np.percentile(logl, percentile_vals[0])
+        else:
+            logl_cutoff_min = -1.e7
         logl_cutoff_max = np.percentile(logl, percentile_vals[1])
         logl_cutoffs = np.linspace(logl_cutoff_min, logl_cutoff_max, n_logl_vals)
 
