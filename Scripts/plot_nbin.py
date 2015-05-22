@@ -25,7 +25,8 @@ else:
     true_mean_g2 = -0.00269821215
 
 n_bins = np.arange(30,151,12)
-percentile_vals = [0, 0]
+percentile_vals = [0, 0] # in a case where there might be some outliers, set this to something like
+                         # 0.1, 5
 n_logl_vals = 2
 filepref = 'outputs/output-rgc-noaber'
 filesuff = '.dat'
