@@ -30,7 +30,7 @@ filepref = 'outputs/output-cgc-nosymm-'
 filesuff = '.dat'
 rootdir = './' # to be passed to shear_ensemble_est.py
 mc_type = 'regauss' # to be passed to shear_ensemble_est.py
-outpref = 'nbins-'
+outpref = 'outputs/'+mc_type+'-'
 
 mean_g1 = np.zeros((len(n_bins), len(percentile_vals)))
 mean_g2 = np.zeros((len(n_bins), len(percentile_vals)))
@@ -201,12 +201,12 @@ else:
         plt.imshow(c1.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
                    interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
         plt.colorbar()
-        plt.savefig('mean_c1_2d.png')
+        plt.savefig(outpref+'mean_c1_2d.png')
         fig = plt.figure()
         plt.imshow(c2.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
                    interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
         plt.colorbar()
-        plt.savefig('mean_c2_2d.png')
+        plt.savefig(outpref+'mean_c2_2d.png')
 
         # make 2d plot of m vs. n, logL
         fig = plt.figure()
@@ -214,12 +214,12 @@ else:
         plt.imshow(m1.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
                    interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
         plt.colorbar()
-        plt.savefig('mean_m1_2d.png')
+        plt.savefig(outpref+'mean_m1_2d.png')
         fig = plt.figure()
         plt.imshow(m2.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
                    interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
         plt.colorbar()
-        plt.savefig('mean_m2_2d.png')
+        plt.savefig(outpref+'mean_m2_2d.png')
 
         # make 2d plot of a vs. n, logL
         fig = plt.figure()
@@ -227,12 +227,12 @@ else:
         plt.imshow(a1.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
                    interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
         plt.colorbar()
-        plt.savefig('mean_a1_2d.png')
+        plt.savefig(outpref+'mean_a1_2d.png')
         fig = plt.figure()
         plt.imshow(a2.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
                    interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
         plt.colorbar()
-        plt.savefig('mean_a2_2d.png')
+        plt.savefig(outpref+'mean_a2_2d.png')
     else:
         # just make plot of shear residual vs. n, logL
         mean_g1 -= true_mean_g1
@@ -242,9 +242,9 @@ else:
         plt.imshow(mean_g1.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
                    interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
         plt.colorbar()
-        plt.savefig('mean_g1_2d.png')
+        plt.savefig(outpref+'mean_g1_2d.png')
         fig = plt.figure()
         plt.imshow(mean_g2.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
                    interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
         plt.colorbar()
-        plt.savefig('mean_g2_2d.png')
+        plt.savefig(outpref+'mean_g2_2d.png')
