@@ -24,7 +24,7 @@ else:
     true_mean_g1 = 0.00066805100000000002 
     true_mean_g2 = -0.00269821215
 
-n_bins = np.arange(30,150,8)
+n_bins = np.arange(30,151,12)
 percentile_vals = [0.5, 20.]
 n_logl_vals = 8
 filepref = 'outputs/output-rgc-noaber'
