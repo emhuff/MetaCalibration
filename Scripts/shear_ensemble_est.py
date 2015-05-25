@@ -351,7 +351,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
 def no_correction_plots(catalogs= None,truthtable = None, mc= None):
     # Simply average all the shears together for each field.
     import matplotlib.pyplot as plt
-
+    
     truthTable = np.loadtxt(truthtable, dtype = [('field_id',np.int), ('g1',np.double), ('g2',np.double )])
     
     obsTable = np.empty(len(catalogs), [('field_id',np.int), ('g1',np.double), ('g2',np.double ),
@@ -433,7 +433,7 @@ def calculate_likelihood_cut(fieldstr = None, mc=None):
     fieldstr.sort(order='e1_logL')
     fieldstr = fieldstr[::-1]
     delta_logL_e1 = np.gradient(fieldstr['e1_logL'])
-    
+    ax3.plot(fieldstr['e1_logL'], delta_logL_e1,color='blue',label='e1')    
 
     for i in xrange(fieldstr.size):
         e1_means[i] = np.mean(fieldstr['g1opt'][i:])
@@ -441,10 +441,11 @@ def calculate_likelihood_cut(fieldstr = None, mc=None):
 
     ax1.plot(fieldstr['e1_logL'],e1_means, color='blue',label='e1 (mean)')
     ax2.plot(fieldstr['e1_logL'],e1_sigmas,color='blue',label='e1 (sigma)')
-    
     fieldstr.sort(order='e2_logL')
     fieldstr = fieldstr[::-1]
     delta_logL_e2 = np.gradient(fieldstr['e2_logL'])
+    ax3.plot(fieldstr['e2_logL'], delta_logL_e2,color='green',label='e2')
+    
     for i in xrange(fieldstr.size):
         e2_means[i] = np.mean(fieldstr['g2opt'][i:])
         e2_sigmas[i] = np.std(fieldstr['g2opt'][i:])
@@ -459,8 +460,8 @@ def calculate_likelihood_cut(fieldstr = None, mc=None):
     ax2.legend(loc='best')
     ax1.set_xscale('symlog')
     ax2.set_xscale('symlog')
-    ax3.plot(delta_logL_e1,color='blue',label='e1')
-    ax3.plot(delta_logL_e2,color='green',label='e2')
+
+    ax3.set_xscale('symlog')
     ax3.legend(loc='best')
     ax3.set_yscale('symlog')
 
@@ -484,6 +485,31 @@ def makeFieldStructure(field_id=None, g1raw = None, g2raw = None, g1opt = None, 
     field_str['e2_logL'] = e2_logL
     return field_str
 
+def calculate_stats(fileName = None, truthTable = None, logL_cut = None):
+    data = np.loadtxt(fileName, dtype = [('field_id',int), ('g1raw',float), ('g2raw',float), ('g1opt',float), ('g2opt',float), ('g1var',float), ('g2var',float), ('psf_e1',float), ('psf_e2',float), ('e1_logL',float), ('e2_logL',float)])
+    truth = np.loadtxt(truthTable, dtype = [('field_id',np.int), ('g1',np.double), ('g2',np.double )])
+    
+    truth.sort(order='field_id')
+    data.sort(order='field_id')
+    if logL_cut is not None:
+        keep = ( data['e1_logL'] >= logL_cut ) & (data['e2_logL'] >= logL_cut)
+        data = data[keep]
+        truth = truth[keep]
+    
+    coeff_shear1 = np.polyfit(truth['g1'], data['g1opt'], deg=1)
+    coeff_shear2 = np.polyfit(truth['g2'], data['g2opt'], deg=1)
+    coeff_psf1 = np.polyfit(data['psf_e1'], data['g1opt'] - truth['g1'], deg=1)
+    coeff_psf2 = np.polyfit(data['psf_e2'], data['g2opt'] - truth['g2'], deg=1)
+
+    coeff = np.empty(1, dtype = [('m1',float),('m2',float),('c1',float),('c2',float),('a1',float),('a2',float)])
+    coeff['m1'] = coeff_shear1[0]
+    coeff['m2'] = coeff_shear2[0]
+    coeff['c1'] = coeff_shear1[1]
+    coeff['c2'] = coeff_shear2[1]
+    coeff['a1'] = coeff_shear1[0]
+    coeff['a2'] = coeff_shear2[0]
+    return coeff
+    
 def main(argv):
 
     # Set defaults and parse args.  This is kind of a stupid way to do it, since right now you can
@@ -531,9 +557,11 @@ def main(argv):
         no_correction_plots(catalogs= catalogs,truthtable = truthfile, mc= mc_type)
         makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
                   psf_e1 = psf_e1, psf_e2 = psf_e2, e1_logL = e1_logL, e2_logL = e2_logL, catalogs = catalogs,
-                  truthFile = truthfile,figName=mc_type+'-opt-shear_plots', logLcut= -500)
+                  truthFile = truthfile,figName=mc_type+'-opt-shear_plots', logLcut= -200)
         print "wrote plots to "+mc_type+'-opt-shear_plots.png'
-
+    print "Writing final fit coefficients to: ",mc_type+'-calibration_coeffs.dat'
+    coeffs = calculate_stats(fileName = outfile, truthTable = truthfile, logL_cut = -200)
+    np.savetxt(mc_type+'-calibration_coeffs.dat',coeffs)
 
 if __name__ == "__main__":
     import pdb, traceback
