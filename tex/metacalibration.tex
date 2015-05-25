@@ -24,7 +24,7 @@
 \shorttitle{Meta-Calibration} \shortauthors{Huff and Mandelbaum}
 
 \begin{document}
-\title{ Meta-Calibration: Direct Self-Calibration of Shear Measurement Biases}
+\title{ Meta-Calibration: Direct Self-Calibration of Biases in Shear Measurement}
 \author{Eric M. Huff \altaffilmark{1}}
 \author{Rachel Mandelbaum \altaffilmark{2}}
 
@@ -125,9 +125,9 @@ R_{\rm psf} = \frac{\vec{e}_{+\rm psf} - \vec{e}_{-,\rm psf}}{2\Delta\gamma}.
 \end{align}
 The result of this is a catalog of shear responsibities, psf responsivities, and additive biases for every galaxy. A histogram of these quantities is shown in figure~\ref{fig:calibhist}. The derived biases and responsivities are very noisy, so attention must be paid to how inference is performed on the full ensemble of galaxies.
 
-\toplotemh{Show histograms of R, c, and R_{\rm psf} for one branch, to demonstrate that these are quite noisy.}
 
 
+\toplotrm{Multi-panel figure showing showing effects of metacalibration.}
 
 
 \subsection{MetaCalibrating the Ensemble}
@@ -170,9 +170,148 @@ and it has variance
 
 This method for shear inference has as its tunable parameter only the histogram binning scheme, about which more below. Once we've chosen a suitable scheme, we then bin the prior into equal-number bins and calculate its shear derivative using equation \ref{eqn:edist_model}\footnote{We add a small shear $\vec{\gamma}$, then rebin.}. We calculate a shape histogram with these bins for each separate field, and evaluate equations~\ref{eqn:hist_est} and \ref{eqn:hist_est_var}.
 
+\toplotemh{Show the shape of the estimator, while somehow accurately conveying the histogram binning scheme, for the three shape measurement methods.}
+\begin{figure}
+\includegraphics[width=0.45\textwidth]{./Plots/regauss-r-histogram.png}
+\includegraphics[width=0.45\textwidth]{./Plots/regauss-a-histogram.png}
+\caption{{\bf Top:} Normalized distribution of meta-calibration shear responsivities from Regaussianization, on the Control-Ground-Constrant branch of the GREAT3 simulations.  {\bf Bottom:} Distribution of meta-calibration psf ellipticity responsivities from Regaussianization, on the Control-Ground-Constrant branch of the GREAT3 simulations. Vertical red dashed lines are drawn at zero for reference in both panels.}
+\label{fig:calibhist}
+\end{figure}
+
+
+\begin{figure*}
+\includegraphics[width=0.3\textwidth]{./Plots/regauss-opt-shear_plots-prior_derivs.png}
+\includegraphics[width=0.3\textwidth]{./Plots/ksb-opt-shear_plots-prior_derivs.png}
+\includegraphics[width=0.3\textwidth]{./Plots/moments-opt-shear_plots-prior_derivs.png}
+\caption{I do not like these figures. Treat them as placeholders for now.\\
+Constructing the histogram estimator for the three shape measurement methods. {\bf Top} panels show measured shape distribution for each (from {\bf right} to {\bf left}) of the regauss, ksb, and moments methds. Vertical red lines show bin edges for a scheme with only 20 bins (much less than used in the estimation). {\bf Bottom} panels show the derivative $\frac{d\,p(e)}{d{e}}$ for each of the histograms. Abscissa are truncated at $\pm 4$, but the estimator runs over bins including all objects.
+}
+\label{fig:estimator}
+\end{figure*}
+
 If we have a poor model for the unlensed histogram, $h_{\rm fid}$, then the results will be biased. We can evaulate the distance from each field to the unlensed prior using equation~\ref{eqn:multnomial}, taking the probabilities $q_i$ from the unlensed prior and the histogram amplitudes from the current field, {after correcting for the estimated shear}. If the shear response measured for the unlensed prior is correct, then the performance of the estimator will depend only on the similarity of the prior to the measurement field. The likelihood can then be used as an objective criterion for the quality of the inference. 
 
 
+
+\section{Testing Framework}
+\towriterm{ brief-ish description of GREAT3 sims and sim framework. Basically, give enough info to show whats go- ing on and convince the reader that this is a non-trivially complicated dataset in terms of the PSFs and galaxy sam- ples. Also note difference from real life in terms of ex- pected mean shear, since thatll be important later.}
+
+
+\subsection{Estimation Algorithms}
+\towriterm{We picked three easily available estimation methods. Briefly describe each.}
+\subsubsection{Regaussianization}
+\towriterm{Brief description of regaussianization}
+\subsubsection{KSB}
+\towriterm{Brief description of KSB}
+\subsubsection{Linear Moments}
+\towriterm{Brief description of linear moments}
+
+
+\subsection{Simulated Images}
+
+\subsubsection{Control Ground Constant without Aberrations}
+\towriterm{Brief description of this branch.}
+\towriteemh{Performance expectations on this branch.}
+\towriteemh{Briefly summarize calibration results for this branch.}
+\todorm{One of us should obtain ksb metacalibration catalogs for this branch. Rachel can give Eric the images, or generate the MC catalogs herself, whichever works.}
+\todorm{One of us should obtain moments metacalibration catalogs for this branch. Rachel can give Eric the images, or generate the MC catalogs herself, whichever works.}
+
+
+\subsubsection{Real Ground Constant without Aberrations}
+
+The first branch we analyze is the simplest. The galaxy models Sersic profiles, and the realization of galaxy parameters is that of the CGC branch of GREAT3. We have generated new images with simpler psf models, keeping the atmospheric component but removing the optical aberrations. 
+\towriterm{Brief description of this branch.}
+\towriteemh{Performance expectations on this branch.}
+\towriteemh{Briefly summarize calibration results for this branch.}
+\todorm{One of us should obtain ksb metacalibration catalogs for this branch. Rachel can give Eric the images, or generate the MC catalogs herself, whichever works.}
+\todorm{One of us should obtain moments metacalibration catalogs for this branch. Rachel can give Eric the images, or generate the MC catalogs herself, whichever works.}
+
+
+
+\subsubsection{Control Ground Constant with Aberrations}
+\towriterm{Brief description of this branch.}
+\towriteemh{Performance expectations on this branch.}
+\towriteemh{Briefly summarize calibration results for this branch.}
+
+\subsubsection{Real Ground Constant with Aberrations}
+\towriterm{Brief description of this branch.}
+\towriteemh{Performance expectations on this branch.}
+\towriteemh{Briefly summarize calibration results for this branch.}
+\todoemh{Generate ksb metacalibration catalogs for this branch. }
+\todoemh{Generate moments metacalibration catalogs for this branch.}
+\toplotemh{Plot ksb results for this branch.}
+\toplotemh{Plot moment results for this branch.}
+
+\subsubsection{Control or Real Ground Constant with constant Aberrations}
+\towriterm{Brief description of this branch.}
+\towriteemh{Performance expectations on this branch.}
+\towriteemh{Briefly summarize calibration results for this branch.}
+\todorm{Generate images and catalogs for this branch.}
+\toplotemh{Plot regauss results for this branch.}
+\toplotemh{Plot ksb results for this branch.}
+\toplotemh{Plot moment results for this branch.}
+
+
+
+
+
+\begin{figure*}
+\includegraphics[width=0.31\linewidth]{./Plots/noaber-regauss-opt-shear_plots.png}
+\includegraphics[width=0.31\linewidth]{./Plots/noaber-regauss-opt-shear_plots.png}
+\includegraphics[width=0.31\linewidth]{./Plots/noaber-regauss-opt-shear_plots.png}
+\caption{Results of metacalibration for regauss on CGC-no aberrations}
+\end{figure*}
+
+
+\begin{figure*}
+\includegraphics[width=0.31\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
+\includegraphics[width=0.31\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
+\includegraphics[width=0.31\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
+\caption{Results of metacalibration for regauss on CGC with no aberrations. From {\bf right} to {\bf left}: regauss, ksb, moments. Note that we do not have these results for ksb and moments yet.}
+\end{figure*}
+
+\begin{figure*}
+\includegraphics[width=0.31\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
+\includegraphics[width=0.31\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
+\includegraphics[width=0.31\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
+\caption{Results of metacalibration for regauss on RGC with no aberrations. From {\bf right} to {\bf left}: regauss, ksb, moments. Note that we do not have these results for ksb and moments yet.}
+\end{figure*}
+
+
+
+\begin{figure*}
+\includegraphics[width=0.31\linewidth]{./Plots/rgc-regauss-opt-shear_plots.png}
+\includegraphics[width=0.31\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
+\includegraphics[width=0.31\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
+\caption{Results of metacalibration for regauss on RGC with aberrations. From {\bf right} to {\bf left}: regauss, ksb, moments. Note that we do not have these results for ksb and moments yet.}
+\end{figure*}
+
+
+\begin{figure*}
+\includegraphics[width=0.3\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
+\includegraphics[width=0.3\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
+\includegraphics[width=0.3\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
+\caption{Results of metacalibration for regauss on RGC with aberrations. From {\bf right} to {\bf left}: regauss, ksb, moments. Note that we do not have these results for any method yet.}
+\end{figure*}
+
+\section{Results}
+\towrite{Outline overall results, i.e., {\it veni, vidi, vici}}
+\toplotemh{Table of Meta-Calibrated shear and psf calibration biases.}
+\toplotrm{Something along the lines of: Great3-style plot showing before/after performance in some projection of m/c/a for regauss/ksb/possibly moments. Something that can easily be compared with one or more figures in the Great3 results paper.}
+
+
+\section{Applicability to Real Data*}
+\towriteemh{Comment on effects that this method may deal with, which we haven’t tested (selection biases, other sys- tematics detrending)}
+\towriteemh{Comment on what measurements this can be straightforwardly applied to (mass mapping, g-g lensing) and what needs further thought (shear-shear) prior to deployment}
+\towriteemh{Comment on effects that this method may or may not play well with -- blending, detector effects, nonlinearity, star-galaxy confusion}
+\towriteemh{Comment on noise symmetrization -- we tried this, we don't understand why it didn't work as anticipated, but it doesn't seem to be important at this level of precision.}
+\towriteemh{Put computational and implementation difficulty (for a realistic survey pipeline) in context. Is this substantially harder than making loads of independent sims? What are the prospects for further optimization, or other shortcuts?}
+
+
+
+
+\section{Conclusions}
+\towrite{Put performance measures from previous sec- tions in context. How do these results compare with the state of the art? Will this be good enough for DES, Kids, LSST?, SuMiRE?}
 
 
 \bibliographystyle{apj}
