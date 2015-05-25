@@ -33,10 +33,10 @@ def getAllCatalogs( path = '../Great3/', mc_type = None ):
         truthFile = 'cgc-noaber-truthtable.txt'
     elif mc_type == 'rgc-regauss':
         path = path+'Outputs-Real-Regauss/rgc_metacal-*.fits'
-        truthFile = 'rgc-dummytable.txt'
+        truthFile = 'rgc-truthtable.txt'
     elif mc_type == 'rgc-noaber-regauss':
         path = path+'Outputs-Real-NoAber-Regauss/rgc_noaber_metacal*.fits'
-        truthFile = 'rgc-noaber-dummytable.txt' 
+        truthFile = 'rgc-noaber-truthtable.txt' 
     else:
         raise RuntimeError('Unrecognized mc_type: %s'%mc_type)
 
@@ -53,7 +53,7 @@ def getAllCatalogs( path = '../Great3/', mc_type = None ):
 
 
 
-def buildPrior(catalogs=None, nbins=100, bins = None):
+def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False, mc_type = None):
     # Get a big master list of all the ellipticities in all fields.
     # Sadly you cannot retain column identity when using hstack, so we have to do the manipulations
     # for each catalog to get a list of e1 arrays to stack.
@@ -110,7 +110,23 @@ def buildPrior(catalogs=None, nbins=100, bins = None):
 
     de1_dg = ( e1_prior_hist_mod - e1_prior_hist) / dg
     de2_dg = ( e2_prior_hist_mod - e2_prior_hist) / dg
- 
+
+
+    if doplot is True:
+        import matplotlib.pyplot as plt
+        fig,(ax1,ax2) =plt.subplots(nrows = 2, ncols = 1,figsize = (7,14))
+        ax1.hist(  e1_corr[np.abs(e1_corr) <= 4], bins=100, normed=True, log = True )
+        for x in bin_edges: ax1.axvline(x,color='red')
+        ax1.set_xlim([-4,4])
+        ax1.set_xlabel('e')
+        ax1.set_ylabel('N(e)')
+        ax1.set_xscale('symlog')
+        ax2.plot(  de1_dg )
+        ax2.set_xlabel(' bin number')
+        ax2.set_ylabel('de / dg')
+        ax2.axhline(0,color='red',linestyle='--')
+        fig.savefig(mc_type+'-prior_derivs')
+
     return bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg
 
 def multinomial_logL(obs_hist= None, truth_prob = None):
@@ -206,9 +222,9 @@ def doInference(catalogs=None, nbins=None):
     return field_id, gamma1_raw, gamma2_raw, gamma1_opt, gamma2_opt, gamma1_var, gamma2_var, psf_e1, psf_e2, field_e1_logL, field_e2_logL
 
 
-def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None,
+def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalogs = None,
               psf_e1 = None, psf_e2 = None, e1_logL = None, e2_logL = None,
-              truthFile = 'cgc-truthtable.txt', figName= None ):
+              truthFile = 'cgc-truthtable.txt', figName= None, logLcut = None ):
     truthTable = np.loadtxt(truthFile, dtype = [('field_id',np.int), ('g1',np.double), ('g2',np.double ) ])
     
     obsTable = np.empty(field_id.size, [('field_id',np.int), ('g1',np.double), ('g2',np.double ),
@@ -233,19 +249,25 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None,
 
     truthTable.sort(order='field_id')
     obsTable.sort(order='field_id')
-    shear_range = 2*( np.percentile( np.concatenate( (g1, g2) ), 75) - np.percentile( np.concatenate( (g1, g2) ), 50))
+    shear_range = 2*( np.percentile( np.concatenate( (g1, g2) ), 95) - np.percentile( np.concatenate( (g1, g2) ), 50))
 
+    if logLcut is not None:
+        outliers = (obsTable['e1_logL'] <= logLcut) & (obsTable['e2_logL'] <= logLcut)
     
     import matplotlib.pyplot as plt
     if not use_errors:
         fig,((ax1,ax2), (ax3,ax4)) = plt.subplots( nrows=2,ncols=2,figsize=(14,21) )
         ax1.plot(truthTable['g1'],obsTable['g1'],'.')
+        if logLcut is not None:
+            ax1.plot(truthTable[outliers]['g1'],obsTable[outliers]['g1'],'.',color='red')
         ax1.plot(truthTable['g1'],truthTable['g1'],'--',color='red')
         ax1.set_title('g1')
         ax2.plot(truthTable['g2'],obsTable['g2'],'.')
+        if logLcut is not None:
+            ax2.plot(truthTable[outliers]['g2'],obsTable[outliers]['g2'],'.',color='red')
         ax2.plot(truthTable['g2'],truthTable['g2'],'--',color='red')
         ax2.set_title('g2')
-
+        
     
         ax3.plot(truthTable['g1'], obsTable['g1'] - truthTable['g1'],'.')
         ax3.axhline(0.,linestyle='--',color='red')
@@ -260,15 +282,24 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None,
         ax1.plot(truthTable['g1'],truthTable['g1'],linestyle='--',color='red')
         ax1.set_title('g1')
         ax2.errorbar(truthTable['g2'],obsTable['g2'],obsTable['err2'],linestyle='.')
+        if logLcut is not None:
+            ax1.plot(truthTable[outliers]['g1'],obsTable[outliers]['g1'],'s',color='red')
         ax2.plot(truthTable['g2'],truthTable['g2'],'--',color='red')
         ax2.set_title('g2')
+        if logLcut is not None:
+            ax2.plot(truthTable[outliers]['g2'],obsTable[outliers]['g2'],'s',color='red')
 
     
         ax3.plot(truthTable['g1'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
+        if logLcut is not None:
+            ax3.plot(truthTable[outliers]['g1'],obsTable[outliers]['g1'] - truthTable[outliers]['g1'],'s',color='red')        
         ax3.axhline(0.,linestyle='--',color='red')
         ax3.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')
         ax3.set_ylim([-shear_range, shear_range])
         ax4.plot(truthTable['g2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
+        if logLcut is not None:
+            ax4.plot(truthTable[outliers]['g2'],obsTable[outliers]['g2'] - truthTable[outliers]['g2'],'s',color='red')
+
         ax4.axhline(0.,linestyle='--',color='red')
         ax4.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')        
         ax4.set_ylim([-shear_range, shear_range])
@@ -278,28 +309,180 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None,
         ax5.set_ylabel('shear error (e1)')
         ax5.set_xscale('symlog')
         ax5.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
+        if logLcut is not None:
+            ax5.axvline(logLcut,color='red')
+
         
         ax6.plot(obsTable['e2_logL'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
         ax6.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
+        if logLcut is not None:
+            ax6.axvline(logLcut,color='red')
         ax6.set_xlabel('multinomial log likelihood')
         ax6.set_ylabel('shear error (e2)')
         ax6.set_xscale('symlog')
         
         ax7.plot(obsTable['psf_e1'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
+        if logLcut is not None:
+            ax7.plot(obsTable[outliers]['psf_e1'],obsTable[outliers]['g1'] - truthTable[outliers]['g1'],'s',color='red')
         ax7.axhline(0.,linestyle='--',color='red')
         ax7.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
-        ax7.set_xlim([-0.04,0.04])
+        ax7.set_xlim([-0.02,0.02])
         ax7.set_ylim([-shear_range, shear_range])
         ax7.set_title('psf trend (e1)')
+        
         ax8.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
+        if logLcut is not None:
+            ax8.plot(obsTable[outliers]['psf_e2'],obsTable[outliers]['g2'] - truthTable[outliers]['g2'],'s',color='red')
+
         ax8.axhline(0.,linestyle='--',color='red')
         ax8.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
         ax8.set_title('psf trend (e2)')
-        ax8.set_xlim([-0.04,0.04])
+        ax8.set_xlim([-0.02,0.02])
         ax8.set_ylim([-shear_range, shear_range])
         fig.savefig(figName)
 
+
+    if catalogs is not None:
+        bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg = buildPrior(catalogs, nbins=20, doplot = True, mc_type = figName)
+
+
+
+
+def no_correction_plots(catalogs= None,truthtable = None, mc= None):
+    # Simply average all the shears together for each field.
+    import matplotlib.pyplot as plt
+
+    truthTable = np.loadtxt(truthtable, dtype = [('field_id',np.int), ('g1',np.double), ('g2',np.double )])
+    
+    obsTable = np.empty(len(catalogs), [('field_id',np.int), ('g1',np.double), ('g2',np.double ),
+                                        ('err1',np.double),('err2',np.double),
+                                        ('psf_e1',np.double),('psf_e2',np.double)])
+
+
+
+    
+    for catalog,i in zip(catalogs, xrange(len(catalogs))):
+        obsTable[i]['field_id'] = catalog[0]['id']/ 1000000
+        if 'regauss' in mc:
+            calib1 = 2*(1 - np.var(catalog['g1'][np.abs(catalog['g1']) <= 3]))
+            calib2 = 2*(1 - np.var(catalog['g2'][np.abs(catalog['g2']) <= 3]))
+        elif 'moments' in mc:
+            calib1 = 2.
+            calib2 = 2.
+        else:
+            calib1 = 1.
+            calib2 = 1.
         
+        obsTable[i]['g1'] = np.mean(catalog['g1'][np.abs(catalog['g1']) <= 3] ) / calib1
+        obsTable[i]['g2'] = np.mean(catalog['g2'][np.abs(catalog['g2']) <= 3]) / calib2
+        obsTable[i]['err1'] = np.std(catalog['g1'][np.abs(catalog['g1']) <= 3]) * 1./np.sqrt(catalog.size) / calib1
+        obsTable[i]['err2'] = np.std(catalog['g2'][np.abs(catalog['g2']) <= 3]) * 1./np.sqrt(catalog.size) / calib2
+        obsTable[i]['psf_e1'] = np.mean(catalog['psf_e1'])
+        obsTable[i]['psf_e2'] = np.mean(catalog['psf_e2'])
+
+        
+    truthTable.sort(order='field_id')
+    obsTable.sort(order='field_id')
+
+    shear_range = 2*( np.percentile( np.concatenate( (obsTable['g1'], obsTable['g2']) ), 75) -
+                      np.percentile( np.concatenate( (obsTable['g1'], obsTable['g2']) ), 50))
+
+    fig,((ax1,ax2), (ax3,ax4), (ax5,ax6)) = plt.subplots(nrows=3, ncols=2,figsize=(14,21))
+    ax1.errorbar(truthTable['g1'],obsTable['g1'],obsTable['err1'],linestyle='.')
+    ax1.plot(truthTable['g1'],truthTable['g1'],linestyle='--',color='red')
+    ax1.set_title('g1')
+    ax1.set_xlabel('g1 (truth)')
+    ax1.set_ylabel('g1 (est)')
+    ax1.set_ylim([-shear_range, shear_range])
+    ax2.errorbar(truthTable['g2'],obsTable['g2'],obsTable['err2'],linestyle='.')
+    ax2.plot(truthTable['g2'],truthTable['g2'],'--',color='red')
+    ax2.set_title('g2')
+    ax2.set_xlabel('g2 (truth)')
+    ax2.set_ylabel('g2 (est)')
+    ax2.set_ylim([-shear_range, shear_range])
+    
+    ax3.plot(truthTable['g1'], obsTable['g1'] - truthTable['g1'],'.')
+    ax3.set_xlabel('g1 (truth)')
+    ax3.set_ylabel('g1 (est) - g1 (truth)')
+    ax3.set_ylim([-2*shear_range, 2*shear_range])
+    ax3.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
+    ax4.plot(truthTable['g2'], obsTable['g2'] - truthTable['g2'],'.')
+    ax4.set_ylim([-2*shear_range, 2*shear_range])
+    ax4.set_xlabel('g2 (truth)')
+    ax4.set_ylabel('g2 (est) - g2 (truth)')
+    ax4.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
+
+    ax5.plot(obsTable['psf_e1'], obsTable['g1'] - truthTable['g1'],'.')
+    ax5.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
+    ax6.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g1'],'.')    
+    ax6.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
+    
+    fig.savefig(mc+'-no_corrections')
+        
+def calculate_likelihood_cut(fieldstr = None, mc=None):
+
+
+    e1_means = np.zeros(fieldstr.size)
+    e1_sigmas = np.zeros(fieldstr.size)
+    e2_means = np.zeros(fieldstr.size)
+    e2_sigmas = np.zeros(fieldstr.size)
+
+
+    import matplotlib.pyplot as plt
+    fig,(ax1, ax2, ax3) = plt.subplots(nrows=1,ncols=3,figsize=(21,7))
+    fieldstr.sort(order='e1_logL')
+    fieldstr = fieldstr[::-1]
+    delta_logL_e1 = np.gradient(fieldstr['e1_logL'])
+    
+
+    for i in xrange(fieldstr.size):
+        e1_means[i] = np.mean(fieldstr['g1opt'][i:])
+        e1_sigmas[i] = np.std(fieldstr['g1opt'][i:])
+
+    ax1.plot(fieldstr['e1_logL'],e1_means, color='blue',label='e1 (mean)')
+    ax2.plot(fieldstr['e1_logL'],e1_sigmas,color='blue',label='e1 (sigma)')
+    
+    fieldstr.sort(order='e2_logL')
+    fieldstr = fieldstr[::-1]
+    delta_logL_e2 = np.gradient(fieldstr['e2_logL'])
+    for i in xrange(fieldstr.size):
+        e2_means[i] = np.mean(fieldstr['g2opt'][i:])
+        e2_sigmas[i] = np.std(fieldstr['g2opt'][i:])
+        
+    ax1.plot(fieldstr['e2_logL'],e1_means,color='green',label='e2')
+    ax2.plot(fieldstr['e2_logL'],e1_sigmas,color='green',label='e2 (sigma)')
+    e1_means = np.zeros(fieldstr.size)
+    e1_sigmas = np.zeros(fieldstr.size)
+    e2_means = np.zeros(fieldstr.size)
+    e2_sigmas = np.zeros(fieldstr.size)
+    ax1.legend(loc='best')
+    ax2.legend(loc='best')
+    ax1.set_xscale('symlog')
+    ax2.set_xscale('symlog')
+    ax3.plot(delta_logL_e1,color='blue',label='e1')
+    ax3.plot(delta_logL_e2,color='green',label='e2')
+    ax3.legend(loc='best')
+    ax3.set_yscale('symlog')
+
+    
+    fig.savefig(mc+'-likelihood_cut_stats')
+
+
+def makeFieldStructure(field_id=None, g1raw = None, g2raw = None, g1opt = None, g2opt = None, g1var = None, g2var = None,
+                       psf_e1 = None, psf_e2 = None, e1_logL = None, e2_logL = None):
+    field_str = np.empty(field_id.size, dtype=[('id',int),('g1raw',float), ('g2raw',float), ('g1opt',float), ('g2opt',float), ('g1var',float),('g2var',float), ('psf_e1',float), ('psf_e2',float), ('e1_logL',float), ('e2_logL',float)])
+    field_str['id'] = field_id
+    field_str['g1raw'] = g1raw
+    field_str['g2raw'] = g2raw
+    field_str['g1opt'] = g1opt
+    field_str['g2opt'] = g2opt
+    field_str['g1var'] = g1var
+    field_str['g2var'] = g2var
+    field_str['psf_e1'] = psf_e1
+    field_str['psf_e2'] = psf_e2
+    field_str['e1_logL'] = e1_logL
+    field_str['e2_logL'] = e2_logL
+    return field_str
 
 def main(argv):
 
@@ -336,14 +519,19 @@ def main(argv):
     print 'Got %d catalogs, doing inference'%len(catalogs)
     field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL = \
         doInference(catalogs=catalogs, nbins=nbins)
+    field_str = makeFieldStructure(field_id=field_id, g1raw = g1raw, g2raw = g2raw, g1opt = g1opt, g2opt = g2opt,
+                                   g1var = g1var, g2var = g2var, psf_e1 = psf_e1, psf_e2 = psf_e2,
+                                   e1_logL = e1_logL, e2_logL = e2_logL)
+    calculate_likelihood_cut(fieldstr = field_str, mc= mc_type)
     print 'Writing field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL to file %s'%outfile
     out_data = np.column_stack((field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL))
     np.savetxt(outfile, out_data, fmt='%d %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
     if args.doplot:
         print "Making plots..."
+        no_correction_plots(catalogs= catalogs,truthtable = truthfile, mc= mc_type)
         makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
-                  psf_e1 = psf_e1, psf_e2 = psf_e2, e1_logL = e1_logL, e2_logL = e2_logL,
-                  truthFile = truthfile,figName=mc_type+'-opt-shear_plots')
+                  psf_e1 = psf_e1, psf_e2 = psf_e2, e1_logL = e1_logL, e2_logL = e2_logL, catalogs = catalogs,
+                  truthFile = truthfile,figName=mc_type+'-opt-shear_plots', logLcut= -500)
         print "wrote plots to "+mc_type+'-opt-shear_plots.png'
 
 
