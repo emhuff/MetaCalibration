@@ -21,17 +21,17 @@ else:
 if use_truth:
     truthfile = 'rgc-noaber-truthtable.txt'
 else:
-    true_mean_g1 = -0.0027895457500000005 
-    true_mean_g2 = 0.0015939298500000005
+    true_mean_g1 = -0.00113594965 #-0.0027895457500000005 
+    true_mean_g2 = 0.00066726915#0.0015939298500000005
 
 n_bins = np.arange(30,151,12)
-percentile_vals = [0.1, 5] # in a case where there might be some outliers, set this to something like
+percentile_vals = [0.1, 10] # in a case where there might be some outliers, set this to something like
                          # 0.1, 5
 n_logl_vals = 10
-filepref = 'outputs/output-rgc'
+filepref = 'outputs/output-rgc-fixedaber'
 filesuff = '.dat'
 rootdir = '../Great3/' # to be passed to shear_ensemble_est.py
-mc_type = 'rgc-regauss' # to be passed to shear_ensemble_est.py
+mc_type = 'rgc-fixedaber-regauss' # to be passed to shear_ensemble_est.py
 outpref = 'outputs/'+mc_type+'-'
 
 mean_g1 = np.zeros((len(n_bins), n_logl_vals))

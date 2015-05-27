@@ -38,7 +38,7 @@ def log(msg):
 # unique number by combining 4 numbers of similar order.  If you don't want to use this whole
 # caching scheme, then set `use_cache=False` to revert to the previous behavior, which gives a new
 # noise symmetrization field for each postage stamp (and is thus verrrrrry expensive).
-use_symm = True # make noise symmetrization optional
+use_symm = False # make noise symmetrization optional
 use_cache = True # decide whether to use the caching trick or not
 cached_noise_field = {}
 
@@ -618,32 +618,32 @@ def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catal
         
 
         res = galsim.hsm.EstimateShear(unsheared1Galaxy, reconv1PSF, sky_var=float(sky_var),
-                                       guess_sig_PSF = guess_sig, shear_est="REGAUSS",  **default_shear_kwds)
+                                       guess_sig_PSF = guess_sig, shear_est="LINEAR",  **default_shear_kwds)
 
         shear_results.append(res)
         try:
             sky_var = float(sky_var)
             # Things needed for multiplicative bias etc.
             res_g1 = galsim.hsm.EstimateShear(sheared1Galaxy, reconv1PSF, sky_var=sky_var,
-                                              guess_sig_PSF = guess_sig, shear_est="REGAUSS")
+                                              guess_sig_PSF = guess_sig, shear_est="LINEAR")
 
             res_g2 = galsim.hsm.EstimateShear(sheared2Galaxy, reconv2PSF, sky_var=sky_var,
-                                              guess_sig_PSF = guess_sig, shear_est="REGAUSS")
+                                              guess_sig_PSF = guess_sig, shear_est="LINEAR")
 
             res_mg1 = galsim.hsm.EstimateShear(shearedm1Galaxy, reconvm1PSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="REGAUSS")
+                                               guess_sig_PSF = guess_sig, shear_est="LINEAR")
 
             res_mg2 = galsim.hsm.EstimateShear(shearedm2Galaxy, reconvm2PSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="REGAUSS")
+                                               guess_sig_PSF = guess_sig, shear_est="LINEAR")
             # Things needed for additive bias
             res_g1p = galsim.hsm.EstimateShear(unsheared1PGalaxy, reconv1PPSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="REGAUSS")
+                                               guess_sig_PSF = guess_sig, shear_est="LINEAR")
             res_g2p = galsim.hsm.EstimateShear(unsheared2PGalaxy, reconv2PPSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="REGAUSS")
+                                               guess_sig_PSF = guess_sig, shear_est="LINEAR")
             res_mg1p = galsim.hsm.EstimateShear(unshearedm1PGalaxy, reconvm1PPSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="REGAUSS")
+                                               guess_sig_PSF = guess_sig, shear_est="LINEAR")
             res_mg2p = galsim.hsm.EstimateShear(unshearedm2PGalaxy, reconvm2PPSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="REGAUSS")
+                                               guess_sig_PSF = guess_sig, shear_est="LINEAR")
             psf_mom = galsim.hsm.FindAdaptiveMom(reconv1PSF)
             
             # Get most of what we need to make a derivative, i.e., (distortion with +g applied) -
@@ -856,7 +856,7 @@ def main(argv):
         # Run on all available CPUs.
         from multiprocessing import Pool, cpu_count
         import itertools
-        n_proc = cpu_count()-2
+        n_proc = 8
         pool = Pool(processes=n_proc)
 
         subfield_range = numpy.arange(200)

@@ -23,7 +23,7 @@ def getAllCatalogs( path = '../Great3/', mc_type = None ):
         path = path+'Outputs-CGN-Regauss/cgc_metacal_moments*.fits'
         truthFile = 'cgc-truthtable.txt'
     elif mc_type=='moments':
-        path = path+'Outputs-Moments/cgc_metacal_moments*.fits'
+        path = path+'Outputs-Moments/output_catalog*.fits'
         truthFile = 'cgc-truthtable.txt'
     elif mc_type=='noaber-regauss-sym':
         path = path+'Outputs-Regauss-NoAber-SymNoise/cgc_noaber_metacal_symm*.fits'
@@ -36,7 +36,11 @@ def getAllCatalogs( path = '../Great3/', mc_type = None ):
         truthFile = 'rgc-truthtable.txt'
     elif mc_type == 'rgc-noaber-regauss':
         path = path+'Outputs-Real-NoAber-Regauss/rgc_noaber_metacal*.fits'
-        truthFile = 'rgc-noaber-truthtable.txt' 
+        truthFile = 'rgc-noaber-truthtable.txt'
+    elif mc_type=='rgc-fixedaber-regauss':
+        path = path+'Outputs-RGC-Regauss-FixedAber/rgc_fixedaber_metacal*.fits'
+        #truthFile = 'rgc-fixedaber-dummytable.txt'
+        truthFile = 'rgc-fixedaber-truthtable.txt'
     else:
         raise RuntimeError('Unrecognized mc_type: %s'%mc_type)
 
@@ -47,7 +51,13 @@ def getAllCatalogs( path = '../Great3/', mc_type = None ):
         raise RuntimeError("No catalogs found with path %s!"%path)
     catalogs = []
     for thisFile in catFiles:
-        catalogs.append( fits.getdata(thisFile) )
+        if mc_type=='moments':
+            this_catalog = fits.getdata(thisFile)
+            this_catalog['a1'] = this_catalog['a1']/2.
+            this_catalog['a2'] = this_catalog['a2']/2.
+            catalogs.append(this_catalog)
+        else:
+            catalogs.append( fits.getdata(thisFile) )
 
     return catalogs, truthFile
 
@@ -117,7 +127,7 @@ def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False, mc_type = 
         fig,(ax1,ax2) =plt.subplots(nrows = 2, ncols = 1,figsize = (7,14))
         ax1.hist(  e1_corr[np.abs(e1_corr) <= 4], bins=100, normed=True, log = True )
         for x in bin_edges: ax1.axvline(x,color='red')
-        ax1.set_xlim([-4,4])
+        ax1.set_xlim([-10,10])
         ax1.set_xlabel('e')
         ax1.set_ylabel('N(e)')
         ax1.set_xscale('symlog')
@@ -326,7 +336,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
             ax7.plot(obsTable[outliers]['psf_e1'],obsTable[outliers]['g1'] - truthTable[outliers]['g1'],'s',color='red')
         ax7.axhline(0.,linestyle='--',color='red')
         ax7.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
-        ax7.set_xlim([-0.02,0.02])
+        #ax7.set_xlim([-0.25,0.25])
         ax7.set_ylim([-shear_range, shear_range])
         ax7.set_title('psf trend (e1)')
         
@@ -337,7 +347,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax8.axhline(0.,linestyle='--',color='red')
         ax8.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
         ax8.set_title('psf trend (e2)')
-        ax8.set_xlim([-0.02,0.02])
+        #ax8.set_xlim([-0.25,0.25])
         ax8.set_ylim([-shear_range, shear_range])
         fig.savefig(figName)
 
@@ -377,8 +387,8 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
         obsTable[i]['g2'] = np.mean(catalog['g2'][np.abs(catalog['g2']) <= 3]) / calib2
         obsTable[i]['err1'] = np.std(catalog['g1'][np.abs(catalog['g1']) <= 3]) * 1./np.sqrt(catalog.size) / calib1
         obsTable[i]['err2'] = np.std(catalog['g2'][np.abs(catalog['g2']) <= 3]) * 1./np.sqrt(catalog.size) / calib2
-        obsTable[i]['psf_e1'] = np.mean(catalog['psf_e1'])
-        obsTable[i]['psf_e2'] = np.mean(catalog['psf_e2'])
+        obsTable[i]['psf_e1'] = np.median(catalog['psf_e1'])
+        obsTable[i]['psf_e2'] = np.median(catalog['psf_e2'])
 
         
     truthTable.sort(order='field_id')
@@ -414,7 +424,7 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
 
     ax5.plot(obsTable['psf_e1'], obsTable['g1'] - truthTable['g1'],'.')
     ax5.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
-    ax6.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g1'],'.')    
+    ax6.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g2'],'.')    
     ax6.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
     
     fig.savefig(mc+'-no_corrections')
@@ -520,7 +530,7 @@ def main(argv):
     import argparse
 
     description = """Analyze MetaCalibration outputs from Great3 and Great3++ simulations."""
-    mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym', 'noaber-regauss','rgc-regauss','rgc-noaber-regauss']
+    mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym', 'noaber-regauss','rgc-regauss','rgc-noaber-regauss','rgc-fixedaber-regauss']
     # Note: The above line needs to be consistent with the choices in getAllCatalogs.
     
     parser = argparse.ArgumentParser(description=description)
