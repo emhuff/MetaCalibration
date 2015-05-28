@@ -330,8 +330,46 @@ a quite stringent test of the metacalibration method.
 
 \subsection{Simulated Images}
 
-\towriterm{ brief-ish description of GREAT3 sims and sim framework. Basically, give enough info to show whats go- ing on and convince the reader that this is a non-trivially complicated dataset in terms of the PSFs and galaxy samples. Also note difference from real life in terms of expected mean shear, since thatll be important later.}
+We use the GREAT3 simulation framework as the source of simulated images that we use for testing
+purposes.  For more detail about that simulation framework, see the GREAT3 handbook
+\citep{2014ApJS..212....5M} and results paper \citep{2015MNRAS.450.2963M}, or the publicly
+available software\footnote{\url{https://github.com/barnabytprowe/great3-public}}.
 
+In brief, we use simulated ``branches'' containing 200 ``subfields''.  Each subfield contains $10^4$
+galaxies placed on a $100\times 100$ grid; the galaxies in a given subfield all have the same
+(unknown) shear and the same known PSF.  The galaxy population within a subfield follows a
+distribution of signal-to-noise ratio, size, ellipticity, and morphology based on that in the {\it
+  Hubble Space Telescope} ({\it HST}) COSMOS survey
+\citep{2007ApJS..172..196K,2007ApJS..172....1S,2007ApJS..172...38S}, roughly approximating a galaxy
+sample with a depth of $I<25$.  To ensure that most methods will be able to measure all galaxies, an
+effective signal-to-noise cut of $\gtrsim 12$ and a minimal resolution cut was imposed (resulting in
+different sets of galaxies in subfields that have different-sized PSFs).  90$^\circ$ rotated pairs
+of galaxies were included, to cancel out shape noise \citep{2007MNRAS.376...13M}.  The PSF in the
+simulations comes from the combination of an optics model from a ground-based telescope, along with
+a Kolmogorov PSF with a typical ellipticity variance.  Thus, the galaxy and PSF properties are
+non-trivially complicated.  The noise is stationary Gaussian noise.  The
+ultimate goal is to estimate the average shear in each subfield in an unbiased way, without any
+multiplicative bias or correlations with the per-subfield PSF ellipticity.
+
+One important distinction between GREAT3 and the real Universe that we will have to consider is the
+mean shear.  In a real patch of sky comparable to the size of a large survey, the expected mean
+shear is zero.  In GREAT3, while lensing shears $g_1$ and $g_2$ are drawn from a distribution with
+zero mean, the fact that there are only 200 subfields means that effectively only 200 draws from
+that distribution were made, and that is not enough to have an effective mean shear of zero.  Thus,
+for all of the results below, we will take the averages of the true shears per component as a known
+quantity instead of doing a fully blind analysis, since the deviation of those quantities from zero
+is just due to the artificial nature of the simulation design.
+
+We consider two sets of galaxy populations.  One comes directly from {\it HST} images, and includes
+a process to remove the HST PSF before shearing (both operations being carried out in Fourier space)
+and convolving with the final target PSF \citep{2012MNRAS.420.1518M}.  The other galaxy population
+consists of simple parametric representations of those {\it HST} images.  These populations have the
+same effective distributions of size, ellipticity, and so on, but one includes realistic galaxy
+morphology while the other only includes such realism as can be captured by the sum of two
+S\'{e}rsic profiles.  In the language of GREAT3, we use simulations corresponding to
+control-ground-constant (describing the parametric galaxy sample, ground-based simulated data, with
+a constant per-subfield shear) and real$\_$galaxy-ground-constant (the realistic galaxy sample),
+denoted CGC and RGC.
 
 
 \subsubsection{Control Ground Constant without Aberrations}
@@ -354,7 +392,7 @@ The first branch we analyze is the simplest. The galaxy models Sersic profiles, 
 
 
 \subsubsection{Control Ground Constant with Aberrations}
-\towriterm{Brief description of this branch.}
+\towriterm{Brief description of this branch, connection to GREAT3 results.}
 \towriteemh{Performance expectations on this branch.}
 \towriteemh{Briefly summarize calibration results for this branch.}
 
@@ -446,6 +484,8 @@ The first branch we analyze is the simplest. The galaxy models Sersic profiles, 
 \section*{Acknowledgments}
 
 \towrite{Thanks to various people. Funding.}
+
+\towrite{Some cleanup in references is needed.}
 
 \bibliographystyle{apj}
 \bibliography{bibliography}

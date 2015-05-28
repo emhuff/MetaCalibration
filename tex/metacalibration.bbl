@@ -1,4 +1,4 @@
-\begin{thebibliography}{46}
+\begin{thebibliography}{49}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 
 \bibitem[{{Albrecht} {et~al.}(2006){Albrecht}, {Bernstein}, {Cahn}, {Freedman},
@@ -106,6 +106,13 @@
 {Kitching}, T.~D., {Balan}, S.~T., {Bridle}, S., {Cantale}, N., {Courbin}, F.,
   {Eifler}, T., {Gentile}, M., {Gill}, M.~S.~S., {Harmeling}, S., {Heymans},
   C., {Hirsch}, M., \& et~al. 2012, \mnras, 423, 3163
+
+\bibitem[{{Koekemoer} {et~al.}(2007){Koekemoer}, {Aussel}, {Calzetti}, {Capak},
+  {Giavalisco}, {Kneib}, {Leauthaud}, {Le F{\`e}vre}, \&
+  et~al.}]{2007ApJS..172..196K}
+{Koekemoer}, A.~M., {Aussel}, H., {Calzetti}, D., {Capak}, P., {Giavalisco},
+  M., {Kneib}, J., {Leauthaud}, A., {Le F{\`e}vre}, O., \& et~al. 2007, \apjs,
+  172, 196
 
 \bibitem[{{Laureijs} {et~al.}(2011){Laureijs}, {Amiaux}, {Arduini},
   {Augu{\`e}res}, {Brinchmann}, {Cole}, {Cropper}, {Dabin}, {Duvet}, {Ealet},
@@ -216,6 +223,20 @@
 {Schneider}, P. 2006, in Saas-Fee Advanced Course 33: Gravitational Lensing:
   Strong, Weak and Micro, ed. G.~{Meylan}, P.~{Jetzer}, P.~{North},
   P.~{Schneider}, C.~S. {Kochanek}, \& J.~{Wambsganss}, 269--451
+
+\bibitem[{{Scoville} {et~al.}(2007{\natexlab{a}}){Scoville}, {Abraham},
+  {Aussel}, {Barnes}, {Benson}, {Blain}, {Calzetti}, {Comastri}, {Capak}, \&
+  et~al.}]{2007ApJS..172...38S}
+{Scoville}, N., {Abraham}, R.~G., {Aussel}, H., {Barnes}, J.~E., {Benson}, A.,
+  {Blain}, A.~W., {Calzetti}, D., {Comastri}, A., {Capak}, P., \& et~al.
+  2007{\natexlab{a}}, \apjs, 172, 38
+
+\bibitem[{{Scoville} {et~al.}(2007{\natexlab{b}}){Scoville}, {Aussel}, {Brusa},
+  {Capak}, {Carollo}, {Elvis}, {Giavalisco}, {Guzzo}, {Hasinger}, \&
+  et~al.}]{2007ApJS..172....1S}
+{Scoville}, N., {Aussel}, H., {Brusa}, M., {Capak}, P., {Carollo}, C.~M.,
+  {Elvis}, M., {Giavalisco}, M., {Guzzo}, L., {Hasinger}, G., \& et~al.
+  2007{\natexlab{b}}, \apjs, 172, 1
 
 \bibitem[{{Semboloni} {et~al.}(2011){Semboloni}, {Hoekstra}, {Schaye}, {van
   Daalen}, \& {McCarthy}}]{2011MNRAS.417.2020S}
