@@ -265,8 +265,33 @@ where the denominator gives the response of the ensemble average distortion to a
 the responsivity).  Estimators of this shear responsivity use the observed galaxy $p(e)$ and its
 moments, and for typical $p(e)$, the denominator is around $1.7$--$1.8$.
 
+{\em random note for Rachel: talk about per-object weighting possibilities?}
+
 \subsubsection{KSB}
-\towriterm{Brief description of KSB}
+
+The KSB method \citep{1995ApJ...449..460K} parametrises galaxies and stars according to their
+weighted quadrupole moments.  The main assumption of the KSB method is that the PSF 
+can be described as a small but highly anisotropic distortion
+convolved with a large circularly symmetric function. 
+With that assumption, the shear can be recovered to
+first-order from the observed ellipticity of each galaxy via
+\begin{equation} \label{eqn:weight}
+\gamma=P_{\gamma}^{-1}\left(e^{\rm obs}-\frac{P^{\rm sm}}{P^{\rm sm*}}e^{*}\right),
+\end{equation}
+where asterisks indicate quantities that should be measured from the
+PSF model at that galaxy position, $P^{\rm sm}$ is the
+smear polarisability (see \citealt{2006MNRAS.368.1323H} for definitions) 
+and $P_\gamma$ is the correction to the shear
+polarisability that includes the smearing with the isotropic component
+of the PSF. The ellipticities are constructed from 
+weighted quadrupole moments, and the other quantities involve
+higher order moments. A  circular Gaussian weight 
+of scale length $r_g$ is used, where $r_g$ is galaxy
+size.
+
+The KSB method returns a per-object estimate of the shears $(\gamma_1,\gamma_2)$. We can use
+metacalibration to infer the shear while removing multiplicative and additive biases in the method.
+
 \subsubsection{Linear Moments}
 \towriterm{Brief description of linear moments}
 
