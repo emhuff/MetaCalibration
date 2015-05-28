@@ -1,4 +1,4 @@
-\begin{thebibliography}{43}
+\begin{thebibliography}{46}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 
 \bibitem[{{Albrecht} {et~al.}(2006){Albrecht}, {Bernstein}, {Cahn}, {Freedman},
@@ -122,6 +122,18 @@
 {LSST Science Collaborations} \& {LSST Project}. 2009, ArXiv e-prints
   (0912.0201), \url{http://www.lsst.org/lsst/scibook}
 
+\bibitem[{{Mandelbaum} {et~al.}(2012){Mandelbaum}, {Hirata}, {Leauthaud},
+  {Massey}, \& {Rhodes}}]{2012MNRAS.420.1518M}
+{Mandelbaum}, R., {Hirata}, C.~M., {Leauthaud}, A., {Massey}, R.~J., \&
+  {Rhodes}, J. 2012, \mnras, 420, 1518
+
+\bibitem[{{Mandelbaum} {et~al.}(2005){Mandelbaum}, {Hirata}, {Seljak}, {Guzik},
+  {Padmanabhan}, {Blake}, {Blanton}, {Lupton}, \&
+  {Brinkmann}}]{2005MNRAS.361.1287M}
+{Mandelbaum}, R., {Hirata}, C.~M., {Seljak}, U., {Guzik}, J., {Padmanabhan},
+  N., {Blake}, C., {Blanton}, M.~R., {Lupton}, R., \& {Brinkmann}, J. 2005,
+  \mnras, 361, 1287
+
 \bibitem[{{Mandelbaum} {et~al.}(2015){Mandelbaum}, {Rowe}, {Armstrong}, {Bard},
   {Bertin}, {Bosch}, {Boutigny}, {Courbin}, {Dawson}, {Donnarumma}, {Fenech
   Conti}, {Gavazzi}, {Gentile}, {Gill}, {Hogg}, {Huff}, {Jee}, {Kacprzak},
@@ -147,6 +159,11 @@
 {Mandelbaum}, R., {Rowe}, B., {Bosch}, J., {Chang}, C., {Courbin}, F., {Gill},
   M., {Jarvis}, M., {Kannawadi}, A., {Kacprzak}, T., {Lackner}, C., \& et~al.
   2014, \apjs, 212, 5
+
+\bibitem[{{Mandelbaum} {et~al.}(2013){Mandelbaum}, {Slosar}, {Baldauf},
+  {Seljak}, {Hirata}, {Nakajima}, {Reyes}, \& {Smith}}]{2013MNRAS.432.1544M}
+{Mandelbaum}, R., {Slosar}, A., {Baldauf}, T., {Seljak}, U., {Hirata}, C.~M.,
+  {Nakajima}, R., {Reyes}, R., \& {Smith}, R.~E. 2013, \mnras, 432, 1544
 
 \bibitem[{{Massey} {et~al.}(2007){Massey}, {Heymans}, {Berg{\'e}}, {Bernstein},
   {Bridle}, {Clowe}, {Dahle}, {Ellis}, \& et~al.}]{2007MNRAS.376...13M}
