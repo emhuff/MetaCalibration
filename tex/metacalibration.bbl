@@ -1,4 +1,4 @@
-\begin{thebibliography}{35}
+\begin{thebibliography}{43}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 
 \bibitem[{{Albrecht} {et~al.}(2006){Albrecht}, {Bernstein}, {Cahn}, {Freedman},
@@ -31,10 +31,22 @@
   {Heymans}, C., {Hirsch}, M., {Hosseini}, R., {Jarvis}, M., {Kirk}, D., \&
   et~al. 2010, \mnras, 405, 2044
 
+\bibitem[{{Bridle} {et~al.}(2009){Bridle}, {Shawe-Taylor}, {Amara},
+  {Applegate}, {Balan}, {Berge}, {Bernstein}, {Dahle}, {Erben}, \&
+  et~al.}]{2009AnApS...3....6B}
+{Bridle}, S., {Shawe-Taylor}, J., {Amara}, A., {Applegate}, D., {Balan}, S.~T.,
+  {Berge}, J., {Bernstein}, G., {Dahle}, H., {Erben}, T., \& et~al. 2009,
+  Annals of Applied Statistics, 3, 6
+
 \bibitem[{{Gruen} {et~al.}(2010){Gruen}, {Seitz}, {Koppenhoefer}, \&
   {Riffeser}}]{2010ApJ...720..639G}
 {Gruen}, D., {Seitz}, S., {Koppenhoefer}, J., \& {Riffeser}, A. 2010, \apj,
   720, 639
+
+\bibitem[{{Heymans} {et~al.}(2006){Heymans}, {Van Waerbeke}, {Bacon}, {Berge},
+  {Bernstein}, {Bertin}, {Bridle}, \& et~al.}]{2006MNRAS.368.1323H}
+{Heymans}, C., {Van Waerbeke}, L., {Bacon}, D., {Berge}, J., {Bernstein}, G.,
+  {Bertin}, E., {Bridle}, S., \& et~al. 2006, \mnras, 368, 1323
 
 \bibitem[{{Hildebrandt} {et~al.}(2010){Hildebrandt}, {Arnouts}, {Capak},
   {Moustakas}, {Wolf}, {Abdalla}, {Assef}, {Banerji}, {Ben{\'{\i}}tez},
@@ -83,6 +95,18 @@
   {Mandelbaum}, R., {Sif{\'o}n}, C., {Cacciato}, M., {Choi}, A., {Kiessling},
   A., {Leonard}, A., {Rassat}, A., \& {Sch{\"a}fer}, B.~M. 2015, ArXiv e-prints
 
+\bibitem[{{Kitching} {et~al.}(2010){Kitching}, {Balan}, {Bernstein}, {Bethge},
+  {Bridle}, {Courbin}, {Gentile}, \& et~al.}]{2010arXiv1009.0779K}
+{Kitching}, T., {Balan}, S., {Bernstein}, G., {Bethge}, M., {Bridle}, S.,
+  {Courbin}, F., {Gentile}, M., \& et~al. 2010, AOAS, 5, 2231
+
+\bibitem[{{Kitching} {et~al.}(2012){Kitching}, {Balan}, {Bridle}, {Cantale},
+  {Courbin}, {Eifler}, {Gentile}, {Gill}, {Harmeling}, {Heymans}, {Hirsch}, \&
+  et~al.}]{2012MNRAS.423.3163K}
+{Kitching}, T.~D., {Balan}, S.~T., {Bridle}, S., {Cantale}, N., {Courbin}, F.,
+  {Eifler}, T., {Gentile}, M., {Gill}, M.~S.~S., {Harmeling}, S., {Heymans},
+  C., {Hirsch}, M., \& et~al. 2012, \mnras, 423, 3163
+
 \bibitem[{{Laureijs} {et~al.}(2011){Laureijs}, {Amiaux}, {Arduini},
   {Augu{\`e}res}, {Brinchmann}, {Cole}, {Cropper}, {Dabin}, {Duvet}, {Ealet},
   \& et~al.}]{2011arXiv1110.3193L}
@@ -97,6 +121,37 @@
   Project}(2009)}]{2009arXiv0912.0201L}
 {LSST Science Collaborations} \& {LSST Project}. 2009, ArXiv e-prints
   (0912.0201), \url{http://www.lsst.org/lsst/scibook}
+
+\bibitem[{{Mandelbaum} {et~al.}(2015){Mandelbaum}, {Rowe}, {Armstrong}, {Bard},
+  {Bertin}, {Bosch}, {Boutigny}, {Courbin}, {Dawson}, {Donnarumma}, {Fenech
+  Conti}, {Gavazzi}, {Gentile}, {Gill}, {Hogg}, {Huff}, {Jee}, {Kacprzak},
+  {Kilbinger}, {Kuntzer}, {Lang}, {Luo}, {March}, {Marshall}, {Meyers},
+  {Miller}, {Miyatake}, {Nakajima}, {Ngol{\'e} Mboula}, {Nurbaeva}, {Okura},
+  {Paulin-Henriksson}, {Rhodes}, {Schneider}, {Shan}, {Sheldon}, {Simet},
+  {Starck}, {Sureau}, {Tewes}, {Zarb Adami}, {Zhang}, \&
+  {Zuntz}}]{2015MNRAS.450.2963M}
+{Mandelbaum}, R., {Rowe}, B., {Armstrong}, R., {Bard}, D., {Bertin}, E.,
+  {Bosch}, J., {Boutigny}, D., {Courbin}, F., {Dawson}, W.~A., {Donnarumma},
+  A., {Fenech Conti}, I., {Gavazzi}, R., {Gentile}, M., {Gill}, M.~S.~S.,
+  {Hogg}, D.~W., {Huff}, E.~M., {Jee}, M.~J., {Kacprzak}, T., {Kilbinger}, M.,
+  {Kuntzer}, T., {Lang}, D., {Luo}, W., {March}, M.~C., {Marshall}, P.~J.,
+  {Meyers}, J.~E., {Miller}, L., {Miyatake}, H., {Nakajima}, R., {Ngol{\'e}
+  Mboula}, F.~M., {Nurbaeva}, G., {Okura}, Y., {Paulin-Henriksson}, S.,
+  {Rhodes}, J., {Schneider}, M.~D., {Shan}, H., {Sheldon}, E.~S., {Simet}, M.,
+  {Starck}, J.-L., {Sureau}, F., {Tewes}, M., {Zarb Adami}, K., {Zhang}, J., \&
+  {Zuntz}, J. 2015, \mnras, 450, 2963
+
+\bibitem[{{Mandelbaum} {et~al.}(2014){Mandelbaum}, {Rowe}, {Bosch}, {Chang},
+  {Courbin}, {Gill}, {Jarvis}, {Kannawadi}, {Kacprzak}, {Lackner}, \&
+  et~al.}]{2014ApJS..212....5M}
+{Mandelbaum}, R., {Rowe}, B., {Bosch}, J., {Chang}, C., {Courbin}, F., {Gill},
+  M., {Jarvis}, M., {Kannawadi}, A., {Kacprzak}, T., {Lackner}, C., \& et~al.
+  2014, \apjs, 212, 5
+
+\bibitem[{{Massey} {et~al.}(2007){Massey}, {Heymans}, {Berg{\'e}}, {Bernstein},
+  {Bridle}, {Clowe}, {Dahle}, {Ellis}, \& et~al.}]{2007MNRAS.376...13M}
+{Massey}, R., {Heymans}, C., {Berg{\'e}}, J., {Bernstein}, G., {Bridle}, S.,
+  {Clowe}, D., {Dahle}, H., {Ellis}, R., \& et~al. 2007, \mnras, 376, 13
 
 \bibitem[{{Massey} {et~al.}(2010){Massey}, {Kitching}, \&
   {Richard}}]{2010RPPh...73h6901M}
@@ -131,6 +186,14 @@
 \bibitem[{{Rhodes} {et~al.}(2000){Rhodes}, {Refregier}, \&
   {Groth}}]{2000ApJ...536...79R}
 {Rhodes}, J., {Refregier}, A., \& {Groth}, E.~J. 2000, \apj, 536, 79
+
+\bibitem[{{Rowe} {et~al.}(2015){Rowe}, {Jarvis}, {Mandelbaum}, {Bernstein},
+  {Bosch}, {Simet}, {Meyers}, {Kacprzak}, {Nakajima}, {Zuntz}, {Miyatake},
+  {Dietrich}, {Armstrong}, {Melchior}, \& {Gill}}]{2015A&C....10..121R}
+{Rowe}, B.~T.~P., {Jarvis}, M., {Mandelbaum}, R., {Bernstein}, G.~M., {Bosch},
+  J., {Simet}, M., {Meyers}, J.~E., {Kacprzak}, T., {Nakajima}, R., {Zuntz},
+  J., {Miyatake}, H., {Dietrich}, J.~P., {Armstrong}, R., {Melchior}, P., \&
+  {Gill}, M.~S.~S. 2015, Astronomy and Computing, 10, 121
 
 \bibitem[{{Schneider}(2006)}]{schneider06}
 {Schneider}, P. 2006, in Saas-Fee Advanced Course 33: Gravitational Lensing:

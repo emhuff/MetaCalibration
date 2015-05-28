@@ -24,7 +24,7 @@
 \shorttitle{Meta-Calibration} \shortauthors{Huff and Mandelbaum}
 
 \begin{document}
-\title{ Meta-Calibration: Direct Self-Calibration of Biases in Shear Measurement}
+\title{Meta-Calibration: Direct Self-Calibration of Biases in Shear Measurement}
 \author{Eric M. Huff\altaffilmark{1}}
 \author{Rachel Mandelbaum\altaffilmark{2}}
 
@@ -56,8 +56,6 @@ of shape measurement techniques  at the level of precision measurable with the a
 \todorm{Rachel}
 \toplotrm{Rachel}
 
-\towrite{RM volunteers to fill in some of the refs below.  I had to make a massive compendium of
-  lensing-related references back when I was working on the GREAT3 papers.}
 Accurate measurement of weak gravitational lensing offers the most direct probe of the dark sector
 of the universe
 \citep[e.g.,][]{2001PhR...340..291B,2003ARA&A..41..645R,schneider06,2008ARNPS..58...99H,2010RPPh...73h6901M,2013PhR...530...87W}. Several
@@ -87,17 +85,18 @@ we will focus on the latter. {\em How to discuss hierarchical inference method i
 The weak lensing community has organized a series of blind measurement challenges, where
 participants attempted to extract a lensing signal -- the exact nature of which was known only to
 the challenge organizers -- from simulated imaging data. The earliest of these was the first Shear
-TEsting Programme (STEP1 [REF]) and its successor (STEP2 [REF]). The results made clear that
+TEsting Programme (STEP1, \citealt{2006MNRAS.368.1323H}) and its successor (STEP2, \citealt{2007MNRAS.376...13M}). The results made clear that
 successive challenges were needed, and that progress would best be made by focusing on solving a
 subset of the complex process of shear estimation. The following simulation challenges, GREAT08
-[REF], Great10[REF], and GREAT3[REF] drove significant improvement in the accuracy of the
-measurement algorithms, with the most recent round of tests suggesting that...
+\citep{2009AnApS...3....6B,2010MNRAS.405.2044B}, GREAT10 \citep{2010arXiv1009.0779K,2012MNRAS.423.3163K}, and GREAT3 \citep{2014ApJS..212....5M,2015MNRAS.450.2963M} drove significant improvement in the accuracy of the
+measurement algorithms, with the most recent round of tests suggesting substantial progress in the
+mitigation of multiplicative shear biases.
 
 \towriterm{A little more background would be helpful here -- what are the primary concerns about shear estimation after GREAT3?}
 
 While current techniques are the result of much progress over the last two decades, the best current algorithms are not yet ready for Stage-IV data. At present, ongoing and future experiments are expected to have to rely on external simulations for calibration. Such simulations are always limited in their realism; they must accurately model the full range of variation of image quality characteristics present in and galaxy populations probed by the survey [REF], insofar as these impact the shear measurement. Merely validating the fidelity of external simulations at the required accuracy is a formidable inference challenge in its own right (see for example sfit from GREAT3, or UFIG [REF: Refregier et al]).
 
-This paper is motivated by the observation that introducing a synthetic shear, even into real data, is much easier than doing shear inference at the level of accuracy described above. We describe the construction and performance of a meta-pipeline, which can be used to self-calibratean arbitrary shear measurement pipeline  (such as those currently implemented for the shear challenge simulations). We show that this process permits accurate estimatition of a wide range of additive and multiplicative shear calibration biases, and demonstrate that the same technique can be used to de-trend additive biases arising from imperfect psf correction. We implement this idea using GalSim [REF], and test it to GREAT3 simulations, as well as several specific simulations generated using the same GREAT3 software. Our MetaCalibration scripts are available for general use.
+This paper is motivated by the observation that introducing a synthetic shear, even into real data, is much easier than doing shear inference at the level of accuracy described above. We describe the construction and performance of a meta-pipeline, which can be used to self-calibratean arbitrary shear measurement pipeline  (such as those currently implemented for the shear challenge simulations). We show that this process permits accurate estimatition of a wide range of additive and multiplicative shear calibration biases, and demonstrate that the same technique can be used to de-trend additive biases arising from imperfect psf correction. We implement this idea using GalSim \citep{2015A&C....10..121R}, and test it to GREAT3 simulations, as well as several specific simulations generated using the same GREAT3 software. Our MetaCalibration scripts are available for general use.
 
 \section{Method}
 The MetaCalibration technique, described below, uses GalSim [REF] to modify real astronomical images by adding synthetic shear and PSF distortions of known amplitude. These modified images can be considered counterfactuals;  they are model for what would have been observed under the same image quality conditions, on the same galaxies, with a different shear. If the measurement process is repeated on the counterfactual images, the result gives an accurate estimate of shear calibration biases. If, instead of introducing a synthetic shear, we choose to add a synthetic psf ellipticity, then measurement on the counterfactual images yields an accurate estimate of residual psf biases, which can be de-trended. Finally, if the detection and measurement steps are both performed on the counterfactuals, the measured calibration biases include shear and psf-driven selection effects, which are otherwise very difficult to estimate directly.
