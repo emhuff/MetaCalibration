@@ -1,0 +1,71 @@
+\begin{thebibliography}{10}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+
+\bibitem[{{Albrecht} {et~al.}(2006){Albrecht}, {Bernstein}, {Cahn}, {Freedman},
+  {Hewitt}, {Hu}, {Huth}, {Kamionkowski}, {Kolb}, {Knox}, {Mather}, {Staggs},
+  \& {Suntzeff}}]{2006astro.ph..9591A}
+{Albrecht}, A., {Bernstein}, G., {Cahn}, R., {Freedman}, W.~L., {Hewitt}, J.,
+  {Hu}, W., {Huth}, J., {Kamionkowski}, M., {Kolb}, E.~W., {Knox}, L.,
+  {Mather}, J.~C., {Staggs}, S., \& {Suntzeff}, N.~B. 2006, ArXiv e-prints
+  (astro-ph/0609591)
+
+\bibitem[{{Bartelmann} \& {Schneider}(2001)}]{2001PhR...340..291B}
+{Bartelmann}, M. \& {Schneider}, P. 2001, \physrep, 340, 291
+
+\bibitem[{{Hoekstra} \& {Jain}(2008)}]{2008ARNPS..58...99H}
+{Hoekstra}, H. \& {Jain}, B. 2008, Annual Review of Nuclear and Particle
+  Science, 58, 99
+
+\bibitem[{{Laureijs} {et~al.}(2011){Laureijs}, {Amiaux}, {Arduini},
+  {Augu{\`e}res}, {Brinchmann}, {Cole}, {Cropper}, {Dabin}, {Duvet}, {Ealet},
+  \& et~al.}]{2011arXiv1110.3193L}
+{Laureijs}, R., {Amiaux}, J., {Arduini}, S., {Augu{\`e}res}, J.~.,
+  {Brinchmann}, J., {Cole}, R., {Cropper}, M., {Dabin}, C., {Duvet}, L.,
+  {Ealet}, A., \& et~al. 2011, ArXiv e-prints (1110.3193)
+
+\bibitem[{{LSST Science Collaborations} \& {LSST
+  Project}(2009)}]{2009arXiv0912.0201L}
+{LSST Science Collaborations} \& {LSST Project}. 2009, ArXiv e-prints
+  (0912.0201), \url{http://www.lsst.org/lsst/scibook}
+
+\bibitem[{{Massey} {et~al.}(2010){Massey}, {Kitching}, \&
+  {Richard}}]{2010RPPh...73h6901M}
+{Massey}, R., {Kitching}, T., \& {Richard}, J. 2010, Reports on Progress in
+  Physics, 73, 086901
+
+\bibitem[{{Refregier}(2003)}]{2003ARA&A..41..645R}
+{Refregier}, A. 2003, \araa, 41, 645
+
+\bibitem[{{Schneider}(2006)}]{schneider06}
+{Schneider}, P. 2006, in Saas-Fee Advanced Course 33: Gravitational Lensing:
+  Strong, Weak and Micro, ed. G.~{Meylan}, P.~{Jetzer}, P.~{North},
+  P.~{Schneider}, C.~S. {Kochanek}, \& J.~{Wambsganss}, 269--451
+
+\bibitem[{{Spergel} {et~al.}(2015){Spergel}, {Gehrels}, {Baltay}, {Bennett},
+  {Breckinridge}, {Donahue}, {Dressler}, {Gaudi}, {Greene}, {Guyon}, {Hirata},
+  {Kalirai}, {Kasdin}, {Macintosh}, {Moos}, {Perlmutter}, {Postman},
+  {Rauscher}, {Rhodes}, {Wang}, {Weinberg}, {Benford}, {Hudson}, {Jeong},
+  {Mellier}, {Traub}, {Yamada}, {Capak}, {Colbert}, {Masters}, {Penny},
+  {Savransky}, {Stern}, {Zimmerman}, {Barry}, {Bartusek}, {Carpenter}, {Cheng},
+  {Content}, {Dekens}, {Demers}, {Grady}, {Jackson}, {Kuan}, {Kruk}, {Melton},
+  {Nemati}, {Parvin}, {Poberezhskiy}, {Peddie}, {Ruffa}, {Wallace}, {Whipple},
+  {Wollack}, \& {Zhao}}]{2015arXiv150303757S}
+{Spergel}, D., {Gehrels}, N., {Baltay}, C., {Bennett}, D., {Breckinridge}, J.,
+  {Donahue}, M., {Dressler}, A., {Gaudi}, B.~S., {Greene}, T., {Guyon}, O.,
+  {Hirata}, C., {Kalirai}, J., {Kasdin}, N.~J., {Macintosh}, B., {Moos}, W.,
+  {Perlmutter}, S., {Postman}, M., {Rauscher}, B., {Rhodes}, J., {Wang}, Y.,
+  {Weinberg}, D., {Benford}, D., {Hudson}, M., {Jeong}, W.-S., {Mellier}, Y.,
+  {Traub}, W., {Yamada}, T., {Capak}, P., {Colbert}, J., {Masters}, D.,
+  {Penny}, M., {Savransky}, D., {Stern}, D., {Zimmerman}, N., {Barry}, R.,
+  {Bartusek}, L., {Carpenter}, K., {Cheng}, E., {Content}, D., {Dekens}, F.,
+  {Demers}, R., {Grady}, K., {Jackson}, C., {Kuan}, G., {Kruk}, J., {Melton},
+  M., {Nemati}, B., {Parvin}, B., {Poberezhskiy}, I., {Peddie}, C., {Ruffa},
+  J., {Wallace}, J.~K., {Whipple}, A., {Wollack}, E., \& {Zhao}, F. 2015, ArXiv
+  e-prints
+
+\bibitem[{{Weinberg} {et~al.}(2013){Weinberg}, {Mortonson}, {Eisenstein},
+  {Hirata}, {Riess}, \& {Rozo}}]{2013PhR...530...87W}
+{Weinberg}, D.~H., {Mortonson}, M.~J., {Eisenstein}, D.~J., {Hirata}, C.,
+  {Riess}, A.~G., \& {Rozo}, E. 2013, \physrep, 530, 87
+
+\end{thebibliography}
