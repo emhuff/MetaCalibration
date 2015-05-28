@@ -98,6 +98,8 @@ mitigation of multiplicative shear biases.
 While current techniques are the result of much progress over the last two decades, the best current algorithms are not yet ready for Stage-IV data. At present, ongoing and future experiments are expected to have to rely on external simulations for calibration. Such simulations are always limited in their realism; they must accurately model the full range of variation of image quality characteristics present in and galaxy populations probed by the survey [REF], insofar as these impact the shear measurement. Merely validating the fidelity of external simulations at the required accuracy is a formidable inference challenge in its own right (see for example sfit from GREAT3, or UFIG [REF: Refregier et al]).
 
 This paper is motivated by the observation that introducing a synthetic shear, even into real data, is much easier than doing shear inference at the level of accuracy described above. We describe the construction and performance of a meta-pipeline, which can be used to self-calibratean arbitrary shear measurement pipeline  (such as those currently implemented for the shear challenge simulations). We show that this process permits accurate estimatition of a wide range of additive and multiplicative shear calibration biases, and demonstrate that the same technique can be used to de-trend additive biases arising from imperfect psf correction. We implement this idea using GalSim \citep{2015A&C....10..121R}, and test it to GREAT3 simulations, as well as several specific simulations generated using the same GREAT3 software. Our MetaCalibration scripts are available for general use.
+\todoemh{Clean up code (really this is a to-do for both of us) and put it in a public place that we
+  can point to here.}
 
 \section{Method}
 The MetaCalibration technique, described below, uses GalSim \citep{2015A&C....10..121R} to modify real astronomical images by adding synthetic shear and PSF distortions of known amplitude. These modified images can be considered counterfactuals;  they are model for what would have been observed under the same image quality conditions, on the same galaxies, with a different shear. If the measurement process is repeated on the counterfactual images, the result gives an accurate estimate of shear calibration biases. If, instead of introducing a synthetic shear, we choose to add a synthetic psf ellipticity, then measurement on the counterfactual images yields an accurate estimate of residual psf biases, which can be de-trended. Finally, if the detection and measurement steps are both performed on the counterfactuals, the measured calibration biases include shear and psf-driven selection effects, which are otherwise very difficult to estimate directly.
@@ -224,6 +226,15 @@ Constructing the histogram estimator for the three shape measurement methods. {\
 
 If we have a poor model for the unlensed histogram, $h_{\rm fid}$, then the results will be biased. We can evaulate the distance from each field to the unlensed prior using equation~\ref{eqn:multnomial}, taking the probabilities $q_i$ from the unlensed prior and the histogram amplitudes from the current field, {after correcting for the estimated shear}. If the shear response measured for the unlensed prior is correct, then the performance of the estimator will depend only on the similarity of the prior to the measurement field. The likelihood can then be used as an objective criterion for the quality of the inference. 
 
+\subsection{Relationship to previous implementations}
+
+As shown in the GREAT3 results paper \citep{2015MNRAS.450.2963M}, an early version of
+metacalibration was used in the GREAT3 challenge.  That implementation differs from the one
+presented here and released publicly in association with this paper in two important ways: the model
+for systematics was simpler than the one presented below (in particular, it neglected additive
+systematics entirely) and the method for inferring shears from an ensemble of objects was entirely
+different.  These differences are of sufficient importance that the GREAT3 results (especially the
+ones for additive systematics) are not relevant to the implementation described here.
 
 
 \section{Testing Framework}
