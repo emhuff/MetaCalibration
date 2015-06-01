@@ -114,9 +114,6 @@ This paper is motivated by the observation that introducing a synthetic shear, e
 \section{Method}
 The MetaCalibration technique, described below, uses GalSim \citep{2015A&C....10..121R} to modify real astronomical images by adding synthetic shear and PSF distortions of known amplitude. These modified images can be considered counterfactuals;  they are model for what would have been observed under the same image quality conditions, on the same galaxies, with a different shear. If the measurement process is repeated on the counterfactual images, the result gives an accurate estimate of shear calibration biases. If, instead of introducing a synthetic shear, we choose to add a synthetic psf ellipticity, then measurement on the counterfactual images yields an accurate estimate of residual psf biases, which can be de-trended. Finally, if the detection and measurement steps are both performed on the counterfactuals, the measured calibration biases include shear and psf-driven selection effects, which are otherwise very difficult to estimate directly.
 
-\towriterm{Should at some point make a brief statement about numerical validation of GalSim for
-  these purposes, pointing to appropriate parts of the GalSim paper.}
-
 \subsection{Generating Counterfactual Image}
 Fortunately, for the weak shears under consideration in most cosmological survey applications, the relationship between the shear and the galaxy shapes (or related observables) is very close to linear, so accurate shear calibration requires only the first derivative of the galaxy properties with respect to the shear. What follows is a method for estimating this derivative directly from the images. Throughout we will assume that the observed image $I({\mathbf{x}})$ is the unsmeared galaxy image $G(\mathbf{x})$ convolved with some seeing kernel $P(\mathbf{x})$.
 
@@ -152,9 +149,18 @@ We have created a simple pipeline that takes as inputs postage stamps of the gal
 
 \subsection{Image Modification}
 We use GalSim\footnote{\url{https://github.com/GalSim-developers/GalSim}}
-\citep{2015A&C....10..121R} to manipulate the images and to generate simulations for validation. For each galaxy, we create nine modified images: two for each shear component, two for each psf ellipticity component, and one for the final measurement. We run the provided shape measurement pipeline on each of these images, and the results are used to construct a set of finite difference estimates of calibration and psf biases.
+\citep{2015A&C....10..121R} to manipulate the images and to generate simulations for validation. For
+each galaxy, we create nine modified images: two for each shear component, two for each psf
+ellipticity component, and one for the final measurement. We run the provided shape measurement
+pipeline on each of these images, and the results are used to construct a set of finite difference
+estimates of calibration and psf biases.
 
-This sort of image manipulation is very similar the simulation design goals of the GalSim  project, so we rely on the rigorous testing of the image convolution, interpolation, and resampling algorithms the development team performed to enable the Great3 shear testing simulations.
+This sort of image manipulation is very similar the simulation design goals of the GalSim project,
+so we rely on the rigorous testing of the image convolution, interpolation, and resampling
+algorithms the development team performed to enable the Great3 shear testing simulations.  From the
+perspective of numerical validation, the tests in section 9 of \cite{2015A&C....10..121R} illustrate
+that GalSim can accurately render sheared images of quite complex galaxy and PSF light profiles with
+its default settings that control numerical accuracy.
 
 For each galaxy and psf postage stamp, we first create an Interpolated Image object. This object is deconvolved by the psf model (including the pixel response). For the shear finite differences, we apply a small shear $\Delta\gamma$ (typically 1\%) to the resulting deconvolved image. The original psf is dilated by twice the shear distortion, and then re-convolved with the sheared deconvolved image. This reconvolved, sheared image is then passed to the shape measurement routine, along with the newly dilated psf. For the psf sensitivity, we follow a similar procedure, but shear the dilated psf image, rather than the deconvolved galaxy image. Finally, we create a reconvolved image with no added shear, on which we'll perform the final shape measurement. 
 
