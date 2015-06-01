@@ -82,7 +82,9 @@ function or PSF
 \citep[e.g.,]{1995ApJ...449..460K,2000ApJ...537..555K,2000ApJ...536...79R,2002AJ....123..583B,2003MNRAS.343..459H,2005MNRAS.363..197M,2009MNRAS.398..471L,2009MNRAS.396.1211N,2010MNRAS.405.2044B,2010MNRAS.406.2793B,2010AJ....140..870B,2010ApJ...720..639G,2011MNRAS.410.2156V,2011MNRAS.414.1047Z,2013MNRAS.434.1604Z,2013MNRAS.429.2858M,2014MNRAS.438.1880B}. Here
 we will focus on the latter. 
 \towriterm{How to discuss hierarchical inference method in Schneider et al,
-  which takes care of some but not all of the issues with traditional shear estimation methods?}
+  which takes care of some but not all of the issues with traditional shear estimation methods?  It
+  has some aspects that are philosophically in common with MetaCalibration.  Not clear if we should
+  discuss this in the intro or discussion.}
 
 The weak lensing community has organized a series of blind measurement challenges, where
 participants attempted to extract a lensing signal -- the exact nature of which was known only to
@@ -92,11 +94,18 @@ successive challenges were needed, and that progress would best be made by focus
 subset of the complex process of shear estimation. The following simulation challenges, GREAT08
 \citep{2009AnApS...3....6B,2010MNRAS.405.2044B}, GREAT10 \citep{2010arXiv1009.0779K,2012MNRAS.423.3163K}, and GREAT3 \citep{2014ApJS..212....5M,2015MNRAS.450.2963M} drove significant improvement in the accuracy of the
 measurement algorithms, with the most recent round of tests suggesting substantial progress in the
-mitigation of multiplicative shear biases.
+mitigation of multiplicative shear biases.  The highest-performing methods in GREAT3 have reached
+the levels of multiplicative and additive biases required for Stage-IV data, though like other GREAT
+challenges, the GREAT3
+simulations do not include all possible sources of biases.  Remaining issues of significant concern
+include biases related to object detection, selection, and deblending; wavelength-dependent
+effects; instrumental and detector defects or non-linearities; star/galaxy separation;
+background estimation; complex pixel noise models; cosmic rays and
+other image artifacts; redshift-dependent
+shear calibration; and shear estimation for galaxies with sizes comparable
+to the PSF or signal-to-noise ratios below 10.
 
-\towriterm{A little more background would be helpful here -- what are the primary concerns about shear estimation after GREAT3?}
-
-While current techniques are the result of much progress over the last two decades, the best current algorithms are not yet ready for Stage-IV data. At present, ongoing and future experiments are expected to have to rely on external simulations for calibration. Such simulations are always limited in their realism; they must accurately model the full range of variation of image quality characteristics present in and galaxy populations probed by the survey [REF], insofar as these impact the shear measurement. Merely validating the fidelity of external simulations at the required accuracy is a formidable inference challenge in its own right (see for example sfit from GREAT3, or UFIG [REF: Refregier et al]).
+Despite the progress made in controlling multiplicative biases, at present, ongoing and future experiments are expected to have to rely on external simulations for calibration. Such simulations are always limited in their realism; they must accurately model the full range of variation of image quality characteristics present in and galaxy populations probed by the survey [REF], insofar as these impact the shear measurement. Merely validating the fidelity of external simulations at the required accuracy is a formidable inference challenge in its own right (see for example sfit from GREAT3, or UFIG [REF: Refregier et al]).
 
 This paper is motivated by the observation that introducing a synthetic shear, even into real data, is much easier than doing shear inference at the level of accuracy described above. We describe the construction and performance of a meta-pipeline, which can be used to self-calibratean arbitrary shear measurement pipeline  (such as those currently implemented for the shear challenge simulations). We show that this process permits accurate estimatition of a wide range of additive and multiplicative shear calibration biases, and demonstrate that the same technique can be used to de-trend additive biases arising from imperfect psf correction. We implement this idea using GalSim \citep{2015A&C....10..121R}, and test it to GREAT3 simulations, as well as several specific simulations generated using the same GREAT3 software. Our MetaCalibration scripts are available for general use.
 \todoemh{Clean up code (really this is a to-do for both of us) and put it in a public place that we
