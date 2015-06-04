@@ -231,19 +231,40 @@ def doInference(catalogs=None, nbins=None):
 
     return field_id, gamma1_raw, gamma2_raw, gamma1_opt, gamma2_opt, gamma1_var, gamma2_var, psf_e1, psf_e2, field_e1_logL, field_e2_logL
 
+def shear_model(x, m, a, c):
+    # x should be 3 x N, where 0=gtrue, 1=epsf, 2=const
+    return m*x[0,:] + a*x[1,:] + c*x[2,:]
+
+
+def getCalibCoeff(g_true = None, g_meas=None, g_var=None, psf_e=None):
+    from scipy.optimize import curve_fit
+    A = np.column_stack([g_true, psf_e, np.ones_like(psf_e)]).transpose()
+    B = g_meas - g_true
+    ret_val, covar = curve_fit(shear_model, A, B, sigma=np.sqrt(g_var))
+    m=ret_val[0]
+    a=ret_val[1]
+    c=ret_val[2]
+    sig_m=np.sqrt(covar[0][0])
+    sig_a=np.sqrt(covar[1][1])
+    sig_c=np.sqrt(covar[2][2])
+    return m,a,c,sig_m,sig_a,sig_c
+    
 
 def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalogs = None,
-              psf_e1 = None, psf_e2 = None, e1_logL = None, e2_logL = None,
+              psf_e1 = None, psf_e2 = None, e1_logL = None, e2_logL = None, g1var=None, g2var=None,
               truthFile = 'cgc-truthtable.txt', figName= None, logLcut = None ):
     truthTable = np.loadtxt(truthFile, dtype = [('field_id',np.int), ('g1',np.double), ('g2',np.double ) ])
     
     obsTable = np.empty(field_id.size, [('field_id',np.int), ('g1',np.double), ('g2',np.double ),
                                         ('err1',np.double),('err2',np.double),
+                                        ('g1var',np.double),('g2var',np.double),
                                         ('psf_e1',np.double),('psf_e2',np.double),
                                         ('e1_logL',np.double),('e2_logL',np.double)])
     obsTable['field_id'] = field_id
     obsTable['g1'] = g1
     obsTable['g2'] = g2
+    obsTable['g1var'] = g1var
+    obsTable['g2var'] = g2var
     obsTable['psf_e1'] = psf_e1
     obsTable['psf_e2'] = psf_e2
     obsTable['e1_logL'] = e1_logL
@@ -259,11 +280,22 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
 
     truthTable.sort(order='field_id')
     obsTable.sort(order='field_id')
-    shear_range = 2*( np.percentile( np.concatenate( (g1, g2) ), 95) - np.percentile( np.concatenate( (g1, g2) ), 50))
+    shear_range = 2*( np.percentile( np.concatenate( (g1, g2) ), 75) - np.percentile( np.concatenate( (g1, g2) ), 50))
+
 
     if logLcut is not None:
         outliers = (obsTable['e1_logL'] <= logLcut) & (obsTable['e2_logL'] <= logLcut)
-    
+        kept = ~outliers
+    else:
+        outliers = np.repeat(False,obsTable.size)
+        kept = ~outliers
+
+    coeff1 = getCalibCoeff(g_true = truthTable[kept]['g1'], g_meas=obsTable[kept]['g1'], g_var=obsTable[kept]['g1var'],
+                           psf_e=obsTable[kept]['psf_e1'])
+    coeff2 = getCalibCoeff(g_true = truthTable[kept]['g2'], g_meas=obsTable[kept]['g2'], g_var=obsTable[kept]['g2var'],
+                           psf_e=obsTable[kept]['psf_e2'])    
+
+    stop
     import matplotlib.pyplot as plt
     if not use_errors:
         fig,((ax1,ax2), (ax3,ax4)) = plt.subplots( nrows=2,ncols=2,figsize=(14,21) )
@@ -305,14 +337,14 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
             ax3.plot(truthTable[outliers]['g1'],obsTable[outliers]['g1'] - truthTable[outliers]['g1'],'s',color='red')        
         ax3.axhline(0.,linestyle='--',color='red')
         ax3.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')
-        ax3.set_ylim([-shear_range, shear_range])
+        ax3.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
         ax4.plot(truthTable['g2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
         if logLcut is not None:
             ax4.plot(truthTable[outliers]['g2'],obsTable[outliers]['g2'] - truthTable[outliers]['g2'],'s',color='red')
 
         ax4.axhline(0.,linestyle='--',color='red')
         ax4.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')        
-        ax4.set_ylim([-shear_range, shear_range])
+        ax4.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
 
         ax5.plot(obsTable['e1_logL'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
         ax5.set_xlabel('multinomial log likelihood')
@@ -336,8 +368,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
             ax7.plot(obsTable[outliers]['psf_e1'],obsTable[outliers]['g1'] - truthTable[outliers]['g1'],'s',color='red')
         ax7.axhline(0.,linestyle='--',color='red')
         ax7.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
-        #ax7.set_xlim([-0.25,0.25])
-        ax7.set_ylim([-shear_range, shear_range])
+        ax7.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
         ax7.set_title('psf trend (e1)')
         
         ax8.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
@@ -347,8 +378,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax8.axhline(0.,linestyle='--',color='red')
         ax8.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
         ax8.set_title('psf trend (e2)')
-        #ax8.set_xlim([-0.25,0.25])
-        ax8.set_ylim([-shear_range, shear_range])
+        ax8.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
         fig.savefig(figName)
 
 
@@ -495,30 +525,6 @@ def makeFieldStructure(field_id=None, g1raw = None, g2raw = None, g1opt = None, 
     field_str['e2_logL'] = e2_logL
     return field_str
 
-def calculate_stats(fileName = None, truthTable = None, logL_cut = None):
-    data = np.loadtxt(fileName, dtype = [('field_id',int), ('g1raw',float), ('g2raw',float), ('g1opt',float), ('g2opt',float), ('g1var',float), ('g2var',float), ('psf_e1',float), ('psf_e2',float), ('e1_logL',float), ('e2_logL',float)])
-    truth = np.loadtxt(truthTable, dtype = [('field_id',np.int), ('g1',np.double), ('g2',np.double )])
-    
-    truth.sort(order='field_id')
-    data.sort(order='field_id')
-    if logL_cut is not None:
-        keep = ( data['e1_logL'] >= logL_cut ) & (data['e2_logL'] >= logL_cut)
-        data = data[keep]
-        truth = truth[keep]
-    
-    coeff_shear1 = np.polyfit(truth['g1'], data['g1opt'], deg=1)
-    coeff_shear2 = np.polyfit(truth['g2'], data['g2opt'], deg=1)
-    coeff_psf1 = np.polyfit(data['psf_e1'], data['g1opt'] - truth['g1'], deg=1)
-    coeff_psf2 = np.polyfit(data['psf_e2'], data['g2opt'] - truth['g2'], deg=1)
-
-    coeff = np.empty(1, dtype = [('m1',float),('m2',float),('c1',float),('c2',float),('a1',float),('a2',float)])
-    coeff['m1'] = coeff_shear1[0]
-    coeff['m2'] = coeff_shear2[0]
-    coeff['c1'] = coeff_shear1[1]
-    coeff['c2'] = coeff_shear2[1]
-    coeff['a1'] = coeff_shear1[0]
-    coeff['a2'] = coeff_shear2[0]
-    return coeff
     
 def main(argv):
 
@@ -566,12 +572,13 @@ def main(argv):
         print "Making plots..."
         no_correction_plots(catalogs= catalogs,truthtable = truthfile, mc= mc_type)
         makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
-                  psf_e1 = psf_e1, psf_e2 = psf_e2, e1_logL = e1_logL, e2_logL = e2_logL, catalogs = catalogs,
-                  truthFile = truthfile,figName=mc_type+'-opt-shear_plots', logLcut= -200)
+                  psf_e1 = psf_e1, psf_e2 = psf_e2, g1var=  g1var, g2var = g2var,
+                  e1_logL = e1_logL, e2_logL = e2_logL, catalogs = catalogs,
+                  truthFile = truthfile,figName=mc_type+'-opt-shear_plots', logLcut= -500)
         print "wrote plots to "+mc_type+'-opt-shear_plots.png'
-    print "Writing final fit coefficients to: ",mc_type+'-calibration_coeffs.dat'
-    coeffs = calculate_stats(fileName = outfile, truthTable = truthfile, logL_cut = -200)
-    np.savetxt(mc_type+'-calibration_coeffs.dat',coeffs)
+    #print "Writing final fit coefficients to: ",mc_type+'-calibration_coeffs.dat'
+    #coeffs = calculate_stats(fileName = outfile, truthTable = truthfile, logL_cut = -500)
+    #np.savetxt(mc_type+'-calibration_coeffs.dat',coeffs)
 
 if __name__ == "__main__":
     import pdb, traceback
