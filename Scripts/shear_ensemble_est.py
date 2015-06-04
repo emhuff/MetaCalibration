@@ -52,9 +52,12 @@ def getAllCatalogs( path = '../Great3/', mc_type = None ):
     catalogs = []
     for thisFile in catFiles:
         if mc_type=='moments':
+            # Here I was investigating the possibility that I'd
+            # regressed the galaxy shapes against the wrong psf
+            # ellipticity. I've disabled this for the time being.
             this_catalog = fits.getdata(thisFile)
-            this_catalog['a1'] = this_catalog['a1']/2.
-            this_catalog['a2'] = this_catalog['a2']/2.
+            this_catalog['a1'] = this_catalog['a1']#/2.
+            this_catalog['a2'] = this_catalog['a2']#/2.
             catalogs.append(this_catalog)
         else:
             catalogs.append( fits.getdata(thisFile) )
@@ -225,8 +228,8 @@ def doInference(catalogs=None, nbins=None):
         
 
         field_id[i] = catalog[0]['id'] / 1000000
-        psf_e1[i] = catalog[0]['psf_e1']
-        psf_e2[i] = catalog[0]['psf_e2']
+        psf_e1[i] = np.median(catalog['psf_e1'])
+        psf_e2[i] = np.median(catalog['psf_e2'])
 
 
     return field_id, gamma1_raw, gamma2_raw, gamma1_opt, gamma2_opt, gamma1_var, gamma2_var, psf_e1, psf_e2, field_e1_logL, field_e2_logL
@@ -254,7 +257,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
               psf_e1 = None, psf_e2 = None, e1_logL = None, e2_logL = None, g1var=None, g2var=None,
               truthFile = 'cgc-truthtable.txt', figName= None, logLcut = None ):
     truthTable = np.loadtxt(truthFile, dtype = [('field_id',np.int), ('g1',np.double), ('g2',np.double ) ])
-    
+
     obsTable = np.empty(field_id.size, [('field_id',np.int), ('g1',np.double), ('g2',np.double ),
                                         ('err1',np.double),('err2',np.double),
                                         ('g1var',np.double),('g2var',np.double),
@@ -269,7 +272,6 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
     obsTable['psf_e2'] = psf_e2
     obsTable['e1_logL'] = e1_logL
     obsTable['e2_logL'] = e2_logL
-    
     if (err1 is not None) and (err2 is not None):
         obsTable['err1'] = err1
         obsTable['err2'] = err2
@@ -277,17 +279,17 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
     else:
         use_errors = False
 
-
+    
     truthTable.sort(order='field_id')
     obsTable.sort(order='field_id')
     shear_range = 2*( np.percentile( np.concatenate( (g1, g2) ), 75) - np.percentile( np.concatenate( (g1, g2) ), 50))
 
 
     if logLcut is not None:
-        outliers = (obsTable['e1_logL'] <= logLcut) & (obsTable['e2_logL'] <= logLcut)
+        outliers =  ((obsTable['e1_logL'] <= logLcut) & (obsTable['e2_logL'] <= logLcut) ) | ( (obsTable['psf_e1'] == -10) | (obsTable['psf_e2'] == -10) )
         kept = ~outliers
     else:
-        outliers = np.repeat(False,obsTable.size)
+        outliers = ( (obsTable['psf_e1'] == -10) | (obsTable['psf_e2'] == -10) )
         kept = ~outliers
 
     coeff1 = getCalibCoeff(g_true = truthTable[kept]['g1'], g_meas=obsTable[kept]['g1'], g_var=obsTable[kept]['g1var'],
@@ -295,7 +297,6 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
     coeff2 = getCalibCoeff(g_true = truthTable[kept]['g2'], g_meas=obsTable[kept]['g2'], g_var=obsTable[kept]['g2var'],
                            psf_e=obsTable[kept]['psf_e2'])    
 
-    stop
     import matplotlib.pyplot as plt
     if not use_errors:
         fig,((ax1,ax2), (ax3,ax4)) = plt.subplots( nrows=2,ncols=2,figsize=(14,21) )
@@ -303,7 +304,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         if logLcut is not None:
             ax1.plot(truthTable[outliers]['g1'],obsTable[outliers]['g1'],'.',color='red')
         ax1.plot(truthTable['g1'],truthTable['g1'],'--',color='red')
-        ax1.set_title('g1')
+        ax1.set_title('g1')        
         ax2.plot(truthTable['g2'],obsTable['g2'],'.')
         if logLcut is not None:
             ax2.plot(truthTable[outliers]['g2'],obsTable[outliers]['g2'],'.',color='red')
@@ -323,11 +324,15 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax1.errorbar(truthTable['g1'],obsTable['g1'],obsTable['err1'],linestyle='.')
         ax1.plot(truthTable['g1'],truthTable['g1'],linestyle='--',color='red')
         ax1.set_title('g1')
-        ax2.errorbar(truthTable['g2'],obsTable['g2'],obsTable['err2'],linestyle='.')
+        ax1.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[2],coeff1[4],coeff1[3],coeff1[5]),
+                     (0.01,-0.03))
         if logLcut is not None:
             ax1.plot(truthTable[outliers]['g1'],obsTable[outliers]['g1'],'s',color='red')
+        ax2.errorbar(truthTable['g2'],obsTable['g2'],obsTable['err2'],linestyle='.')
         ax2.plot(truthTable['g2'],truthTable['g2'],'--',color='red')
         ax2.set_title('g2')
+        ax2.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[2],coeff2[4],coeff2[3],coeff2[5]),
+                     (0.01,-0.03))
         if logLcut is not None:
             ax2.plot(truthTable[outliers]['g2'],obsTable[outliers]['g2'],'s',color='red')
 
@@ -369,6 +374,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax7.axhline(0.,linestyle='--',color='red')
         ax7.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
         ax7.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
+        #ax7.set_xlim([-0.03,0.03])
         ax7.set_title('psf trend (e1)')
         
         ax8.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
@@ -379,6 +385,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax8.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
         ax8.set_title('psf trend (e2)')
         ax8.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
+        #ax8.set_xlim([-0.03,0.03])
         fig.savefig(figName)
 
 
@@ -528,11 +535,6 @@ def makeFieldStructure(field_id=None, g1raw = None, g2raw = None, g1opt = None, 
     
 def main(argv):
 
-    # Set defaults and parse args.  This is kind of a stupid way to do it, since right now you can
-    # specify either path, or path AND mc_type, or path AND mc_type AND outfile, but you can't (for
-    # example) just specify outfile or just specify mc_type.  But it'll do for now.
-
-
     import argparse
 
     description = """Analyze MetaCalibration outputs from Great3 and Great3++ simulations."""
@@ -565,7 +567,7 @@ def main(argv):
                                    g1var = g1var, g2var = g2var, psf_e1 = psf_e1, psf_e2 = psf_e2,
                                    e1_logL = e1_logL, e2_logL = e2_logL)
     calculate_likelihood_cut(fieldstr = field_str, mc= mc_type)
-    print 'Writing field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL to file %s'%outfile
+    print 'Writing field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_qe2, e1_logL, e2_logL to file %s'%outfile
     out_data = np.column_stack((field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL))
     np.savetxt(outfile, out_data, fmt='%d %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
     if args.doplot:
@@ -576,9 +578,7 @@ def main(argv):
                   e1_logL = e1_logL, e2_logL = e2_logL, catalogs = catalogs,
                   truthFile = truthfile,figName=mc_type+'-opt-shear_plots', logLcut= -500)
         print "wrote plots to "+mc_type+'-opt-shear_plots.png'
-    #print "Writing final fit coefficients to: ",mc_type+'-calibration_coeffs.dat'
-    #coeffs = calculate_stats(fileName = outfile, truthTable = truthfile, logL_cut = -500)
-    #np.savetxt(mc_type+'-calibration_coeffs.dat',coeffs)
+
 
 if __name__ == "__main__":
     import pdb, traceback
