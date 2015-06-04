@@ -1,3 +1,5 @@
+*.blg
+*.pdf
 *.aux
 *.log
 *.out
