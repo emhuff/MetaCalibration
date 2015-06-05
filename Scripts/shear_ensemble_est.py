@@ -480,11 +480,12 @@ def calculate_likelihood_cut(fieldstr = None, mc=None):
     fieldstr.sort(order='e1_logL')
     fieldstr = fieldstr[::-1]
     delta_logL_e1 = np.gradient(fieldstr['e1_logL'])
+
     ax3.plot(fieldstr['e1_logL'], delta_logL_e1,color='blue',label='e1')    
 
     for i in xrange(fieldstr.size):
-        e1_means[i] = np.mean(fieldstr['g1opt'][i:])
-        e1_sigmas[i] = np.std(fieldstr['g1opt'][i:])
+        e1_means[i] = np.mean(fieldstr['g1opt'][:i])
+        e1_sigmas[i] = np.std(fieldstr['g1opt'][:i])
 
     ax1.plot(fieldstr['e1_logL'],e1_means, color='blue',label='e1 (mean)')
     ax2.plot(fieldstr['e1_logL'],e1_sigmas,color='blue',label='e1 (sigma)')
@@ -494,8 +495,8 @@ def calculate_likelihood_cut(fieldstr = None, mc=None):
     ax3.plot(fieldstr['e2_logL'], delta_logL_e2,color='green',label='e2')
     
     for i in xrange(fieldstr.size):
-        e2_means[i] = np.mean(fieldstr['g2opt'][i:])
-        e2_sigmas[i] = np.std(fieldstr['g2opt'][i:])
+        e2_means[i] = np.mean(fieldstr['g2opt'][:i])
+        e2_sigmas[i] = np.std(fieldstr['g2opt'][:i])
         
     ax1.plot(fieldstr['e2_logL'],e1_means,color='green',label='e2')
     ax2.plot(fieldstr['e2_logL'],e1_sigmas,color='green',label='e2 (sigma)')
@@ -576,7 +577,7 @@ def main(argv):
         makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
                   psf_e1 = psf_e1, psf_e2 = psf_e2, g1var=  g1var, g2var = g2var,
                   e1_logL = e1_logL, e2_logL = e2_logL, catalogs = catalogs,
-                  truthFile = truthfile,figName=mc_type+'-opt-shear_plots', logLcut= -500)
+                  truthFile = truthfile,figName=mc_type+'-opt-shear_plots', logLcut= -100)
         print "wrote plots to "+mc_type+'-opt-shear_plots.png'
 
 

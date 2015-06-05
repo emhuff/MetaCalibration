@@ -6,29 +6,31 @@ import os
 import subprocess
 from scipy.optimize import curve_fit
 import sys
+import socket
+
 
 
 def get_true_mean_shear(mc_type =  None):
     all_branches = ['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments',
                     'noaber-regauss-sym', 'noaber-regauss','rgc-regauss',
                     'rgc-noaber-regauss','rgc-fixedaber-regauss']
-    if branch not in all_branches:
+    if mc_type not in all_branches:
         print "mc_type must be one of: "+' '.join(all_branches)
         raise Exception(mc_type+' is not a legitimate mc_type')
 
-    if branch is in ['regauss','regauss-sym','ksb','moments']:
+    if mc_type in ['regauss','regauss-sym','ksb','moments']:
         # cgc from GREAT3
         g1 =-6.97501411e-04
         g2 = 2.72438059e-03
-    if branch is in ['rgc-regauss']:
+    if mc_type in ['rgc-regauss']:
         # rgc from GREAT3
         g1 =  -0.0027895457500000005
         g2 = 0.0015939298500000005
-    if branch is in ['rgc-noaber-regauss','noaber-regauss-sym','noaber-regauss']:
+    if mc_type in ['rgc-noaber-regauss','noaber-regauss-sym','noaber-regauss']:
         # both rgc and cgc with no aberrations.
         g1 = 0.00066805100000000002
         g2 = -0.00269821215
-    if branch is in ['rgc-fixedaber-regauss']:
+    if mc_type in ['rgc-fixedaber-regauss']:
         # rgc with large fixed aberrations
         g1 = -0.00113594965
         g2 =  0.00066726915
@@ -57,17 +59,24 @@ def main(argv):
     parser.add_argument("-c", "--clobber", dest="clobber", action="store_true")
     args = parser.parse_args(argv[1:])
 
-    outputs = 'outputs/output-'+mc_type
+    mc_type = args.mc_type
+    
+    filepref = 'outputs/output-'+mc_type
     filesuff = '.dat'
     if 'compute' in socket.gethostname() or 'coma' in socket.gethostname():
         rootdir = 'rachel_root_here'
 
     else:
         rootdir = '../Great3/'
-    mc_type = args.mc_type
+
     outpref = 'outputs/'+mc_type+'-'
 
     true_mean_g1,  true_mean_g2 = get_true_mean_shear( mc_type =  mc_type)
+    
+
+    n_bins = np.arange(30,151,12)
+    percentile_vals = [0.1, 10] # in a case where there might be some outliers, set this to something like 0.1, 5
+    n_logl_vals = 10
 
     
     mean_g1 = np.zeros((len(n_bins), n_logl_vals))
