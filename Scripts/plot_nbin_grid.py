@@ -75,7 +75,7 @@ def main(argv):
     
 
     n_bins = np.arange(30,151,12)
-    percentile_vals = [0.1, 10] # in a case where there might be some outliers, set this to something like 0.1, 5
+    percentile_vals = [0,0]#[0.1, 5] # in a case where there might be some outliers, set this to something like 0.1, 5
     n_logl_vals = 10
 
     
@@ -117,9 +117,10 @@ def main(argv):
             if percentile_vals[1] > 0.:
                 logl_cutoff_max = np.percentile(logl, percentile_vals[1])
             else:
-                logl_cutoff_max = -1.e6
-            logl_cutoffs = np.linspace(logl_cutoff_min, logl_cutoff_max, n_logl_vals)
-
+                logl_cutoff_max = -50
+            #logl_cutoffs = np.linspace(logl_cutoff_min, logl_cutoff_max, n_logl_vals)
+            logl_cutoffs = -np.logspace(np.log10(np.abs(logl_cutoff_max)),np.log10(np.abs(logl_cutoff_min)),n_logl_vals)[::-1]
+            
         # Loop over nbins, logL_cut, and make plots of the mean shear as a function of these two.
         for logl_indx, logl_cut in enumerate(logl_cutoffs):
             print "Log likelihood cutoff: ",logl_cut
@@ -135,10 +136,11 @@ def main(argv):
 
             print "Using ",len(use_g1_opt),' and ',len(use_g2_opt),' for g1 and g2'
 
+
             # compute and store <gamma>
             mean_g1[n_indx][logl_indx]=np.mean(use_g1_opt)
             mean_g2[n_indx][logl_indx]=np.mean(use_g2_opt)
-
+            print  "Found mean shears:",np.mean(use_g1_opt), np.mean(use_g2_opt)
             # store sigma_gamma
             sig_g1[n_indx][logl_indx]=np.mean(np.sqrt(use_g1_var))
             sig_g2[n_indx][logl_indx]=np.mean(np.sqrt(use_g2_var))
@@ -155,8 +157,9 @@ def main(argv):
         mean_g1 -= true_mean_g1
         mean_g2 -= true_mean_g2
         fig = plt.figure()
-        vmax = max(np.max(mean_g1), -np.min(mean_g1))
-        plt.imshow(mean_g1.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
+        vmax = max(np.max(mean_g1[np.isfinite(mean_g1)]), -np.min(mean_g1[np.isfinite(mean_g1)]))
+        print "Plotting with vmax =", vmax
+        plt.imshow(mean_g1.transpose(), extent=(min(n_bins), max(n_bins), min(np.log10(logl_cutoffs)), max(np.log10(logl_cutoffs))),
                    interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
         plt.colorbar()
         plt.savefig(outpref+'mean_g1_2d.png')

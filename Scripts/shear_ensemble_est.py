@@ -198,8 +198,12 @@ def doInference(catalogs=None, nbins=None):
         # Try making a covariance matrix from just this field?
         this_field_covar1 = ( - np.outer( this_e1_hist, this_e1_hist) * ( np.ones( (this_e1_hist.size, this_e1_hist.size) ) - np.diag(np.ones(this_e1_hist.size) ) ) + np.diag( this_e1_hist * (1 - this_e1_hist) ) ) / catalog.size
         this_field_covar2 =  (- np.outer( this_e2_hist, this_e2_hist) * ( np.ones( (this_e2_hist.size, this_e2_hist.size) ) - np.diag(np.ones(this_e2_hist.size) ) ) + np.diag( this_e2_hist * (1 - this_e2_hist) ) ) / catalog.size
-        this_cinv1 = np.linalg.pinv(this_field_covar1)
-        this_cinv2 = np.linalg.pinv(this_field_covar2)
+        try:
+            this_cinv1 = np.linalg.pinv(this_field_covar1)
+            this_cinv2 = np.linalg.pinv(this_field_covar2)
+        except:
+            this_cinv1 = np.linalg.inv(this_field_covar1)
+            this_cinv2 = np.linalg.inv(this_field_covar2)
 
         # Get derivatives for this shear field.
         #_, _, _, this_de1_dg, this_de2_dg = buildPrior([catalog], nbins=nbins, bins = bin_edges)
