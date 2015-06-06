@@ -5,6 +5,36 @@ import subprocess
 from scipy.optimize import curve_fit
 import sys
 
+def get_true_mean_shear(mc_type =  None):
+    all_branches = ['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments',
+                    'noaber-regauss-sym', 'noaber-regauss','rgc-regauss',
+                    'rgc-noaber-regauss','rgc-fixedaber-regauss']
+    if mc_type not in all_branches:
+        print "mc_type must be one of: "+' '.join(all_branches)
+        raise Exception(mc_type+' is not a legitimate mc_type')
+
+    if mc_type in ['regauss','regauss-sym','ksb','moments']:
+        # cgc from GREAT3
+        g1 = -6.97526000e-04
+        g2 =  2.72440450e-03
+    if mc_type in ['rgc-regauss']:
+        # rgc from GREAT3
+        g1 =  -2.78954575e-03
+        g2 =   1.59392985e-03
+    if mc_type in ['rgc-noaber-regauss']:
+        # both rgc and cgc with no aberrations.
+        g1 =  0.00066805100000000002
+        g2 = -0.00269821215
+    if mc_type in ['noaber-regauss']:
+        g1 = 6.68051000e-04
+        g2 = -2.69821215e-03
+    if mc_type in ['rgc-fixedaber-regauss']:
+        # rgc with large fixed aberrations
+        g1 = -0.00113594965
+        g2 =  0.00066726915
+    return g1, g2
+
+
 def shear_model(x, m, a, c):
     # x should be 3 x N, where 0=gtrue, 1=epsf, 2=const
     return m*x[0,:] + a*x[1,:] + c*x[2,:]
@@ -19,19 +49,19 @@ else:
 
 # Truth info: either a table, or mean shears across the field
 if use_truth:
-    truthfile = 'rgc-noaber-truthtable.txt'
+    truthfile = 'cgc-truthtable.txt'
 else:
-    true_mean_g1 = -0.00113594965 #-0.0027895457500000005 
-    true_mean_g2 = 0.00066726915#0.0015939298500000005
+    true_mean_g1 = -6.97526000e-04 
+    true_mean_g2 =  2.72440450e-03 
 
 n_bins = np.arange(30,151,12)
 percentile_vals = [0.1, 10] # in a case where there might be some outliers, set this to something like
                          # 0.1, 5
 n_logl_vals = 10
-filepref = 'outputs/output-rgc-fixedaber'
+filepref = 'outputs/output-regauss'
 filesuff = '.dat'
 rootdir = '../Great3/' # to be passed to shear_ensemble_est.py
-mc_type = 'rgc-fixedaber-regauss' # to be passed to shear_ensemble_est.py
+mc_type = 'regauss' # to be passed to shear_ensemble_est.py
 outpref = 'outputs/'+mc_type+'-'
 
 mean_g1 = np.zeros((len(n_bins), n_logl_vals))
@@ -247,7 +277,7 @@ else:
         mean_g1 -= true_mean_g1
         mean_g2 -= true_mean_g2
         fig = plt.figure()
-        vmax = max(np.max(mean_g1), -np.min(mean_g1))
+        vmax = max(np.max(mean_g1[np.isfinite(mean_g1)]), -np.min(mean_g1[np.isfinite(mean_g1)]))
         plt.imshow(mean_g1.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
                    interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
         plt.colorbar()

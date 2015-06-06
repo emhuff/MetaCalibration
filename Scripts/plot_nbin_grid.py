@@ -20,15 +20,15 @@ def get_true_mean_shear(mc_type =  None):
 
     if mc_type in ['regauss','regauss-sym','ksb','moments']:
         # cgc from GREAT3
-        g1 =-6.97501411e-04
-        g2 = 2.72438059e-03
+        g1 = -6.97526000e-04
+        g2 =  2.72440450e-03
     if mc_type in ['rgc-regauss']:
         # rgc from GREAT3
-        g1 =  -0.0027895457500000005
-        g2 = 0.0015939298500000005
+        g1 =  -2.78954575e-03
+        g2 =   1.59392985e-03
     if mc_type in ['rgc-noaber-regauss','noaber-regauss-sym','noaber-regauss']:
         # both rgc and cgc with no aberrations.
-        g1 = 0.00066805100000000002
+        g1 =  0.00066805100000000002
         g2 = -0.00269821215
     if mc_type in ['rgc-fixedaber-regauss']:
         # rgc with large fixed aberrations
@@ -74,9 +74,9 @@ def main(argv):
     true_mean_g1,  true_mean_g2 = get_true_mean_shear( mc_type =  mc_type)
     
 
-    n_bins = np.arange(30,151,12)
-    percentile_vals = [0,0]#[0.1, 5] # in a case where there might be some outliers, set this to something like 0.1, 5
-    n_logl_vals = 10
+    n_bins = np.arange(20,150,10)
+    percentile_max = 50
+    n_logl_vals = 50
 
     
     mean_g1 = np.zeros((len(n_bins), n_logl_vals))
@@ -109,27 +109,18 @@ def main(argv):
         # If we haven't set up the logl cutoffs to use, then set it up now:
         if 'logl_cutoffs' not in locals():
             # concatenate the list of log likelihoods for both components
-            logl = np.concatenate((logl1, logl2))
-            if percentile_vals[0] > 0.:
-                logl_cutoff_min = np.percentile(logl, percentile_vals[0])
-            else:
-                logl_cutoff_min = -1.e7
-            if percentile_vals[1] > 0.:
-                logl_cutoff_max = np.percentile(logl, percentile_vals[1])
-            else:
-                logl_cutoff_max = -50
-            #logl_cutoffs = np.linspace(logl_cutoff_min, logl_cutoff_max, n_logl_vals)
-            logl_cutoffs = -np.logspace(np.log10(np.abs(logl_cutoff_max)),np.log10(np.abs(logl_cutoff_min)),n_logl_vals)[::-1]
+            logl1_cutoffs = np.percentile(logl1, np.linspace(0,percentile_max,n_logl_vals))
+            logl2_cutoffs = np.percentile(logl2, np.linspace(0,percentile_max,n_logl_vals))
             
         # Loop over nbins, logL_cut, and make plots of the mean shear as a function of these two.
-        for logl_indx, logl_cut in enumerate(logl_cutoffs):
-            print "Log likelihood cutoff: ",logl_cut
-            to_save_1 = logl1 > logl_cut
+        for logl_indx, logl1_cut, logl2_cut in zip(xrange(len(logl1_cutoffs)), logl1_cutoffs, logl2_cutoffs):
+            print "Log likelihood cutoffs: ",logl1_cut, logl2_cut
+            to_save_1 = logl1 > logl1_cut
             use_g1_opt = g1_opt[to_save_1]
             use_g1_var = g1_var[to_save_1]
             use_psf_e1 = psf_e1[to_save_1]
     
-            to_save_2 = logl2 > logl_cut
+            to_save_2 = logl2 > logl2_cut
             use_g2_opt = g2_opt[to_save_2]
             use_g2_var = g2_var[to_save_2]
             use_psf_e2 = psf_e2[to_save_2]
@@ -159,17 +150,17 @@ def main(argv):
         fig = plt.figure()
         vmax = max(np.max(mean_g1[np.isfinite(mean_g1)]), -np.min(mean_g1[np.isfinite(mean_g1)]))
         print "Plotting with vmax =", vmax
-        plt.imshow(mean_g1.transpose(), extent=(min(n_bins), max(n_bins), min(np.log10(logl_cutoffs)), max(np.log10(logl_cutoffs))),
+        plt.imshow(mean_g1.transpose(), extent=(min(n_bins), max(n_bins), 0, percentile_max),
                    interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
         plt.colorbar()
         plt.savefig(outpref+'mean_g1_2d.png')
         fig = plt.figure()
-        plt.imshow(mean_g2.transpose(), extent=(min(n_bins), max(n_bins), min(logl_cutoffs), max(logl_cutoffs)),
+        plt.imshow(mean_g2.transpose(), extent=(min(n_bins),  max(n_bins), 0, percentile_max),
                    interpolation='bicubic', aspect='auto', vmin=-vmax, vmax=vmax, cmap=plt.cm.bwr)
         plt.colorbar()
         plt.savefig(outpref+'mean_g2_2d.png')
 
-
+        
 if __name__ == "__main__":
     import pdb, traceback
     try:

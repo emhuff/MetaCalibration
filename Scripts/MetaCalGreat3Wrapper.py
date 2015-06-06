@@ -618,32 +618,32 @@ def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catal
         
 
         res = galsim.hsm.EstimateShear(unsheared1Galaxy, reconv1PSF, sky_var=float(sky_var),
-                                       guess_sig_PSF = guess_sig, shear_est="LINEAR",  **default_shear_kwds)
+                                       guess_sig_PSF = guess_sig, shear_est="regauss",  **default_shear_kwds)
 
         shear_results.append(res)
         try:
             sky_var = float(sky_var)
             # Things needed for multiplicative bias etc.
             res_g1 = galsim.hsm.EstimateShear(sheared1Galaxy, reconv1PSF, sky_var=sky_var,
-                                              guess_sig_PSF = guess_sig, shear_est="LINEAR")
+                                              guess_sig_PSF = guess_sig, shear_est="regauss")
 
             res_g2 = galsim.hsm.EstimateShear(sheared2Galaxy, reconv2PSF, sky_var=sky_var,
-                                              guess_sig_PSF = guess_sig, shear_est="LINEAR")
+                                              guess_sig_PSF = guess_sig, shear_est="regauss")
 
             res_mg1 = galsim.hsm.EstimateShear(shearedm1Galaxy, reconvm1PSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="LINEAR")
+                                               guess_sig_PSF = guess_sig, shear_est="regauss")
 
             res_mg2 = galsim.hsm.EstimateShear(shearedm2Galaxy, reconvm2PSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="LINEAR")
+                                               guess_sig_PSF = guess_sig, shear_est="regauss")
             # Things needed for additive bias
             res_g1p = galsim.hsm.EstimateShear(unsheared1PGalaxy, reconv1PPSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="LINEAR")
+                                               guess_sig_PSF = guess_sig, shear_est="regauss")
             res_g2p = galsim.hsm.EstimateShear(unsheared2PGalaxy, reconv2PPSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="LINEAR")
+                                               guess_sig_PSF = guess_sig, shear_est="regauss")
             res_mg1p = galsim.hsm.EstimateShear(unshearedm1PGalaxy, reconvm1PPSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="LINEAR")
+                                               guess_sig_PSF = guess_sig, shear_est="regauss")
             res_mg2p = galsim.hsm.EstimateShear(unshearedm2PGalaxy, reconvm2PPSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="LINEAR")
+                                               guess_sig_PSF = guess_sig, shear_est="regauss")
             psf_mom = galsim.hsm.FindAdaptiveMom(reconv1PSF)
             
             # Get most of what we need to make a derivative, i.e., (distortion with +g applied) -
