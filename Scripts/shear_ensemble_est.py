@@ -113,17 +113,36 @@ def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False, mc_type = 
     # positive direction if dg>0.  Previous code had -(e1+r1*dg) which does the opposite, i.e.,
     # shifts e1 negative if dg is positive.
     dg = 0.01
-    e1_prior_hist_mod, _  = np.histogram( 
+    e1_prior_hist_mod_p, _  = np.histogram(
         np.hstack( (e1_corr+r1*dg, -e1_corr+(r1*dg) ) ),  bins=bin_edges)
-    e1_prior_hist_mod = e1_prior_hist_mod * 1./e1prior.size
+    e1_prior_hist_mod_p = e1_prior_hist_mod_p * 1./e1prior.size
 
-    e2_prior_hist_mod, _  = np.histogram( 
+    e1_prior_hist_mod_m, _  = np.histogram(
+        np.hstack( (e1_corr-r1*dg, -e1_corr-(r1*dg) ) ),  bins=bin_edges)
+    e1_prior_hist_mod_m = e1_prior_hist_mod_m * 1./e1prior.size
+    #e1_prior_hist_mod = ( e1_prior_hist_mod_p - e1_prior_hist_mod_m ) /2.
+    
+    
+    e2_prior_hist_mod_p, _  = np.histogram(
         np.hstack( (e2_corr+r2*dg, -e2_corr+(r2*dg) ) ),  bins=bin_edges)
-    e2_prior_hist_mod = e2_prior_hist_mod * 1./e2prior.size
+    e2_prior_hist_mod_p = e2_prior_hist_mod_p * 1./e2prior.size
 
-    de1_dg = ( e1_prior_hist_mod - e1_prior_hist) / dg
-    de2_dg = ( e2_prior_hist_mod - e2_prior_hist) / dg
+    e2_prior_hist_mod_m, _  = np.histogram(
+        np.hstack( (e2_corr - r2*dg, -e2_corr - (r2*dg) ) ),  bins=bin_edges)
+    e2_prior_hist_mod_m = e2_prior_hist_mod_m * 1./e2prior.size
+    #e2_prior_hist_mod = (e2_prior_hist_mod_p - e2_prior_hist_mod_m)/2.
+    
+    #de1_dg = ( e1_prior_hist_mod_p - e1_prior_hist) / (dg)
+    #de2_dg = ( e2_prior_hist_mod_p - e2_prior_hist) / (dg)
+    de1_dg = ( e1_prior_hist_mod_p - e1_prior_hist_mod_m) / (2*dg)
+    de2_dg = ( e2_prior_hist_mod_p - e2_prior_hist_mod_m) / (2*dg)
 
+
+    
+    de1_dg[-1] = 0.
+    de1_dg[0] = 0.
+    de2_dg[-1] = 0.
+    de2_dg[0] = 0.
 
     if doplot is True:
         import matplotlib.pyplot as plt
@@ -398,8 +417,8 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax8.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
         #ax8.set_xlim([-0.03,0.03])
         fig.savefig(figName)
-
-
+        print 'Found coeff:\n m1 = %.4f +/- %.4f \n a1 = %.4f +/- %.4f \n c1 = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5])
+        print 'Found coeff:\n m2 = %.4f +/- %.4f \n a2 = %.4f +/- %.4f \n c2 = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5])
     if catalogs is not None:
         bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg = buildPrior(catalogs, nbins=20, doplot = True, mc_type = figName)
 
@@ -513,8 +532,8 @@ def calculate_likelihood_cut(fieldstr = None, mc=None):
     ax3.plot(fieldstr['e1_logL'], delta_logL_e1,color='blue',label='e1')    
 
     for i in xrange(fieldstr.size):
-        e1_means[i] = np.mean(fieldstr['g1opt'][:i])
-        e1_sigmas[i] = np.std(fieldstr['g1opt'][:i])
+        e1_means[i] = np.mean(fieldstr['g1opt'][i:])
+        e1_sigmas[i] = np.std(fieldstr['g1opt'][i:])
 
     ax1.plot(fieldstr['e1_logL'],e1_means, color='blue',label='e1 (mean)')
     ax2.plot(fieldstr['e1_logL'],e1_sigmas,color='blue',label='e1 (sigma)')
@@ -524,8 +543,8 @@ def calculate_likelihood_cut(fieldstr = None, mc=None):
     ax3.plot(fieldstr['e2_logL'], delta_logL_e2,color='green',label='e2')
     
     for i in xrange(fieldstr.size):
-        e2_means[i] = np.mean(fieldstr['g2opt'][:i])
-        e2_sigmas[i] = np.std(fieldstr['g2opt'][:i])
+        e2_means[i] = np.mean(fieldstr['g2opt'][i:])
+        e2_sigmas[i] = np.std(fieldstr['g2opt'][i:])
         
     ax1.plot(fieldstr['e2_logL'],e1_means,color='green',label='e2')
     ax2.plot(fieldstr['e2_logL'],e1_sigmas,color='green',label='e2 (sigma)')
@@ -611,8 +630,9 @@ def main(argv):
                   e1_logL = e1_logL, e2_logL = e2_logL, catalogs = catalogs,
                   truthFile = truthfile,figName=mc_type+'-opt-shear_plots', logLcut = logLcut)
         print "wrote plots to "+mc_type+'-opt-shear_plots.png'
-    
 
+        
+        
 if __name__ == "__main__":
     import pdb, traceback
     try:
