@@ -6,6 +6,7 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{ulem}
+\usepackage{adjustbox}
 \usepackage[draft]{todonotes}
 
 \newcommand\toplotrm[1]{\todo[color=green, inline, size=\small]{Plot: #1}}
@@ -238,10 +239,8 @@ This method for shear inference has as its tunable parameter only the histogram 
 \begin{figure*}
 \includegraphics[width=0.3\textwidth]{./Plots/regauss-opt-shear_plots-prior_derivs.png}
 \includegraphics[width=0.3\textwidth]{./Plots/ksb-opt-shear_plots-prior_derivs.png}
-\includegraphics[width=0.3\textwidth]{./Plots/moments-opt-shear_plots-prior_derivs.png}
 \caption{I do not like these figures. Treat them as placeholders for now.\\
-Constructing the histogram estimator for the three shape measurement methods. {\bf Top} panels show measured shape distribution for each (from {\bf right} to {\bf left}) of the regauss, ksb, and moments methds. Vertical red lines show bin edges for a scheme with only 20 bins (much less than used in the estimation). {\bf Bottom} panels show the derivative $\frac{d\,p(e)}{d{e}}$ for each of the histograms. Abscissa are truncated at $\pm 4$, but the estimator runs over bins including all objects.
-}
+Constructing the histogram estimator for the three shape measurement methods. {\bf Top} panels show measured shape distribution for the regauss ({\bf left}) and {\bf right} ksb algorithms. Vertical red lines show bin edges for a scheme with 20 bins, as used in the estimation. {\bf Bottom} panels show the derivative $\frac{d\,p(e)}{d{e}}$ for each of the histograms. Abscissa are truncated at $\pm 4$, but the estimator runs over bins including all objects. To stabilize the estimator, we set the values of the histogram derivatives in the outermost two bins to zero.}
 \label{fig:estimator}
 \end{figure*}
 
@@ -467,56 +466,67 @@ wave.
 
 \begin{figure*}
 \includegraphics[width=0.31\linewidth]{./Plots/noaber-regauss-opt-shear_plots.png}
-\includegraphics[width=0.31\linewidth]{./Plots/noaber-regauss-opt-shear_plots.png}
-\includegraphics[width=0.31\linewidth]{./Plots/noaber-regauss-opt-shear_plots.png}
 \caption{Results of metacalibration for regauss on CGC-no aberrations}
 \end{figure*}
 
 
 \begin{figure*}
 \includegraphics[width=0.31\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
-\includegraphics[width=0.31\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
-\includegraphics[width=0.31\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
-\caption{Results of metacalibration for regauss on CGC with no aberrations. From {\bf right} to {\bf left}: regauss, ksb, moments. Note that we do not have these results for ksb and moments yet.}
-\end{figure*}
-
-\begin{figure*}
-\includegraphics[width=0.31\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
-\includegraphics[width=0.31\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
-\includegraphics[width=0.31\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
-\caption{Results of metacalibration for regauss on RGC with no aberrations. From {\bf right} to {\bf left}: regauss, ksb, moments. Note that we do not have these results for ksb and moments yet.}
+\caption{Results of metacalibration for regauss on RGC with no aberrations. }
 \end{figure*}
 
 
 
 \begin{figure*}
 \includegraphics[width=0.31\linewidth]{./Plots/rgc-regauss-opt-shear_plots.png}
-\includegraphics[width=0.31\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
-\includegraphics[width=0.31\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
-\caption{Results of metacalibration for regauss on RGC with aberrations. From {\bf right} to {\bf left}: regauss, ksb, moments. Note that we do not have these results for ksb and moments yet.}
+\caption{Results of metacalibration for regauss on RGC with aberrations. }
 \end{figure*}
 
 
 \begin{figure*}
-\includegraphics[width=0.3\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
-\includegraphics[width=0.3\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
-\includegraphics[width=0.3\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
-\caption{Results of metacalibration for regauss on RGC with large amplitude but small disperion aberrations. From {\bf right} to {\bf left}: regauss, ksb, moments. Note that we do not have these results for any method yet.}
+\includegraphics[width=0.3\linewidth]{./Plots/rgc-fixedaber-regauss-opt-shear_plots.png}
+\caption{Results of metacalibration for regauss on RGC with large amplitude but small disperion aberrations. }
 \end{figure*}
 
 \begin{figure*}
-\includegraphics[width=0.3\linewidth]{./Plots/rgc-fixedaber-regauss-no_corrections.png}
-\caption{ RGC-fixed aberration regaussianization outputs, without metacalibration. Calibration coefficients are inset.}
+\includegraphics[width=0.23\linewidth]{./Plots/regauss-no_corrections.png}
+\includegraphics[width=0.23\linewidth]{./Plots/rgc-regauss-no_corrections.png}
+\includegraphics[width=0.23\linewidth]{./Plots/rgc-fixedaber-regauss-no_corrections.png}
+\includegraphics[width=0.23\linewidth]{./Plots/ksb-no_corrections.png}
+\caption{ Various regaussianization outputs, without metacalibration. Calibration coefficients are inset. In order from {\bf left} to {\bf right}: CGC-regauss, RGC-regauss, RGC-fixed-regauss, and CGC-ksb. }
 \end{figure*}
 
 
 \section{Results}
 \towrite{Outline overall results, i.e., {\it veni, vidi, vici}}
-\toplotemh{Table of Meta-Calibrated shear and psf calibration biases.}
 \toplotrm{Something along the lines of: Great3-style plot showing before/after performance in some
   projection of m/c/a for regauss/ksb/possibly moments. Something that can easily be compared with
   one or more figures in the Great3 results paper.  Something like figure 17 with same axes and scaling.}
 
+\begin{figure*}
+\makebox[\textwidth][c]{
+\begin{tabular}{l  c |cc | cc |cc }
+\hline
+branch & algorithm  &  $m_1$ & $m_2$  & $a_1$ & $a_2$ &  $c_1$ & $c_2$ \\
+\hline
+\hline
+CGC & regauss (MC)  & $0.0062 \pm 0.0061$ & $0.0099\pm0.0061$ & $-0.0275\pm0.0039$ & $-0.0192\pm0.0035$ &  $0.0004\pm0.0001$ & $0.0007\pm0.0002$ \\
+CGC & regauss  &  $0.0859\pm0.0065$ & $0.0753\pm0.0052$  & $-0.0411\pm0.004$ & $-0.0461\pm0.0032$ &  $0.0000\pm0.0002$ & $0.0000\pm0.0001$ \\
+CGC & ksb (MC)  &  $-0.0050\pm0.013$ & $-0.0032\pm0.0111$  & $-0.0851\pm0.0077$ & $-0.0907\pm0.0063$ &  $0.0009\pm0.0003$ & $0.001\pm0.0003$ \\
+CGC & ksb  &  $0.1359\pm0.0102$ & $0.1570\pm0.0112$  & $0.1170\pm0.0062$ & $0.1149\pm0.0066$ &  $-0.0003\pm0.0002$ & $0.0001\pm0.0003$ \\
+RGC & regauss (MC) &  $-0.0027\pm0.0103$ & $0.0160\pm0.0056$  & $0.0054\pm0.0054$ & $-0.0168\pm0.0031$ &  $0.0005\pm0.0003$ & $0.0004\pm0.0001$ \\
+RGC & regauss &  $0.0404\pm0.0057$ & $0.0350\pm0.0057$  & $-0.0307\pm0.0031$ & $-0.0207\pm0.0032$ &  $0.0001\pm0.0001$ & $0.0002\pm0.0001$ \\
+CGC-Noaber (MC) & regauss  &  $-0.0003\pm0.0050$ & $0.0009\pm0.0049$  & $-0.0261\pm0.0091$ & $-0.0238\pm0.0086$ &  $0.0000\pm0.0001$ & $0.0000\pm0.0001$ \\
+CGC-Noaber & regauss  &  $0.0528\pm0.0028$ & $0.0552\pm0.0028$  & $-0.0257\pm0.0050$ & $-0.0270\pm0.0050$ &  $0.0001\pm0.0001$ & $0.0000\pm0.0001$ \\
+RGC-Noaber (MC) & regauss &  $0.0075\pm0.0050$ & $0.0140\pm0.0048$  & $-0.0188\pm0.0096$ & $-0.0108\pm0.0091$ &  $0.0000\pm0.0001$ & $0.0000\pm0.0001$ \\
+RGC-Noaber & regauss &  $0.0308\pm0.0029$ & $0.0282\pm0.0034$  & $0.0007\pm0.0055$ & $0.0045\pm0.0065$ &  $0.0002\pm0.0001$ & $0.0000\pm0.0001$ \\
+RGC-FixedAber (MC) & regauss  &  $0.0140\pm0.0061$ & $0.0054\pm0.0061$  & $-0.0165\pm0.0151$ & $-0.0152\pm0.0143$ &  $0.0000\pm0.0002$ & $-0.0003\pm0.0002$ \\
+RGC-FixedAber  & regauss  &  $0.0791\pm0.0069$ & $0.0799\pm0.0059$  & $-0.0248\pm0.0169$ & $-0.0323\pm0.0135$ &  $0.0002\pm0.0002$ & $0.0000\pm0.0001$ \\
+\hline
+\end{tabular}
+}
+\caption{Shear and psf calibration bias parameters from each of the branches considered. Rows with MetaCalibrated parameters are shown above their un-calibrated counterparts. Note that in every case, MetaCalibrating removes multiplicative biases within the precision allowed by the simulation volume, and reduces the amplitude of psf calibration biases.}
+\end{figure*}
 
 \section{Applicability to Real Data}
 \towriteemh{Comment on effects that this method may deal with, which we haven’t tested (selection
