@@ -136,9 +136,6 @@ def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False, mc_type = 
     #de2_dg = ( e2_prior_hist_mod_p - e2_prior_hist) / (dg)
     de1_dg = ( e1_prior_hist_mod_p - e1_prior_hist_mod_m) / (2*dg)
     de2_dg = ( e2_prior_hist_mod_p - e2_prior_hist_mod_m) / (2*dg)
-
-
-    
     de1_dg[-1] = 0.
     de1_dg[0] = 0.
     de2_dg[-1] = 0.
@@ -261,18 +258,44 @@ def shear_model(x, m, a, c):
     # x should be 3 x N, where 0=gtrue, 1=epsf, 2=const
     return m*x[0,:] + a*x[1,:] + c*x[2,:]
 
+def bootstrapCoeffErr(shear_model,A,B,sigma, n_resample = 10000):
+    from scipy.optimize import curve_fit
+    all_indices = np.arange(sigma.size)
+    m = np.empty(n_resample)
+    a = np.empty(n_resample)
+    c = np.empty(n_resample)
+    for i in xrange(n_resample):
+        these = np.random.choice(all_indices, size= all_indices.size, replace=True)
+        this_A = A[:,these]
+        this_B = B[these]
+        this_sigma = sigma[these]
+        (this_m, this_a, this_c), _ = curve_fit(shear_model, this_A, this_B, sigma=this_sigma)
+        m[i] = this_m
+        a[i] = this_a
+        c[i] = this_c
+    sigma_m = np.std(m)
+    sigma_a = np.std(a)
+    sigma_c = np.std(c)
+    m = np.mean(m)
+    a = np.mean(a)
+    c = np.mean(c)
 
-def getCalibCoeff(g_true = None, g_meas=None, g_var=None, psf_e=None):
+    return m,a,c,sigma_m, sigma_a, sigma_c
+
+def getCalibCoeff(g_true = None, g_meas=None, g_var=None, psf_e=None, bootstrap = False):
     from scipy.optimize import curve_fit
     A = np.column_stack([g_true, psf_e, np.ones_like(psf_e)]).transpose()
     B = g_meas - g_true
-    ret_val, covar = curve_fit(shear_model, A, B, sigma=np.sqrt(g_var))
-    m=ret_val[0]
-    a=ret_val[1]
-    c=ret_val[2]
-    sig_m=np.sqrt(covar[0][0])
-    sig_a=np.sqrt(covar[1][1])
-    sig_c=np.sqrt(covar[2][2])
+    if bootstrap:
+        m,a,c, sig_m, sig_a, sig_c = bootstrapCoeffErr(shear_model,A,B, np.sqrt(g_var), n_resample = 1000)
+    else:
+        ret_val, covar = curve_fit(shear_model, A, B, sigma=np.sqrt(g_var))
+        m=ret_val[0]
+        a=ret_val[1]
+        c=ret_val[2]
+        sig_m=np.sqrt(covar[0][0])
+        sig_a=np.sqrt(covar[1][1])
+        sig_c=np.sqrt(covar[2][2])
     return m,a,c,sig_m,sig_a,sig_c
     
 
@@ -317,9 +340,9 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         kept = ~outliers
 
     coeff1 = getCalibCoeff(g_true = truthTable[kept]['g1'], g_meas=obsTable[kept]['g1'], g_var=obsTable[kept]['g1var'],
-                           psf_e=obsTable[kept]['psf_e1'])
+                           psf_e=obsTable[kept]['psf_e1'], bootstrap = True)
     coeff2 = getCalibCoeff(g_true = truthTable[kept]['g2'], g_meas=obsTable[kept]['g2'], g_var=obsTable[kept]['g2var'],
-                           psf_e=obsTable[kept]['psf_e2'])
+                           psf_e=obsTable[kept]['psf_e2'], bootstrap = True)
 
     import matplotlib.pyplot as plt
     if not use_errors:
@@ -417,8 +440,8 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax8.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
         #ax8.set_xlim([-0.03,0.03])
         fig.savefig(figName)
-        print 'Found coeff:\n m1 = %.4f +/- %.4f \n a1 = %.4f +/- %.4f \n c1 = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5])
-        print 'Found coeff:\n m2 = %.4f +/- %.4f \n a2 = %.4f +/- %.4f \n c2 = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5])
+        print 'Found coeff:\n m1 = %.4f +/- %.4f \n a1 = %.4f +/- %.4f \n c1 = %.4f +/- %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5])
+        print 'Found coeff:\n m2 = %.4f +/- %.4f \n a2 = %.4f +/- %.4f \n c2 = %.4f +/- %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5])
     if catalogs is not None:
         bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg = buildPrior(catalogs, nbins=20, doplot = True, mc_type = figName)
 
@@ -465,9 +488,9 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
                       np.percentile( np.concatenate( (obsTable['g1'], obsTable['g2']) ), 50))
 
     coeff1 = getCalibCoeff(g_true = truthTable['g1'], g_meas=obsTable['g1'], g_var=obsTable['err1']**2,
-                           psf_e=obsTable['psf_e1'])
+                           psf_e=obsTable['psf_e1'], bootstrap = True)
     coeff2 = getCalibCoeff(g_true = truthTable['g2'], g_meas=obsTable['g2'], g_var=obsTable['err2']**2,
-                           psf_e=obsTable['psf_e2'])    
+                           psf_e=obsTable['psf_e2'], bootstrap = True)
 
     
     fig,((ax1,ax2), (ax3,ax4), (ax5,ax6)) = plt.subplots(nrows=3, ncols=2,figsize=(14,21))
@@ -595,7 +618,7 @@ def main(argv):
                         help="path to MetaCalibration output catalogs")
     parser.add_argument("-mc","--mc_type", dest="mc_type", type=str, default="regauss",
                         choices = mc_choices, help="metcalibration catalog type to use")
-    parser.add_argument("-n", "--nbins", dest = "nbins", type = int, default= 80,
+    parser.add_argument("-n", "--nbins", dest = "nbins", type = int, default= 20,
                         help = "number of bins to use in histogram estimator.")
     parser.add_argument("-o", "--outfile", dest = "outfile", type = str, default = "tmp_outfile.txt",
                         help = "destination for output per-field shear catalogs.")
