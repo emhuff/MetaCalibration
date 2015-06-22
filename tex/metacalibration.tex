@@ -414,12 +414,24 @@ subfield.
 
 \towriteemh{Performance expectations on this branch.}
 \towriteemh{Briefly summarize calibration results for this branch.}
+\begin{figure}
+\includegraphics[width=0.31\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
+\caption{Results of metacalibration for regauss on RGC with no aberrations. }
+\end{figure}
+
+
 
 
 \subsubsection{Real Ground Constant without Aberrations}
 
 The next branch we analyze is similar to the previous one, but with realistic galaxies.  Thus, we
 refer to this branch as ``RGC without aberrations''.
+
+\begin{figure}
+\includegraphics[width=0.31\linewidth]{./Plots/noaber-regauss-opt-shear_plots.png}
+\caption{Results of metacalibration for regauss on CGC-no aberrations}
+\end{figure}
+
 
 \towriteemh{Performance expectations on this branch.}
 \towriteemh{Briefly summarize calibration results for this branch.}
@@ -433,16 +445,25 @@ GREAT3 simulated data in the CGC branch, including parametric galaxies.
 \towriteemh{Performance expectations on this branch.}
 \towriteemh{Briefly summarize calibration results for this branch.}
 
+\begin{figure}
+\includegraphics[width=0.49\linewidth]{./Plots/regauss-opt-shear_plots.png}
+\includegraphics[width=0.49\linewidth]{./Plots/ksb-opt-shear_plots.png}
+\caption{Results of metacalibration for regauss ({\bf left}) and (KSB {\bf right}) on CGC}
+\end{figure}
+
+
 \subsubsection{Real Ground Constant}
 
 Next, we analyze the actual GREAT3 simulations in the RGC branch, with realistic galaxy morphology.
 
 \towriteemh{Performance expectations on this branch.}
 \towriteemh{Briefly summarize calibration results for this branch.}
-\todoemh{Generate ksb metacalibration catalogs for this branch. }
-\todoemh{Generate moments metacalibration catalogs for this branch.}
-\toplotemh{Plot ksb results for this branch.}
-\toplotemh{Plot moment results for this branch.}
+\begin{figure}
+\includegraphics[width= 0.49\linewidth]{./Plots/rgc-regauss-opt-shear_plots.png}
+\caption{Results of metacalibration for regauss on RGC with aberrations. }
+\end{figure}
+
+
 
 \subsubsection{Real Ground Constant with constant aberrations}
 
@@ -450,41 +471,30 @@ One issue of concern is how to understand outlier fields.  In GREAT3, there was 
 outliers were due to failure of our model for interpreting the per-object shapes in fields that had
 large aberrations. {\it Eric, should I add a plot showing why we came to these conclusions, i.e.,
   the distributions of defocus and so on for outliers?  Or just paraphrase its conclusions?} 
-{\bf Yes, I think that would be helpful.}  As a
+{\bf Yes, I think that would be helpful.}  
+
+\begin{figure}
+\includegraphics[width=0.5\linewidth]{./Plots/rgc-fixedaber-regauss-opt-shear_plots.png}
+\caption{Results of metacalibration for regauss on RGC with large fixed aberrations. }
+\end{figure}
+
+As a
 way to understand this, we generated a version of RGC that had quite large aberrations that were
 identical in each field: specifically defocus of $0.5$ waves and one component of trefoil of $0.1$
 wave.
 
 \towriteemh{Performance expectations on this branch.}
 \towriteemh{Briefly summarize calibration results for this branch.}
-\toplotemh{Plot regauss results for this branch.}
-\toplotemh{Plot ksb results for this branch.}
-\toplotemh{Plot moment results for this branch.}
-
-
-\begin{figure*}
-\includegraphics[width=0.31\linewidth]{./Plots/noaber-regauss-opt-shear_plots.png}
-\caption{Results of metacalibration for regauss on CGC-no aberrations}
-\end{figure*}
-
-
-\begin{figure*}
-\includegraphics[width=0.31\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
-\caption{Results of metacalibration for regauss on RGC with no aberrations. }
-\end{figure*}
 
 
 
-\begin{figure*}
-\includegraphics[width=0.31\linewidth]{./Plots/rgc-regauss-opt-shear_plots.png}
-\caption{Results of metacalibration for regauss on RGC with aberrations. }
-\end{figure*}
 
 
-\begin{figure*}
-\includegraphics[width=0.3\linewidth]{./Plots/rgc-fixedaber-regauss-opt-shear_plots.png}
-\caption{Results of metacalibration for regauss on RGC with large fixed aberrations. }
-\end{figure*}
+
+
+
+
+
 
 \begin{figure*}
 \includegraphics[width=0.23\linewidth]{./Plots/regauss-no_corrections.png}
