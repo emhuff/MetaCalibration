@@ -38,13 +38,19 @@ Department of Physics, The Ohio State University, OH 43210, USA}
   methods: observational}
 
 \begin{abstract}
-  One of the major limiting sources of systematic error in forthcoming weak lensing measurements is
- systematic uncertainty in the quantitative relationship between the distortions due to gravitational lensing and 
- the measurable properties of galaxy images. We present a statistically principled, general solution to this 
-problem. Our technique infers calibration parameters for an arbitrary shape measurement technique by modifying 
-the real images to simulate the effects a known shear. We test our results on simulated images from the 
-Great3 shear calibration challenge, and show that the method eliminates calibration biases for a variety 
-of shape measurement techniques  at the level of precision measurable with the available Great3 simulations.
+  One of the major limiting sources of systematic error in forthcoming
+  weak lensing measurements is
+  systematic uncertainty in the quantitative relationship between the
+  distortions due to gravitational lensing and
+  the measurable properties of galaxy images. We present a
+  statistically principled, general solution to this problem. Our
+  technique infers calibration parameters for an arbitrary shape
+  measuremtoent technique by modifying the real images to simulate the
+  effects a known shear. We test our results on simulated timages from
+  the Great3 shear calibration challenge, and show that the method
+  eliminates calibration biases for a variety of shape measurement
+  techniques at the level of precision measurable with the available
+  Great3 simulations. 
 \end{abstract}
 
 
@@ -57,80 +63,172 @@ of shape measurement techniques  at the level of precision measurable with the a
 \todorm{Rachel}
 \toplotrm{Rachel}
 
-Accurate measurement of weak gravitational lensing offers the most direct probe of the dark sector
-of the universe
-\citep[e.g.,][]{2001PhR...340..291B,2003ARA&A..41..645R,schneider06,2008ARNPS..58...99H,2010RPPh...73h6901M,2013PhR...530...87W}. Several
-ongoing (Stage III according to the definitions of the Dark Energy Task Force, \citealt{2006astro.ph..9591A}) and planned [Stage IV; Euclid\footnote{\url{http://sci.esa.int/euclid/},
-  \url{http://www.euclid-ec.org}}
+
+Accurate measurement of weak gravitational lensing offers the most
+direct probe of the dark sector of the universe
+\citep[e.g.,][]{2001PhR...340..291B,2003ARA&A..41..645R,schneider06,2008ARNPS..58...99H,2010RPPh...73h6901M,2013PhR...530...87W}.
+Weak lensing measurements are thus a core part of the international
+cosmology program, and a key science driver for many wide-field
+astronomical astronomical surveys (KiDS, DES, SuMIRE,
+LSST\footnote{\url{http://www.lsst.org/lsst/}},
+  Euclid\footnote{\url{http://sci.esa.int/euclid/}\url{http://www.euclid-ec.org}}
   \citep{2011arXiv1110.3193L},
-  LSST\footnote{\url{http://www.lsst.org/lsst/}}
-  \citep{2009arXiv0912.0201L}, and
-  WFIRST-AFTA\footnote{\url{http://wfirst.gsfc.nasa.gov}}
-  \citep{2015arXiv150303757S}] imaging surveys [REF]  will attempt to measure weak lensing by the large-scale structure of the universe, with a  special (but not exclusive) focus on constaining the physical nature of the so-called dark energy driving cosmic acceleration. If these measurements achieve their full potential, they will provide the most powerful available constraints on dark energy parameters.
+WFIRST-AFTA\footnote{\url{http://wfirst.gsfc.nasa.gov}}
+\citep{2009arXiv0912.0201L ,2011arXiv1110.3193,2015arXiv150303757S}).
 
-If the results of the Stage-IV surveys were available to be analyzed today, however, it is likely
-that much of their data would have been effectively wasted. The systematic uncertainties involved in
-the actual measurement of the shear, and the interpretation of the resulting signal, would dominate
-the purely statistical noise arising from sample variance. This has spurred much recent work on
-mitigating weak lensing systematics, including (but not limited to) work on photometric redshift
-estimation \citep[e.g.,][]{2010A&A...523A..31H}, modeling the intrinsic noise properties of the
-lensing signal [REF], contamination due to intrinsic galaxy alignments
-\citep{2014arXiv1407.6990T,2015arXiv150405456J,2015arXiv150405546K,2015arXiv150405465K}, the effects
-of baryonic physics on the lensing observables
-\citep{2011MNRAS.417.2020S,2014MNRAS.445.3382M,2015arXiv150102055O}, and numerous proposed
-techniques for estimating shear from the galaxy images, including removal of the point-spread
-function or PSF 
-\citep[e.g.,]{1995ApJ...449..460K,2000ApJ...537..555K,2000ApJ...536...79R,2002AJ....123..583B,2003MNRAS.343..459H,2005MNRAS.363..197M,2009MNRAS.398..471L,2009MNRAS.396.1211N,2010MNRAS.405.2044B,2010MNRAS.406.2793B,2010AJ....140..870B,2010ApJ...720..639G,2011MNRAS.410.2156V,2011MNRAS.414.1047Z,2013MNRAS.434.1604Z,2013MNRAS.429.2858M,2014MNRAS.438.1880B}. Here
-we will focus on the latter. 
-\towriterm{How to discuss hierarchical inference method in Schneider et al,
-  which takes care of some but not all of the issues with traditional shear estimation methods?  It
-  has some aspects that are philosophically in common with MetaCalibration.  Not clear if we should
-  discuss this in the intro or discussion.}
+Despite this investment, it is not yet clear that the statistical
+power of these measurements will ultimately be matched by their
+accuracy. There are several sources of systematic uncertainty that may
+turn out to be larger than the statistical errors of these
+experiments. One of the largest such systematic error sources is
+the {\it shear calibration bias}, the quantitative realationship between
+the gravitational lensing signal and its chief observables.
 
-The weak lensing community has organized a series of blind measurement challenges, where
-participants attempted to extract a lensing signal -- the exact nature of which was known only to
-the challenge organizers -- from simulated imaging data. The earliest of these was the first Shear
-TEsting Programme (STEP1, \citealt{2006MNRAS.368.1323H}) and its successor (STEP2, \citealt{2007MNRAS.376...13M}). The results made clear that
-successive challenges were needed, and that progress would best be made by focusing on solving a
-subset of the complex process of shear estimation. The following simulation challenges, GREAT08
-\citep{2009AnApS...3....6B,2010MNRAS.405.2044B}, GREAT10 \citep{2010arXiv1009.0779K,2012MNRAS.423.3163K}, and GREAT3 \citep{2014ApJS..212....5M,2015MNRAS.450.2963M} drove significant improvement in the accuracy of the
-measurement algorithms, with the most recent round of tests suggesting substantial progress in the
-mitigation of multiplicative shear biases.  The highest-performing methods in GREAT3 have reached
-the levels of multiplicative and additive biases required for Stage-IV data, though like other GREAT
-challenges, the GREAT3
-simulations do not include all possible sources of biases.  Remaining issues of significant concern
-include biases related to object detection, selection, and deblending; wavelength-dependent
-effects; instrumental and detector defects or non-linearities; star/galaxy separation;
-background estimation; complex pixel noise models; cosmic rays and
-other image artifacts; redshift-dependent
-shear calibration; and shear estimation for galaxies with sizes comparable
-to the PSF or signal-to-noise ratios below 10.
+The major physical effect studied by weak lensing surveys is the
+gravitational shear. The major observable effect of a weak shear
+$\boldsymbol{\gamma}$ is a perturbation to the observed ellipticities
+$\boldsymbol{e}$ of distant galaxies. The intrinsic properties of
+galaxies know no preferred direction, so their average ellipticity
+$\boldsymbol{e}$ should vanish over a wide enough field. Weak lensing
+measurements exploit this intrinsic symmetry, and search for
+statistical anisitropies resulting from lensing distortions due to
+foreground matter.
 
-Despite the progress made in controlling multiplicative biases, at present, ongoing and future experiments are expected to have to rely on external simulations for calibration. Such simulations are always limited in their realism; they must accurately model the full range of variation of image quality characteristics present in and galaxy populations probed by the survey [REF], insofar as these impact the shear measurement. Merely validating the fidelity of external simulations at the required accuracy is a formidable inference challenge in its own right (see for example sfit from GREAT3, or UFIG [REF: Refregier et al]).
+In the domain of weakest lensing, which is the major focus for
+cosmological measurements, shears linearly modify the observed
+ellipticities, and the calibration problem is quantitatively reduced
+to constraining the coefficients of the linear relation
+\begin{align}
+\boldsymbol{e} = (1+m)\:\boldsymbol{\gamma} + c.
+\end{align}
+Generally $c$ is a result of measurement biases (such as an incomplete
+correction for the point-spread function) that introduce a preferred
+direction in the image plane. It can in principle be known or removed
+with sufficient knowledge of the experiment. $m$ depends in part on
+the ensemble of (unobserved) galaxy properties, so it is impossible in
+principle to know exactly {\it a priori}.
 
-This paper is motivated by the observation that introducing a synthetic shear, even into real data, is much easier than doing shear inference at the level of accuracy described above. We describe the construction and performance of a meta-pipeline, which can be used to self-calibratean arbitrary shear measurement pipeline  (such as those currently implemented for the shear challenge simulations). We show that this process permits accurate estimatition of a wide range of additive and multiplicative shear calibration biases, and demonstrate that the same technique can be used to de-trend additive biases arising from imperfect psf correction. We implement this idea using GalSim \citep{2015A&C....10..121R}, and test it to GREAT3 simulations, as well as several specific simulations generated using the same GREAT3 software. Our MetaCalibration scripts are available for general use.
-\todoemh{Clean up code (really this is a to-do for both of us) and put it in a public place that we
-  can point to here.}
+In practice, nonlinearities introduced by the algorithms used for
+measurement of $\boldsymbol{e}$ can introduce both multiplicative and
+additive biases in a manner that interacts with the unknown true
+ensemble properties of galaxies. and are very difficult to predict
+from first principles. For this reason, the weak lensing community has
+organized a series of blind measurement challenges, where participants
+attempted to extract an unkown lensing signal from simulated images.
+The earliest of these were the first two Shear TEsting Programmes
+\citep[STEP1,STEP2]{2006MNRAS.368.1323H,2007MNRAS.376...13M}. The
+results made two things clear: that lensing measurement algorithms
+needed to improve, and that shear measurement was complex enough that
+successive simulation challenges should focus on a subset of the
+issues.
+
+The next round of simulation challenges, GREAT08, GREAT10, and GREAT3,
+\citep{2009AnApS...3....6B,2013ApJS..205...12K,2015MNRAS.450.2963M}
+embraced a narrower focus and resulted in significant performance
+improvements. In particular, the best-performing algorithms from the
+most recent challenge, GREAT3, were able to reduce $m$ and $c$ to
+levels that are good enough for even the most ambitious planned
+lensing measurements.
+
+While this was certainly good news, the narrowed focus of the GREAT
+challenges necessarily left some of the most important sources of
+lensing calibration bias untouched. Remaining issues of significant
+concern include biases resulting from:
+\begin{itemize}
+\item object detection and selection
+\item deblending
+\item wavelength-dependent effects
+\item instrumental defects and nonlinearities
+\item star-galaxy separation
+\item non-white pixel noise
+\item cosmic rays and other image artifacts
+\item redshift-dependent calibration biases
+\item shear estimation for low-resolution and/or low signal-to-noise ratio galaxies
+\end{itemize}
+The impact of these factors depends strongly on the specifics of the
+experiment. For this reason, shear calibration in future experiments
+is expected to rely on simulations designed to match the properties of
+each experiment. Such external simulations are always limited in their
+realism: they must accurately model everything relevant about the
+experiment. Showing that a given simulation suite is adequate for
+calibrating a lensing measurement is a formidable challenge in its own
+right (c.f. the Ultra Fast Image Generation simulations described in \citet{2013A&C.....1...23B}, or .
+
+This paper is motivated by the observation that introducing a
+synthetic shear signal into real data is much easier than building a
+sufficiently accurate suite of simulated data. Modifying the real
+data is operationally easier than building a comprehensive simulation
+suite, and automatically incorporates features (e.g., image artifacts
+or selection biases) that are difficult to model from scratch.
+
+We have implemented this idea, which we call MetaCalibration, using
+the public GalSim \citep{2015A&C....10..121R} image simulation
+package, and designed our algorithm to wrap an arbitrary external
+shear estimation module. We test our technique on simulated GREAT3
+image data, and find that it successfully calibrates older shear
+estimation methods to a level of accuracy comparable to the
+best-performing algorithms from the GREAT3 challenge. We also
+demonstrate that we can detrend additive biases resulting from
+incomplete PSF corrections by introducing synthetic PSF ellipticity.
+We make our MetaCalibration scripts available for general use.
 
 \section{Method}
-The MetaCalibration technique, described below, uses GalSim \citep{2015A&C....10..121R} to modify real astronomical images by adding synthetic shear and PSF distortions of known amplitude. These modified images can be considered counterfactuals;  they are model for what would have been observed under the same image quality conditions, on the same galaxies, with a different shear. If the measurement process is repeated on the counterfactual images, the result gives an accurate estimate of shear calibration biases. If, instead of introducing a synthetic shear, we choose to add a synthetic psf ellipticity, then measurement on the counterfactual images yields an accurate estimate of residual psf biases, which can be de-trended. Finally, if the detection and measurement steps are both performed on the counterfactuals, the measured calibration biases include shear and psf-driven selection effects, which are otherwise very difficult to estimate directly.
+The MetaCalibration technique, described below, uses GalSim
+\citep{2015A&C....10..121R} to modify real astronomical images by
+adding synthetic shear and PSF distortions of known amplitude. These
+modified images can be considered counterfactuals; they are model for
+what would have been observed under the same image quality conditions,
+on the same galaxies, with a different shear. If the measurement
+process is repeated on the counterfactual images, the result gives an
+accurate estimate of shear calibration biases. If, instead of
+introducing a synthetic shear, we choose to add a synthetic psf
+ellipticity, then measurement on the counterfactual images yields an
+accurate estimate of residual psf biases, which can be de-trended.
+Finally, if the detection and measurement steps are both performed on
+the counterfactuals, the measured calibration biases include shear and
+psf-driven selection effects, which are otherwise very difficult to
+estimate directly.
 
 \subsection{Generating Counterfactual Image}
-Fortunately, for the weak shears under consideration in most cosmological survey applications, the relationship between the shear and the galaxy shapes (or related observables) is very close to linear, so accurate shear calibration requires only the first derivative of the galaxy properties with respect to the shear. What follows is a method for estimating this derivative directly from the images. Throughout we will assume that the observed image $I({\mathbf{x}})$ is the unsmeared galaxy image $G(\mathbf{x})$ convolved with some seeing kernel $P(\mathbf{x})$.
+Fortunately, for the weak shears under consideration in most
+cosmological survey applications, the relationship between the shear
+and the galaxy shapes (or related observables) is very close to
+linear, so accurate shear calibration requires only the first
+derivative of the galaxy properties with respect to the shear. What
+follows is a method for estimating this derivative directly from the
+images. Throughout we will assume that the observed image
+$I({\mathbf{x}})$ is the unsmeared galaxy image $G(\mathbf{x})$
+convolved with some seeing kernel $P(\mathbf{x})$.
 
-In an ideal world, we would vary the gravitational shear experienced by the image before is smeared by $P$, constructing the counterfactual image $I'(\mathbf{x}| {\boldsymbol \gamma})$:
-\begin{equation}
+In an ideal world, we would vary the gravitational shear experienced
+by the image before is smeared by $P$, constructing the counterfactual
+image $I'(\mathbf{x}| {\boldsymbol \gamma})$: \begin{equation}
   I'({\mathbf{x}}) = P \otimes\left( \hat{\mathbf{s}}G\right)
 \end{equation}
 
-where $\hat{\mathbf{s}}$ is the shear operator that produces the shear ${\boldsymbol \gamma}$, as in e.g. \cite{2002AJ....123..583B}. The shear sensitivity would then be a straightforward numerical derivative of $I'$ with respect to ${\boldsymbol \gamma}$. We can even write down a procedure for producing $I'$ from $I$ if we understand $P$:
+where $\hat{\mathbf{s}}$ is the shear operator that produces the shear
+${\boldsymbol \gamma}$, as in e.g. \cite{2002AJ....123..583B}. The
+shear sensitivity would then be a straightforward numerical derivative
+of $I'$ with respect to ${\boldsymbol \gamma}$. We can even write down
+a procedure for producing $I'$ from $I$ if we understand $P$:
 \begin{equation}
   I'({\mathbf{x}}) = P \otimes \left[ \hat{\mathbf{s}}\left( P^{-1} \otimes I \right)\right].
 \end{equation}
 
-The noise in $I$ has non-zero power on scales where $P$ is small or vanishing. Deconvolution amplifies noise, and because of the shear this is not cancelled by reconvolution with $P$. 
+The noise in $I$ has non-zero power on scales where $P$ is small or
+vanishing. Deconvolution amplifies noise, and because of the shear
+this is not cancelled by reconvolution with $P$.
 
-The noise amplification can be mitigated by reconvolving after the shear operation with a new psf $\Gamma$, (instead of $P$) and constructing $\Gamma$ so that it suppresses the noise amplification that would normally be produced by the deconvolution operation. All that is required for this is that (in Fourier space, with the tilde indicating the Fourier transformed quantity) $\|\tilde{\Gamma}(\mathbf{|k|}) \| \geq \|\hat{\mathbf{s}} \tilde{P}(\mathbf{k})\|$ for all $\mathbf{k}$, which can be met without introducing additional PSF anisotropy by choosing $\Gamma(\mathbf{x}) = P\left((1+2|\gamma|)\mathbf{x}\right)$.
+The noise amplification can be mitigated by reconvolving after the
+shear operation with a new psf $\Gamma$, (instead of $P$) and
+constructing $\Gamma$ so that it suppresses the noise amplification
+that would normally be produced by the deconvolution operation. All
+that is required for this is that (in Fourier space, with the tilde
+indicating the Fourier transformed quantity)
+$\|\tilde{\Gamma}(\mathbf{|k|}) \| \geq \|\hat{\mathbf{s}}
+\tilde{P}(\mathbf{k})\|$ for all $\mathbf{k}$, which can be met
+without introducing additional PSF anisotropy by choosing
+$\Gamma(\mathbf{x}) = P\left((1+2|\gamma|)\mathbf{x}\right)$.
 
 Our chosen procedure for producing a sheared counterfactual image is
 \begin{equation}
@@ -139,7 +237,7 @@ Our chosen procedure for producing a sheared counterfactual image is
 
 This procedure clearly requires a good model for $P$, but so do all shear measurements. PSF model mis-specification errors enter at the same order in measurements on the resulting image that they would in an unmodified image.
 
-Once the counterfactual image $I'(\mathbf{x}|\gamma)$ with $\|{\boldsymbol \gamma}\| << 1$ has been created, the galaxy detection and  shear measurement pipeline should be run. This provides a measure of the shear sensitivity for an image with the PSF $\Gamma$, not an image with the psf $P$. This requires that the full measurement -- not just the sensitivity analysis -- be run on a third image $I'(\mathbf{x}|\gamma=0)$, so that the numerical derivative $\frac{\partial I'}{\partial \gamma}$ is well-defined. 
+Once the counterfactual image $I'(\mathbf{x}|\gamma)$ with $\|{\boldsymbol \gamma}\| << 1$ has been created, the galaxy detection and shear measurement pipeline should be run. This provides a measure of the shear sensitivity for an image with the PSF $\Gamma$, not an image with the psf $P$. This requires that the full measurement -- not just the sensitivity analysis -- be run on a third image $I'(\mathbf{x}|\gamma=0)$, so that the numerical derivative $\frac{\partial I'}{\partial \gamma}$ is well-defined.
 
 This procedure introduces correlated, anisotropic noise, which can produce a systematic multiplicative shear bias. If the noise properties of the initial image are known, the noise anistropy can be removed with additional anisotropic noise. As we describe below, we have not found noise isotropization to be a necessary step.
 

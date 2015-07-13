@@ -1,35 +1,16 @@
-\begin{thebibliography}{49}
+\begin{thebibliography}{24}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
-
-\bibitem[{{Albrecht} {et~al.}(2006){Albrecht}, {Bernstein}, {Cahn}, {Freedman},
-  {Hewitt}, {Hu}, {Huth}, {Kamionkowski}, {Kolb}, {Knox}, {Mather}, {Staggs},
-  \& {Suntzeff}}]{2006astro.ph..9591A}
-{Albrecht}, A., {Bernstein}, G., {Cahn}, R., {Freedman}, W.~L., {Hewitt}, J.,
-  {Hu}, W., {Huth}, J., {Kamionkowski}, M., {Kolb}, E.~W., {Knox}, L.,
-  {Mather}, J.~C., {Staggs}, S., \& {Suntzeff}, N.~B. 2006, ArXiv e-prints
-  (astro-ph/0609591)
 
 \bibitem[{{Bartelmann} \& {Schneider}(2001)}]{2001PhR...340..291B}
 {Bartelmann}, M. \& {Schneider}, P. 2001, \physrep, 340, 291
 
-\bibitem[{{Bernstein}(2010)}]{2010MNRAS.406.2793B}
-{Bernstein}, G.~M. 2010, \mnras, 406, 2793
-
-\bibitem[{{Bernstein} \& {Armstrong}(2014)}]{2014MNRAS.438.1880B}
-{Bernstein}, G.~M. \& {Armstrong}, R. 2014, \mnras, 438, 1880
+\bibitem[{{Berg{\'e}} {et~al.}(2013){Berg{\'e}}, {Gamper}, {R{\'e}fr{\'e}gier},
+  \& {Amara}}]{2013A&C.....1...23B}
+{Berg{\'e}}, J., {Gamper}, L., {R{\'e}fr{\'e}gier}, A., \& {Amara}, A. 2013,
+  Astronomy and Computing, 1, 23
 
 \bibitem[{{Bernstein} \& {Jarvis}(2002)}]{2002AJ....123..583B}
 {Bernstein}, G.~M. \& {Jarvis}, M. 2002, \aj, 123, 583
-
-\bibitem[{{Bosch}(2010)}]{2010AJ....140..870B}
-{Bosch}, J. 2010, \aj, 140, 870
-
-\bibitem[{{Bridle} {et~al.}(2010){Bridle}, {Balan}, {Bethge}, {Gentile},
-  {Harmeling}, {Heymans}, {Hirsch}, {Hosseini}, {Jarvis}, {Kirk}, \&
-  et~al.}]{2010MNRAS.405.2044B}
-{Bridle}, S., {Balan}, S.~T., {Bethge}, M., {Gentile}, M., {Harmeling}, S.,
-  {Heymans}, C., {Hirsch}, M., {Hosseini}, R., {Jarvis}, M., {Kirk}, D., \&
-  et~al. 2010, \mnras, 405, 2044
 
 \bibitem[{{Bridle} {et~al.}(2009){Bridle}, {Shawe-Taylor}, {Amara},
   {Applegate}, {Balan}, {Berge}, {Bernstein}, {Dahle}, {Erben}, \&
@@ -38,27 +19,10 @@
   {Berge}, J., {Bernstein}, G., {Dahle}, H., {Erben}, T., \& et~al. 2009,
   Annals of Applied Statistics, 3, 6
 
-\bibitem[{{Gruen} {et~al.}(2010){Gruen}, {Seitz}, {Koppenhoefer}, \&
-  {Riffeser}}]{2010ApJ...720..639G}
-{Gruen}, D., {Seitz}, S., {Koppenhoefer}, J., \& {Riffeser}, A. 2010, \apj,
-  720, 639
-
 \bibitem[{{Heymans} {et~al.}(2006){Heymans}, {Van Waerbeke}, {Bacon}, {Berge},
   {Bernstein}, {Bertin}, {Bridle}, \& et~al.}]{2006MNRAS.368.1323H}
 {Heymans}, C., {Van Waerbeke}, L., {Bacon}, D., {Berge}, J., {Bernstein}, G.,
   {Bertin}, E., {Bridle}, S., \& et~al. 2006, \mnras, 368, 1323
-
-\bibitem[{{Hildebrandt} {et~al.}(2010){Hildebrandt}, {Arnouts}, {Capak},
-  {Moustakas}, {Wolf}, {Abdalla}, {Assef}, {Banerji}, {Ben{\'{\i}}tez},
-  {Brammer}, {Budav{\'a}ri}, {Carliles}, {Coe}, {Dahlen}, {Feldmann}, {Gerdes},
-  {Gillis}, {Ilbert}, {Kotulla}, {Lahav}, {Li}, {Miralles}, {Purger},
-  {Schmidt}, \& {Singal}}]{2010A&A...523A..31H}
-{Hildebrandt}, H., {Arnouts}, S., {Capak}, P., {Moustakas}, L.~A., {Wolf}, C.,
-  {Abdalla}, F.~B., {Assef}, R.~J., {Banerji}, M., {Ben{\'{\i}}tez}, N.,
-  {Brammer}, G.~B., {Budav{\'a}ri}, T., {Carliles}, S., {Coe}, D., {Dahlen},
-  T., {Feldmann}, R., {Gerdes}, D., {Gillis}, B., {Ilbert}, O., {Kotulla}, R.,
-  {Lahav}, O., {Li}, I.~H., {Miralles}, J.-M., {Purger}, N., {Schmidt}, S., \&
-  {Singal}, J. 2010, \aap, 523, A31
 
 \bibitem[{{Hirata} \& {Seljak}(2003)}]{2003MNRAS.343..459H}
 {Hirata}, C. \& {Seljak}, U. 2003, \mnras, 343, 459
@@ -67,45 +31,18 @@
 {Hoekstra}, H. \& {Jain}, B. 2008, Annual Review of Nuclear and Particle
   Science, 58, 99
 
-\bibitem[{{Joachimi} {et~al.}(2015){Joachimi}, {Cacciato}, {Kitching},
-  {Leonard}, {Mandelbaum}, {Sch{\"a}fer}, {Sif{\'o}n}, {Hoekstra}, {Kiessling},
-  {Kirk}, \& {Rassat}}]{2015arXiv150405456J}
-{Joachimi}, B., {Cacciato}, M., {Kitching}, T.~D., {Leonard}, A., {Mandelbaum},
-  R., {Sch{\"a}fer}, B.~M., {Sif{\'o}n}, C., {Hoekstra}, H., {Kiessling}, A.,
-  {Kirk}, D., \& {Rassat}, A. 2015, ArXiv e-prints
-
-\bibitem[{{Kaiser}(2000)}]{2000ApJ...537..555K}
-{Kaiser}, N. 2000, \apj, 537, 555
-
 \bibitem[{{Kaiser} {et~al.}(1995){Kaiser}, {Squires}, \&
   {Broadhurst}}]{1995ApJ...449..460K}
 {Kaiser}, N., {Squires}, G., \& {Broadhurst}, T. 1995, \apj, 449, 460
 
-\bibitem[{{Kiessling} {et~al.}(2015){Kiessling}, {Cacciato}, {Joachimi},
-  {Kirk}, {Kitching}, {Leonard}, {Mandelbaum}, {Sch{\"a}fer}, {Sif{\'o}n},
-  {Brown}, \& {Rassat}}]{2015arXiv150405546K}
-{Kiessling}, A., {Cacciato}, M., {Joachimi}, B., {Kirk}, D., {Kitching}, T.~D.,
-  {Leonard}, A., {Mandelbaum}, R., {Sch{\"a}fer}, B.~M., {Sif{\'o}n}, C.,
-  {Brown}, M.~L., \& {Rassat}, A. 2015, ArXiv e-prints
-
-\bibitem[{{Kirk} {et~al.}(2015){Kirk}, {Brown}, {Hoekstra}, {Joachimi},
-  {Kitching}, {Mandelbaum}, {Sif{\'o}n}, {Cacciato}, {Choi}, {Kiessling},
-  {Leonard}, {Rassat}, \& {Sch{\"a}fer}}]{2015arXiv150405465K}
-{Kirk}, D., {Brown}, M.~L., {Hoekstra}, H., {Joachimi}, B., {Kitching}, T.~D.,
-  {Mandelbaum}, R., {Sif{\'o}n}, C., {Cacciato}, M., {Choi}, A., {Kiessling},
-  A., {Leonard}, A., {Rassat}, A., \& {Sch{\"a}fer}, B.~M. 2015, ArXiv e-prints
-
-\bibitem[{{Kitching} {et~al.}(2010){Kitching}, {Balan}, {Bernstein}, {Bethge},
-  {Bridle}, {Courbin}, {Gentile}, \& et~al.}]{2010arXiv1009.0779K}
-{Kitching}, T., {Balan}, S., {Bernstein}, G., {Bethge}, M., {Bridle}, S.,
-  {Courbin}, F., {Gentile}, M., \& et~al. 2010, AOAS, 5, 2231
-
-\bibitem[{{Kitching} {et~al.}(2012){Kitching}, {Balan}, {Bridle}, {Cantale},
-  {Courbin}, {Eifler}, {Gentile}, {Gill}, {Harmeling}, {Heymans}, {Hirsch}, \&
-  et~al.}]{2012MNRAS.423.3163K}
-{Kitching}, T.~D., {Balan}, S.~T., {Bridle}, S., {Cantale}, N., {Courbin}, F.,
-  {Eifler}, T., {Gentile}, M., {Gill}, M.~S.~S., {Harmeling}, S., {Heymans},
-  C., {Hirsch}, M., \& et~al. 2012, \mnras, 423, 3163
+\bibitem[{{Kitching} {et~al.}(2013){Kitching}, {Rowe}, {Gill}, {Heymans},
+  {Massey}, {Witherick}, {Courbin}, {Georgatzis}, {Gentile}, {Gruen},
+  {Kilbinger}, {Li}, {Mariglis}, {Meylan}, {Storkey}, \&
+  {Xin}}]{2013ApJS..205...12K}
+{Kitching}, T.~D., {Rowe}, B., {Gill}, M., {Heymans}, C., {Massey}, R.,
+  {Witherick}, D., {Courbin}, F., {Georgatzis}, K., {Gentile}, M., {Gruen}, D.,
+  {Kilbinger}, M., {Li}, G.~L., {Mariglis}, A.~P., {Meylan}, G., {Storkey}, A.,
+  \& {Xin}, B. 2013, \apjs, 205, 12
 
 \bibitem[{{Koekemoer} {et~al.}(2007){Koekemoer}, {Aussel}, {Calzetti}, {Capak},
   {Giavalisco}, {Kneib}, {Leauthaud}, {Le F{\`e}vre}, \&
@@ -120,14 +57,6 @@
 {Laureijs}, R., {Amiaux}, J., {Arduini}, S., {Augu{\`e}res}, J.~.,
   {Brinchmann}, J., {Cole}, R., {Cropper}, M., {Dabin}, C., {Duvet}, L.,
   {Ealet}, A., \& et~al. 2011, ArXiv e-prints (1110.3193)
-
-\bibitem[{{Lewis}(2009)}]{2009MNRAS.398..471L}
-{Lewis}, A. 2009, \mnras, 398, 471
-
-\bibitem[{{LSST Science Collaborations} \& {LSST
-  Project}(2009)}]{2009arXiv0912.0201L}
-{LSST Science Collaborations} \& {LSST Project}. 2009, ArXiv e-prints
-  (0912.0201), \url{http://www.lsst.org/lsst/scibook}
 
 \bibitem[{{Mandelbaum} {et~al.}(2012){Mandelbaum}, {Hirata}, {Leauthaud},
   {Massey}, \& {Rhodes}}]{2012MNRAS.420.1518M}
@@ -182,34 +111,8 @@
 {Massey}, R., {Kitching}, T., \& {Richard}, J. 2010, Reports on Progress in
   Physics, 73, 086901
 
-\bibitem[{{Massey} \& {Refregier}(2005)}]{2005MNRAS.363..197M}
-{Massey}, R. \& {Refregier}, A. 2005, \mnras, 363, 197
-
-\bibitem[{{Miller} {et~al.}(2013){Miller}, {Heymans}, {Kitching}, {van
-  Waerbeke}, {Erben}, {Hildebrandt}, {Hoekstra}, {Mellier}, {Rowe}, {Coupon},
-  \& et~al.}]{2013MNRAS.429.2858M}
-{Miller}, L., {Heymans}, C., {Kitching}, T.~D., {van Waerbeke}, L., {Erben},
-  T., {Hildebrandt}, H., {Hoekstra}, H., {Mellier}, Y., {Rowe}, B.~T.~P.,
-  {Coupon}, J., \& et~al. 2013, \mnras, 429, 2858
-
-\bibitem[{{Mohammed} \& {Seljak}(2014)}]{2014MNRAS.445.3382M}
-{Mohammed}, I. \& {Seljak}, U. 2014, \mnras, 445, 3382
-
-\bibitem[{{Ngan} {et~al.}(2009){Ngan}, {van Waerbeke}, {Mahdavi}, {Heymans}, \&
-  {Hoekstra}}]{2009MNRAS.396.1211N}
-{Ngan}, W., {van Waerbeke}, L., {Mahdavi}, A., {Heymans}, C., \& {Hoekstra}, H.
-  2009, \mnras, 396, 1211
-
-\bibitem[{{Osato} {et~al.}(2015){Osato}, {Shirasaki}, \&
-  {Yoshida}}]{2015arXiv150102055O}
-{Osato}, K., {Shirasaki}, M., \& {Yoshida}, N. 2015, ArXiv e-prints
-
 \bibitem[{{Refregier}(2003)}]{2003ARA&A..41..645R}
 {Refregier}, A. 2003, \araa, 41, 645
-
-\bibitem[{{Rhodes} {et~al.}(2000){Rhodes}, {Refregier}, \&
-  {Groth}}]{2000ApJ...536...79R}
-{Rhodes}, J., {Refregier}, A., \& {Groth}, E.~J. 2000, \apj, 536, 79
 
 \bibitem[{{Rowe} {et~al.}(2015){Rowe}, {Jarvis}, {Mandelbaum}, {Bernstein},
   {Bosch}, {Simet}, {Meyers}, {Kacprzak}, {Nakajima}, {Zuntz}, {Miyatake},
@@ -238,51 +141,9 @@
   {Elvis}, M., {Giavalisco}, M., {Guzzo}, L., {Hasinger}, G., \& et~al.
   2007{\natexlab{b}}, \apjs, 172, 1
 
-\bibitem[{{Semboloni} {et~al.}(2011){Semboloni}, {Hoekstra}, {Schaye}, {van
-  Daalen}, \& {McCarthy}}]{2011MNRAS.417.2020S}
-{Semboloni}, E., {Hoekstra}, H., {Schaye}, J., {van Daalen}, M.~P., \&
-  {McCarthy}, I.~G. 2011, \mnras, 417, 2020
-
-\bibitem[{{Spergel} {et~al.}(2015){Spergel}, {Gehrels}, {Baltay}, {Bennett},
-  {Breckinridge}, {Donahue}, {Dressler}, {Gaudi}, {Greene}, {Guyon}, {Hirata},
-  {Kalirai}, {Kasdin}, {Macintosh}, {Moos}, {Perlmutter}, {Postman},
-  {Rauscher}, {Rhodes}, {Wang}, {Weinberg}, {Benford}, {Hudson}, {Jeong},
-  {Mellier}, {Traub}, {Yamada}, {Capak}, {Colbert}, {Masters}, {Penny},
-  {Savransky}, {Stern}, {Zimmerman}, {Barry}, {Bartusek}, {Carpenter}, {Cheng},
-  {Content}, {Dekens}, {Demers}, {Grady}, {Jackson}, {Kuan}, {Kruk}, {Melton},
-  {Nemati}, {Parvin}, {Poberezhskiy}, {Peddie}, {Ruffa}, {Wallace}, {Whipple},
-  {Wollack}, \& {Zhao}}]{2015arXiv150303757S}
-{Spergel}, D., {Gehrels}, N., {Baltay}, C., {Bennett}, D., {Breckinridge}, J.,
-  {Donahue}, M., {Dressler}, A., {Gaudi}, B.~S., {Greene}, T., {Guyon}, O.,
-  {Hirata}, C., {Kalirai}, J., {Kasdin}, N.~J., {Macintosh}, B., {Moos}, W.,
-  {Perlmutter}, S., {Postman}, M., {Rauscher}, B., {Rhodes}, J., {Wang}, Y.,
-  {Weinberg}, D., {Benford}, D., {Hudson}, M., {Jeong}, W.-S., {Mellier}, Y.,
-  {Traub}, W., {Yamada}, T., {Capak}, P., {Colbert}, J., {Masters}, D.,
-  {Penny}, M., {Savransky}, D., {Stern}, D., {Zimmerman}, N., {Barry}, R.,
-  {Bartusek}, L., {Carpenter}, K., {Cheng}, E., {Content}, D., {Dekens}, F.,
-  {Demers}, R., {Grady}, K., {Jackson}, C., {Kuan}, G., {Kruk}, J., {Melton},
-  M., {Nemati}, B., {Parvin}, B., {Poberezhskiy}, I., {Peddie}, C., {Ruffa},
-  J., {Wallace}, J.~K., {Whipple}, A., {Wollack}, E., \& {Zhao}, F. 2015, ArXiv
-  e-prints
-
-\bibitem[{{Troxel} \& {Ishak}(2014)}]{2014arXiv1407.6990T}
-{Troxel}, M.~A. \& {Ishak}, M. 2014, ArXiv e-prints
-
-\bibitem[{{Viola} {et~al.}(2011){Viola}, {Melchior}, \&
-  {Bartelmann}}]{2011MNRAS.410.2156V}
-{Viola}, M., {Melchior}, P., \& {Bartelmann}, M. 2011, \mnras, 410, 2156
-
 \bibitem[{{Weinberg} {et~al.}(2013){Weinberg}, {Mortonson}, {Eisenstein},
   {Hirata}, {Riess}, \& {Rozo}}]{2013PhR...530...87W}
 {Weinberg}, D.~H., {Mortonson}, M.~J., {Eisenstein}, D.~J., {Hirata}, C.,
   {Riess}, A.~G., \& {Rozo}, E. 2013, \physrep, 530, 87
-
-\bibitem[{{Zhang} \& {Komatsu}(2011)}]{2011MNRAS.414.1047Z}
-{Zhang}, J. \& {Komatsu}, E. 2011, \mnras, 414, 1047
-
-\bibitem[{{Zuntz} {et~al.}(2013){Zuntz}, {Kacprzak}, {Voigt}, {Hirsch}, {Rowe},
-  \& {Bridle}}]{2013MNRAS.434.1604Z}
-{Zuntz}, J., {Kacprzak}, T., {Voigt}, L., {Hirsch}, M., {Rowe}, B., \&
-  {Bridle}, S. 2013, \mnras, 434, 1604
 
 \end{thebibliography}
