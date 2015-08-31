@@ -12,6 +12,7 @@ import os
 import optparse
 import numpy
 import socket
+import numpy as np
 
 try:
     import astropy.io.fits as pyfits
@@ -293,14 +294,14 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
     # Create a GSObj from the psf image.
     l5 = galsim.Lanczos(5, True, 1.0E-4)
     l52d = galsim.InterpolantXY(l5)
-    psf = galsim.InterpolatedImage(psfImage, x_interpolant = l52d)
+    psf = galsim.InterpolatedImage(psfImage)
 
     # Deconvolve the pixel from the PSF.
     pixInv = galsim.Deconvolve(pixel)
     psfNoPixel = galsim.Convolve([psf , pixInv])
 
     # Increase the size of the PSF by 2*shear
-    psfGrownNoPixel = psfNoPixel.dilate(1 + 2*numpy.max([g1,g2]))
+    psfGrownNoPixel = psfNoPixel.dilate(1 + 2*np.sqrt(g1**2 + g2**2))
 
     # Convolve the grown psf with the pixel
     psfGrown = galsim.Convolve(psfGrownNoPixel,pixel)
@@ -316,16 +317,21 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
     return psfGrownImage
 
 
-def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1=0.01, g2=0.0, variance=1.,
+def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1=0.0, g2=0.0, variance=1.,
                             g1psf=0., g2psf=0.):
     
     pixel = psfImage.scale
-    l5 = galsim.Lanczos(5, True, 1.0E-4)
+    l5 = galsim.Lanczos(5, True, 1.0E-6)
     l52d = galsim.InterpolantXY(l5)
+
+    
     # Turn the provided image arrays into GSObjects
-    galaxy = galsim.InterpolatedImage(galaxyImage, x_interpolant = l52d)
-    psf = galsim.InterpolatedImage(psfImage, x_interpolant = l52d)
-    psfTarget = galsim.InterpolatedImage(psfImageTarget, x_interpolant = l52d)
+    # pad factor may be important here (increase to 6?)
+    # also, look at k-space interpolant
+
+    galaxy = galsim.InterpolatedImage(galaxyImage)
+    psf = galsim.InterpolatedImage(psfImage)
+    psfTarget = galsim.InterpolatedImage(psfImageTarget)
     
     # Remove the psf from the galaxy
     psfInv = galsim.Deconvolve(psf)
@@ -655,8 +661,8 @@ def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catal
             # Basic systematics correction for regauss oddities:
             c1 = 0.5 * (res_g1.corrected_e1 + res_mg1.corrected_e1) - res.corrected_e1
             c2 = 0.5 * (res_g2.corrected_e2 + res_mg2.corrected_e2) - res.corrected_e2
-#            if numpy.random.randomu() <= 0.1:
-#                print "measured responsivity: ",de1_g1
+            #if numpy.random.randomu() <= 0.1:
+            #                print "measured responsivity: ",de1_g1
             # This is the new stuff for additive PSF anisotropy correction:
             de1_dpg1 = 0.5*(res_g1p.corrected_e1 - res_mg1p.corrected_e1)/0.01
             de2_dpg2 = 0.5*(res_g2p.corrected_e2 - res_mg2p.corrected_e2)/0.01
@@ -667,8 +673,8 @@ def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catal
             additive_2.append(c2)
             anisotropy_1.append(de1_dpg1)
             anisotropy_2.append(de2_dpg2)
-            psf_e1.append(psf_mom.observed_shape.e1)
-            psf_e2.append(psf_mom.observed_shape.e2)
+            psf_e1.append(psf_mom.observed_e1)
+            psf_e2.append(psf_mom.observed_e2)
         except:
             responsivity_stat.append(0)
             responsivity_1.append(-10.)
@@ -809,6 +815,9 @@ def main(argv):
                       help="Directory in which to find variable PSF models; only use this option for a variable PSF branch!")
     parser.add_option("--quiet", dest="quiet", action='store_true', default=False,
                       help="Don't print progress statements")
+    parser.add_option("--single", dest="single", action='store_true', default=False,
+                      help="Don't call Pool.Map")
+
     opts, args = parser.parse_args()
     try:
         subfield, sim_dir, output_dir = args
@@ -839,7 +848,7 @@ def main(argv):
     else:
         verbose = True
 
-    if 'compute' in socket.gethostname() or 'coma' in socket.gethostname():
+    if ('compute' in socket.gethostname() or 'coma' in socket.gethostname()) or opts.single:
         # Just use one CPU on the coma cluster, since we've already made this whole thing
         # embarrassingly parallel by farming out each subfield to a single CPU.
         EstimateAllShears(
