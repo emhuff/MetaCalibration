@@ -673,8 +673,8 @@ def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catal
             additive_2.append(c2)
             anisotropy_1.append(de1_dpg1)
             anisotropy_2.append(de2_dpg2)
-            psf_e1.append(psf_mom.observed_e1)
-            psf_e2.append(psf_mom.observed_e2)
+            psf_e1.append(psf_mom.observed_shape.e1)
+            psf_e2.append(psf_mom.observed_shape.e2)
         except:
             responsivity_stat.append(0)
             responsivity_1.append(-10.)
