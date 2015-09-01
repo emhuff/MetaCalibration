@@ -10,9 +10,9 @@ import sys
 import time
 import os
 import optparse
+import math
 import numpy
 import socket
-import numpy as np
 
 try:
     import astropy.io.fits as pyfits
@@ -301,7 +301,7 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
     psfNoPixel = galsim.Convolve([psf , pixInv])
 
     # Increase the size of the PSF by 2*shear
-    psfGrownNoPixel = psfNoPixel.dilate(1 + 2*np.sqrt(g1**2 + g2**2))
+    psfGrownNoPixel = psfNoPixel.dilate(1 + 2*math.sqrt(g1**2 + g2**2))
 
     # Convolve the grown psf with the pixel
     psfGrown = galsim.Convolve(psfGrownNoPixel,pixel)
