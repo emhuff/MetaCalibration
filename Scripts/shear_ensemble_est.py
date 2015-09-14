@@ -39,7 +39,7 @@ def getAllCatalogs( path = '../Great3/', mc_type = None, sn_cut = None ):
 
     globalPath = path
     if mc_type=='regauss':
-        path = path+'Outputs-Regauss/cgc_metacal_regauss_fix*.fits'
+        path = path+'Outputs-Regauss-BugFix/output_catalog*.fits'
         truthFile = 'cgc-truthtable.txt'
     elif mc_type=='regauss-sym':
         path = path+'Outputs-Regauss-SymNoise/cgc_metacal_symm*.fits'
@@ -57,24 +57,21 @@ def getAllCatalogs( path = '../Great3/', mc_type = None, sn_cut = None ):
         path = path+'Outputs-Regauss-NoAber-SymNoise/cgc_noaber_metacal_symm*.fits'
         truthFile = 'cgc-noaber-truthtable.txt'
     elif mc_type=='noaber-regauss':
-        path = path+'Outputs-Regauss-NoAber/cgc_noaber_metacal*.fits'
+        path = path+'Outputs-Regauss-NoAber-Bugfix/cgc_noaber_metacalfix_regauss*.fits'
         truthFile = 'cgc-noaber-truthtable.txt'
     elif mc_type=='cgc-noaber-precise':
         path = path+'Outputs-Regauss-NoAber-HighPrec/cgc_noaber_precise3_metacal*.fits'
         truthFile = 'cgc-noaber-truthtable.txt'
     elif mc_type == 'rgc-regauss':
-        path = path+'Outputs-Real-Regauss/rgc_metacal-*.fits'
+        path = path+'Outputs-Real-Regauss-BugFix/output_catalog*.fits'
         truthFile = 'rgc-truthtable.txt'
     elif mc_type == 'rgc-noaber-regauss':
-        path = path+'Outputs-Real-NoAber-Regauss/rgc_noaber_metacal*.fits'
+        path = path+'Outputs-Real-NoAber-Regauss-BugFix/rgc_noaber_metacalfix_regauss*.fits'
         truthFile = 'rgc-noaber-truthtable.txt'
     elif mc_type=='rgc-fixedaber-regauss':
-        path = path+'Outputs-RGC-Regauss-FixedAber/rgc_fixedaber_metacal*.fits'
-        #truthFile = 'rgc-fixedaber-dummytable.txt'
+        path = path+'Outputs-Real-Regauss-FixedAber-BugFix/rgc_fixedaber_metacalfix_regauss*.fits'
         truthFile = 'rgc-fixedaber-truthtable.txt'
-    elif mc_type=='regauss-bugfix':
-        path = path+'Outputs-Regauss-BugFix/output_catalog*.fits'
-        truthFile = 'cgc-truthtable.txt'
+
     else:
         raise RuntimeError('Unrecognized mc_type: %s'%mc_type)
 
@@ -84,7 +81,9 @@ def getAllCatalogs( path = '../Great3/', mc_type = None, sn_cut = None ):
             truthPath = truthPath+'rgc-noaber/'
         if (mc_type == 'noaber-regauss') or (mc_type == 'cgc-noaber-precise'):
             truthPath = truthPath+'cgc-noaber/'
-
+        if (mc_type == 'regauss') or (mc_type == 'regauss-bugfix'):
+            truthPath = truthPath+'cgc/'
+            
     catFiles = glob.glob(path)
     if len(catFiles) == 0:
         raise RuntimeError("No catalogs found with path %s!"%path)
@@ -118,20 +117,9 @@ def getAllCatalogs( path = '../Great3/', mc_type = None, sn_cut = None ):
             use = np.in1d(this_catalog['id'],truthCat[keep]['id'])
             this_catalog = this_catalog[use]
             truthCat = truthCat[use]
-            alltruth.append(truthCat)
-
-
-            #--------------------------------------------------
-            #extCat = np.empty(this_catalog.shape, dtype = this_catalog.dtype.descr + [('size',np.float)])
-            #for name in this_catalog.dtype.names:
-            #    extCat[name] = this_catalog[name]
-            #extCat['size'] = size[use]
-            #for entry in truthCat:
-            #    extCat['size'] = get_object_size(entry)
-            #this_catalog = extCat
 
         catalogs.append(this_catalog)
-    cat = np.hstack(catalogs)
+    #cat = np.hstack(catalogs)
     #truth = np.hstack(alltruth)
     #stop
     return catalogs, truthFile
@@ -614,25 +602,32 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
     ax3.plot(truthTable['g1'],coeff1[0]*truthTable['g1'] + coeff1[2],linestyle='--',color='cyan')
     ax3.set_xlabel('g1 (truth)')
     ax3.set_ylabel('g1 (est) - g1 (truth)')
-    ax3.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
+    #ax3.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
     ax3.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
+    ax3.axhline(0.,linestyle='--',color='red')
     
     ax4.plot(truthTable['g2'], obsTable['g2'] - truthTable['g2'],'.')
     ax4.plot(truthTable['g2'],coeff2[0]*truthTable['g2'] + coeff2[2],linestyle='--',color='cyan')
 
-    ax4.set_ylim([-0.01,0.01])#.set_ylim([-shear_range, shear_range])
+    #ax4.set_ylim([-0.01,0.01])#.set_ylim([-shear_range, shear_range])
     ax4.set_xlabel('g2 (truth)')
     ax4.set_ylabel('g2 (est) - g2 (truth)')
     ax4.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
+    ax4.axhline(0.,linestyle='--',color='red')
 
+    
     ax5.plot(obsTable['psf_e1'], obsTable['g1'] - truthTable['g1'],'.')
     ax5.plot(obsTable['psf_e1'],coeff1[1]*obsTable['psf_e1'] + coeff1[2],linestyle='--',color='cyan')
     ax5.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
+    ax5.axhline(0.,linestyle='--',color='red')
+    ax5.set_xlabel('psf_e1')
     
     ax6.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g2'],'.')
     ax6.plot(obsTable['psf_e2'],coeff2[1]*obsTable['psf_e2'] + coeff2[2],linestyle='--',color='cyan')
     ax6.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
-    
+    ax6.axhline(0.,linestyle='--',color='red')
+    ax6.set_xlabel('psf_e2')
+        
     fig.savefig(mc+'-no_corrections')
         
 def calculate_likelihood_cut(fieldstr = None, mc=None):
@@ -708,8 +703,9 @@ def main(argv):
     import argparse
 
     description = """Analyze MetaCalibration outputs from Great3 and Great3++ simulations."""
-    mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym','noaber-regauss','rgc-regauss','rgc-noaber-regauss','rgc-fixedaber-regauss','cgc-noaber-precise', 'regauss-bugfix']
+    mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym','noaber-regauss','rgc-regauss','rgc-noaber-regauss','rgc-fixedaber-regauss','cgc-noaber-precise']
     # Note: The above line needs to be consistent with the choices in getAllCatalogs.
+    method_choices = ["regauss","ksb"]
     
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("--path", dest="path", type=str, default="../Great3/",
@@ -725,6 +721,7 @@ def main(argv):
     parser.add_argument("-dp", "--doplot", dest = "doplot", action="store_true")
     parser.add_argument("-sn", "--snos_cut", dest="sn_cut",
                         help="percentile",type= float, default = 0)
+    #parser.add_argument("-a","--algorithm", dest="algorithm"
 
     args = parser.parse_args(argv[1:])
     if args.sn_cut > 0:
