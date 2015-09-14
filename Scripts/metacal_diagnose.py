@@ -39,8 +39,8 @@ def size_mom(image= None, weight = None):
 
 
 def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, shear2_step = 0., psf_size =
-                     1.0, sersic_index = 4., pixscale = 0.3,
-                     galaxy_size = 3.0, doplot = False, size = False):
+                     1.0, sersic_index = 4., pixscale = 0.2,
+                     galaxy_size = 2.0, doplot = False, size = False):
 
 
     image_size = np.ceil(125 * (0.3/pixscale))
@@ -68,7 +68,7 @@ def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, 
 
     # Copied straight from MetaCalGreat3Wrapper.py
     sheared1Galaxy, unsheared1Galaxy, reconv1PSF = mcG3.metaCalibrate(image, psf_im, g1 = shear1_step, g2 = shear2_step)
-    shearedm1Galaxy, unshearedm1Galaxy, reconvm1PSF = mcG3.metaCalibrate(image, psf_im, g1 = - shear1_step, g2 = - shear2_step)
+    shearedm1Galaxy, unshearedm1Galaxy, reconvm1PSF = mcG3.metaCalibrate(image, psf_im, g1 =  -shear1_step, g2 = - shear2_step)
 
     # Make an interpolated image of the psf.
     l5 = galsim.Lanczos(5, True, 1.0E-4)
@@ -190,16 +190,24 @@ def main(argv):
     thing =  metacal_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic, shear1_step = shear1_step, shear2_step = shear2_step, doplot=True)
 
     for i, this_e in zip(xrange(npts), e_arr):
-        R_true, R_est, R_rec = metacal_diagnose(e1_intrinsic = this_e, e2_intrinsic = 0.,  shear1_step = shear1_step, shear2_step = shear2_step, size = True)
+        R_true, R_est, R_rec = metacal_diagnose(e1_intrinsic = this_e, e2_intrinsic = 0.,  shear1_step = shear1_step, shear2_step = shear2_step, size = False)
         R_true_arr[i] = R_true
         R_est_arr[i] = R_est
         R_rec_arr[i] = R_rec
-    plt.plot(e_arr, R_true_arr, label="R_true")
-    plt.plot(e_arr, R_est_arr, label="R_metacal")        
-    plt.plot(e_arr, R_rec_arr, label="R_reconv")
-    plt.axvline(0,color='black',linestyle='--')
+
+
+    fig, (ax1, ax2) = plt.subplots(nrows=1, ncols = 2, figsize = (14,7))
+    ax1.plot(e_arr, R_true_arr, label="R_true")
+    ax1.plot(e_arr, R_est_arr, label="R_metacal")        
+    ax1.plot(e_arr, R_rec_arr, label="R_reconv")
+    ax1.axvline(0,color='black',linestyle='--')
     #plt.axhline(2,color='black',linestyle='--')
-    plt.legend(loc='best')
+    ax1.legend(loc='best')
+
+    ax2.plot(e_arr, R_est_arr - R_true_arr, label = "R_est - R_true")
+    ax2.plot(e_arr, R_rec_arr - R_true_arr, label = "R_reconv - R_true")
+    ax2.axhline(0,color='black',linestyle='--')
+    ax2.legend(loc='best')
     plt.show()
 
     
