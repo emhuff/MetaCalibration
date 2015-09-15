@@ -39,8 +39,9 @@ def size_mom(image= None, weight = None):
 
 
 def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, shear2_step = 0., psf_size =
-                     1.0, sersic_index = 4., pixscale = 0.2,
-                     galaxy_size = 2.0, doplot = False, size = False):
+                     1.0, sersic_index = 4., pixscale = 0.3,
+                     galaxy_size = 2.0, doplot = False, size = False,
+                     do_centroid = False):
 
 
     image_size = np.ceil(125 * (0.3/pixscale))
@@ -64,7 +65,7 @@ def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, 
     image2 = objConv2.drawImage(image=galsim.Image(image_size,image_size,scale=pixscale) )
 
     # Make an image of the psf
-    psf_im = psf.drawImage(image=galsim.Image(25,25,scale=pixscale) )
+    psf_im = psf.drawImage(image=galsim.Image(image_size,image_size,scale=pixscale) )
 
     # Copied straight from MetaCalGreat3Wrapper.py
     sheared1Galaxy, unsheared1Galaxy, reconv1PSF = mcG3.metaCalibrate(image, psf_im, g1 = shear1_step, g2 = shear2_step)
@@ -90,7 +91,7 @@ def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, 
 
     if doplot is True:
 
-        fig,(ax1, ax2, ax3) = plt.subplots(nrows=1,ncols=3,figsize=(21,7))
+        fig,(ax1, ax2, ax3) = plt.subplots(nrows=1,ncols=3,figsize=(21,6))
         plt1 = ax1.imshow(image4.array)
         ax1.set_title("(true) sheared image")
         plt2 = ax2.imshow(sheared1Galaxy.array)
@@ -164,7 +165,25 @@ def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, 
         r_4 = image3.FindAdaptiveMom().moments_sigma#np.sqrt(x2_4 + y2_4)
         r_5 = image4.FindAdaptiveMom().moments_sigma#np.sqrt(x2_5 + y2_5)
         return r1, r_mcp, r_5    
-        
+
+    if do_centroid is True:
+        # Now for some other diagnostics. Do our image centroids shift at
+        # all?
+        x_0, y_0 = centroid(image)
+        x_1, y_1 = centroid(image2)
+        x_mcp, y_mcp = centroid(sheared1Galaxy)
+        x_mcm, y_mcm = centroid(shearedm1Galaxy)
+        x_4, y_4 = centroid(image3)
+        x_5, y_5 = centroid(image4)
+
+        dx_1 = x_1 - x_0
+        dx_m = x_mcp - x_0
+        dx_r = x_5 - x_0
+
+        return dx_1, dx_m, dx_r
+
+
+    
     if shear1_step != 0. and shear2_step == 0.:
         return de1_g1_tru, de1_g1_est, de1_g1_rec
     elif shear2_step != 0. and shear1_step == 0.:
@@ -180,8 +199,8 @@ def main(argv):
     R_true_arr = e_arr*0.
     R_est_arr = e_arr*0.
     R_rec_arr = e_arr*0.
-    shear1_step = 0.01
-    shear2_step = 0.00
+    shear1_step = 0.0
+    shear2_step = 0.01
     e1_intrinsic = 0.
     e2_intrinsic = 0.
     
@@ -190,7 +209,7 @@ def main(argv):
     thing =  metacal_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic, shear1_step = shear1_step, shear2_step = shear2_step, doplot=True)
 
     for i, this_e in zip(xrange(npts), e_arr):
-        R_true, R_est, R_rec = metacal_diagnose(e1_intrinsic = this_e, e2_intrinsic = 0.,  shear1_step = shear1_step, shear2_step = shear2_step, size = False)
+        R_true, R_est, R_rec = metacal_diagnose(e1_intrinsic = 0., e2_intrinsic = this_e,  shear1_step = shear1_step, shear2_step = shear2_step, size = False, do_centroid = False)
         R_true_arr[i] = R_true
         R_est_arr[i] = R_est
         R_rec_arr[i] = R_rec
@@ -210,6 +229,7 @@ def main(argv):
     ax2.legend(loc='best')
     plt.show()
 
+    
     
     stop
     

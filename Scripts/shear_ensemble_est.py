@@ -478,7 +478,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax3.axhline(0.,linestyle='--',color='red')
         ax3.plot(truthTable['g1'],coeff1[0]*truthTable['g1'] + coeff1[2],linestyle='--',color='cyan')
         ax3.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')
-        ax3.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
+        ax3.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
         
         ax4.plot(truthTable['g2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
         if logLcut is not None:
@@ -486,7 +486,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax4.axhline(0.,linestyle='--',color='red')
         ax4.plot(truthTable['g2'],coeff2[0]*truthTable['g2'] + coeff2[2],linestyle='--',color='cyan')
         ax4.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')        
-        ax4.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
+        ax4.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
 
         ax5.plot(obsTable['e1_logL'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
         ax5.set_xlabel('multinomial log likelihood')
@@ -602,14 +602,13 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
     ax3.plot(truthTable['g1'],coeff1[0]*truthTable['g1'] + coeff1[2],linestyle='--',color='cyan')
     ax3.set_xlabel('g1 (truth)')
     ax3.set_ylabel('g1 (est) - g1 (truth)')
-    #ax3.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
+    ax3.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
     ax3.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
     ax3.axhline(0.,linestyle='--',color='red')
     
     ax4.plot(truthTable['g2'], obsTable['g2'] - truthTable['g2'],'.')
     ax4.plot(truthTable['g2'],coeff2[0]*truthTable['g2'] + coeff2[2],linestyle='--',color='cyan')
-
-    #ax4.set_ylim([-0.01,0.01])#.set_ylim([-shear_range, shear_range])
+    ax4.set_ylim([-0.03,0.03])#.set_ylim([-shear_range, shear_range])
     ax4.set_xlabel('g2 (truth)')
     ax4.set_ylabel('g2 (est) - g2 (truth)')
     ax4.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
