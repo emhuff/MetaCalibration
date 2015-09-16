@@ -68,6 +68,9 @@ def getAllCatalogs( path = '../Great3/', mc_type = None, sn_cut = None ):
     elif mc_type == 'rgc-noaber-regauss':
         path = path+'Outputs-Real-NoAber-Regauss-BugFix/rgc_noaber_metacalfix_regauss*.fits'
         truthFile = 'rgc-noaber-truthtable.txt'
+    elif mc_type == 'rgc-ksb':
+        path= path+'Outputs-Real-KSB/output_catalog*.fits'
+        truthFile = 'rgc-truthtable.txt'
     elif mc_type=='rgc-fixedaber-regauss':
         path = path+'Outputs-Real-Regauss-FixedAber-BugFix/rgc_fixedaber_metacalfix_regauss*.fits'
         truthFile = 'rgc-fixedaber-truthtable.txt'
@@ -90,16 +93,17 @@ def getAllCatalogs( path = '../Great3/', mc_type = None, sn_cut = None ):
     catalogs = []
     #alltruth = []
     for thisFile in catFiles:
-        if mc_type=='moments':
+
             # Here I was investigating the possibility that I'd
             # regressed the galaxy shapes against the wrong psf
             # ellipticity. I've disabled this for the time being.
-            this_catalog = fits.getdata(thisFile)
-            keep  =   (this_catalog['g1'] != -10) & (this_catalog['g2'] != -10) & (this_catalog['weight'] > 0)
-            this_catalog = this_catalog[keep]
-
+        this_catalog = fits.getdata(thisFile)
+        keep  =   (this_catalog['g1'] != -10) & (this_catalog['g2'] != -10) & (this_catalog['weight'] > 0)
+        this_catalog = this_catalog[keep]
+        if mc_type=='moments':
             this_catalog['a1'] = this_catalog['a1']/2.
             this_catalog['a2'] = this_catalog['a2']/2.
+            
         else:
             this_catalog = fits.getdata(thisFile)
             keep  =   (this_catalog['g1'] != -10) & (this_catalog['g2'] != -10) & (this_catalog['weight'] > 0)
@@ -111,9 +115,7 @@ def getAllCatalogs( path = '../Great3/', mc_type = None, sn_cut = None ):
             thisField = pattern.findall(thisFile)[0]
             thisTruthFile = truthPath + 'subfield_catalog-'+thisField+'.fits'
             truthCat = fits.getdata(thisTruthFile)
-            #size = truthCat['bulge_flux']*truthCat['bulge_hlr']*np.sqrt(truthCat['bulge_q']) + truthCat['disk_flux']*truthCat['disk_hlr']*np.sqrt(truthCat['disk_q'])
-            #size = size /  (truthCat['bulge_flux'] + truthCat['disk_flux'])
-            keep  =   (truthCat['gal_sn'] > (sn_cut) )# & (truthCat['gal_sn'] < sn_cut )
+            keep  =   (truthCat['gal_sn'] > (sn_cut) )
             use = np.in1d(this_catalog['id'],truthCat[keep]['id'])
             this_catalog = this_catalog[use]
             truthCat = truthCat[use]
@@ -238,7 +240,7 @@ def linear_estimator(data = None, null = None, deriv = None, cinv = None):
         return est, var
 
     
-def doInference(catalogs=None, nbins=None):
+def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
 
     print '  About to build prior...'
     bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg = \
@@ -261,35 +263,58 @@ def doInference(catalogs=None, nbins=None):
     covar2_scaled = - np.outer( e2_prior_hist, e2_prior_hist) * ( np.ones( (e2_prior_hist.size, e2_prior_hist.size) ) - np.diag(np.ones(e2_prior_hist.size) ) ) + np.diag( e2_prior_hist * (1 - e2_prior_hist) )
     
     for catalog,i in zip(catalogs, xrange(len(catalogs) )):
+
+
+        if mean is False:
+            this_e1_hist, _ = np.histogram(catalog['g1'] - catalog['c1'] - catalog['a1']*catalog['psf_e1'] , bins = bin_edges )
+            this_e1_hist = this_e1_hist * 1./catalog.size
+            this_e2_hist, _ = np.histogram(catalog['g2'] - catalog['c2'] - catalog['a2']*catalog['psf_e2'], bins = bin_edges )
+            this_e2_hist = this_e2_hist * 1./catalog.size
         
-        this_e1_hist, _ = np.histogram(catalog['g1'] - catalog['c1'] - catalog['a1']*catalog['psf_e1'] , bins = bin_edges )
-        this_e1_hist = this_e1_hist * 1./catalog.size
-        this_e2_hist, _ = np.histogram(catalog['g2'] - catalog['c2'] - catalog['a2']*catalog['psf_e2'], bins = bin_edges )
-        this_e2_hist = this_e2_hist * 1./catalog.size
-        
-        # covar_hist = N_obj  * covar; but we divide hist by N_obj, so divide covar_hist by N_obj*N_obj
-        this_covar1 = covar1_scaled * 1./catalog.size
-        this_covar2 = covar2_scaled * 1./catalog.size
+            # covar_hist = N_obj  * covar; but we divide hist by N_obj, so divide covar_hist by N_obj*N_obj
+            this_covar1 = covar1_scaled * 1./catalog.size
+            this_covar2 = covar2_scaled * 1./catalog.size
     
-        # Try making a covariance matrix from just this field?
-        this_field_covar1 = ( - np.outer( this_e1_hist, this_e1_hist) * ( np.ones( (this_e1_hist.size, this_e1_hist.size) ) - np.diag(np.ones(this_e1_hist.size) ) ) + np.diag( this_e1_hist * (1 - this_e1_hist) ) ) / catalog.size
-        this_field_covar2 =  (- np.outer( this_e2_hist, this_e2_hist) * ( np.ones( (this_e2_hist.size, this_e2_hist.size) ) - np.diag(np.ones(this_e2_hist.size) ) ) + np.diag( this_e2_hist * (1 - this_e2_hist) ) ) / catalog.size
-        try:
-            this_cinv1 = np.linalg.pinv(this_field_covar1)
-            this_cinv2 = np.linalg.pinv(this_field_covar2)
-        except:
-            this_cinv1 = np.linalg.inv(this_field_covar1)
-            this_cinv2 = np.linalg.inv(this_field_covar2)
+            # Try making a covariance matrix from just this field?
+            this_field_covar1 = ( - np.outer( this_e1_hist, this_e1_hist) * ( np.ones( (this_e1_hist.size, this_e1_hist.size) ) - np.diag(np.ones(this_e1_hist.size) ) ) + np.diag( this_e1_hist * (1 - this_e1_hist) ) ) / catalog.size
+            this_field_covar2 =  (- np.outer( this_e2_hist, this_e2_hist) * ( np.ones( (this_e2_hist.size, this_e2_hist.size) ) - np.diag(np.ones(this_e2_hist.size) ) ) + np.diag( this_e2_hist * (1 - this_e2_hist) ) ) / catalog.size
+            try:
+                this_cinv1 = np.linalg.pinv(this_field_covar1)
+                this_cinv2 = np.linalg.pinv(this_field_covar2)
+            except:
+                this_cinv1 = np.linalg.inv(this_field_covar1)
+                this_cinv2 = np.linalg.inv(this_field_covar2)
 
-        # Get derivatives for this shear field.
-        #_, _, _, this_de1_dg, this_de2_dg = buildPrior([catalog], nbins=nbins, bins = bin_edges)
+            # Get derivatives for this shear field.
+            #_, _, _, this_de1_dg, this_de2_dg = buildPrior([catalog], nbins=nbins, bins = bin_edges)
 
-        gamma1_raw[i] = linear_estimator(data=this_e1_hist, null=e1_prior_hist, deriv=de1_dg)
-        gamma2_raw[i] = linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv=de2_dg) 
-        this_g1_opt, this_g1_var = \
-            linear_estimator(data=this_e1_hist, null=e1_prior_hist, deriv= de1_dg, cinv=this_cinv1)
-        this_g2_opt, this_g2_var = \
-            linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv= de2_dg, cinv=this_cinv2) 
+            gamma1_raw[i] = linear_estimator(data=this_e1_hist, null=e1_prior_hist, deriv=de1_dg)
+            gamma2_raw[i] = linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv=de2_dg) 
+            this_g1_opt, this_g1_var = \
+                linear_estimator(data=this_e1_hist, null=e1_prior_hist, deriv= de1_dg, cinv=this_cinv1)
+            this_g2_opt, this_g2_var = \
+                linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv= de2_dg, cinv=this_cinv2)
+            if plotFile is not None:
+                fig, (ax1, ax2) = plt.subplots(nrows=1, ncols = 3, figsize = (14,7))
+                linear_bin_edges = np.linspace(-15,15,100)
+                linear_bin_centers = (linear_bin_edges[0:-1] + linear_bin_edges[1:])/2.
+                ax1.semilogy(linear_bin_centers, e1_prior_hist, label = 'e1 prior')
+                ax1.semilogy(linear_bin_centers, this_e1_hist, label = 'this_e1')
+                ax1.legend(loc='best')
+                ax1.axvline(bin_edges,color='red')
+                ax1.plot((bin_edges[0:-1] + bin_edges[1:])/2., de1_dg)
+                ax1.plot((bin_edges[0:-1] + bin_edges[1:])/2., de2_dg)
+                fig.savefig(plotFile)
+        
+        elif mean is True:
+            this_g1_opt =  np.average(catalog['g1'] - catalog['c1'] - catalog['a1'] * catalog['psf_e1'], weights = catalog['weight']) \
+               / np.average(catalog['R1'], weights = catalog['weight'])
+            this_g2_opt =  np.average(catalog['g2'] - catalog['c2'] - catalog['a2'] * catalog['psf_e2'], weights = catalog['weight']) \
+              / np.average(catalog['R2'], weights = catalog['weight'])
+            this_g1_var =  np.average(  ( ( catalog['g1'] - catalog['c1'] - catalog['a1'] * catalog['psf_e1']) - this_g1_opt )**2, weights = catalog['weight']) *1./ len(catalog)
+            this_g2_var =  np.average(  ( ( catalog['g2'] - catalog['c2'] - catalog['a2'] * catalog['psf_e2']) - this_g2_opt )**2, weights = catalog['weight']) *1./ len(catalog)
+
+                            
         gamma1_opt[i] = this_g1_opt
         gamma2_opt[i] = this_g2_opt
         gamma1_var[i] = this_g1_var
@@ -552,7 +577,7 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
         if 'regauss' in mc:
             calib1 = 2*(1 - np.var(catalog['g1'][np.abs(catalog['g1']) <= 3]))
             calib2 = 2*(1 - np.var(catalog['g2'][np.abs(catalog['g2']) <= 3]))
-        elif 'moments' in mc:
+        elif 'moments' in mc or 'ksb' in mc:
             calib1 = 2.
             calib2 = 2.
         else:
@@ -702,7 +727,7 @@ def main(argv):
     import argparse
 
     description = """Analyze MetaCalibration outputs from Great3 and Great3++ simulations."""
-    mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym','noaber-regauss','rgc-regauss','rgc-noaber-regauss','rgc-fixedaber-regauss','cgc-noaber-precise']
+    mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym','noaber-regauss','rgc-regauss','rgc-noaber-regauss','rgc-fixedaber-regauss', 'rgc-ksb','cgc-noaber-precise']
     # Note: The above line needs to be consistent with the choices in getAllCatalogs.
     method_choices = ["regauss","ksb"]
     

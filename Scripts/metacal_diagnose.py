@@ -39,7 +39,7 @@ def size_mom(image= None, weight = None):
 
 
 def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, shear2_step = 0., psf_size =
-                     1.0, sersic_index = 4., pixscale = 0.3,
+                     1.0, sersic_index = 4., pixscale = 0.2,
                      galaxy_size = 2.0, doplot = False, size = False,
                      do_centroid = False):
 
@@ -53,17 +53,19 @@ def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, 
     obj = galsim.Sersic(sersic_index, half_light_radius =galaxy_size, flux=1.0, gsparams = gspars)
     objEllip = obj.lens(e1_intrinsic, e2_intrinsic, 1.)
 
-
     # Convolve with a gaussian PSF
     psf = galsim.Gaussian(sigma= psf_size, gsparams = gspars)
     objConv = galsim.Convolve([psf,objEllip], gsparams = gspars)
     image = objConv.drawImage(image=galsim.Image(image_size,image_size,scale=pixscale) )
 
     # Create the object to compare the metacalibration-generated image to.
-    objEllip2 = objEllip.lens( shear1_step, shear2_step,1.0)
+    objEllip2  = objEllip.lens( shear1_step, shear2_step,1.0)
+    objEllip2n = objEllip.lens( -shear1_step, -shear2_step,1.0)
     objConv2 = galsim.Convolve([psf,objEllip2], gsparams = gspars)
+    objConv2n = galsim.Convolve([psf,objEllip2n], gsparams = gspars)
     image2 = objConv2.drawImage(image=galsim.Image(image_size,image_size,scale=pixscale) )
-
+    image2n = objConv2n.drawImage(image=galsim.Image(image_size,image_size,scale=pixscale) )
+    
     # Make an image of the psf
     psf_im = psf.drawImage(image=galsim.Image(image_size,image_size,scale=pixscale) )
 
@@ -71,6 +73,7 @@ def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, 
     sheared1Galaxy, unsheared1Galaxy, reconv1PSF = mcG3.metaCalibrate(image, psf_im, g1 = shear1_step, g2 = shear2_step)
     shearedm1Galaxy, unshearedm1Galaxy, reconvm1PSF = mcG3.metaCalibrate(image, psf_im, g1 =  -shear1_step, g2 = - shear2_step)
 
+    
     # Make an interpolated image of the psf.
     l5 = galsim.Lanczos(5, True, 1.0E-4)
     l52d = galsim.InterpolantXY(l5)
@@ -86,8 +89,9 @@ def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, 
     image3 = objConv3.drawImage(image=galsim.Image(image_size,image_size,scale=pixscale) )
 
     objConv4 = galsim.Convolve([psf_dil,objEllip2], gsparams = gspars)
+    objConv4n = galsim.Convolve([psf_dil,objEllip2n], gsparams = gspars)
     image4 = objConv4.drawImage(image=galsim.Image(image_size,image_size,scale=pixscale) )
-
+    image4n = objConv4n.drawImage(image=galsim.Image(image_size,image_size,scale=pixscale) )
 
     if doplot is True:
 
@@ -119,35 +123,39 @@ def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, 
     # Now measure the shapes of the metacal galaxies.
     res_g1  = galsim.hsm.EstimateShear(sheared1Galaxy,  reconv1PSF,  guess_sig_PSF = 1.0, shear_est="regauss")
     res_mg1 = galsim.hsm.EstimateShear(shearedm1Galaxy, reconvm1PSF ,guess_sig_PSF = 1.0, shear_est="regauss")
-    
+    res_ng1 = galsim.hsm.EstimateShear(unsheared1Galaxy, reconvm1PSF ,guess_sig_PSF = 1.0, shear_est="regauss")
 
     # Then measure the change in shape of the original galaxy, when the
     # true shear is changed.
-    shape_0 = galsim.hsm.EstimateShear(image,psf_im, guess_sig_PSF = 1.0, shear_est = "regauss")
+    shape_0 = galsim.hsm.EstimateShear(image2n,psf_im, guess_sig_PSF = 1.0, shear_est = "regauss")
     shape_1 = galsim.hsm.EstimateShear(image2,psf_im,guess_sig_PSF = 1.0, shear_est = "regauss")
     
     # Finally, do the same thing with the slightly dilated psf used by metacal.
     shape_3 = galsim.hsm.EstimateShear(image3,reconv1PSF, guess_sig_PSF = 1.0, shear_est = "regauss")
     shape_4 = galsim.hsm.EstimateShear(image4,reconv1PSF, guess_sig_PSF = 1.0, shear_est = "regauss")
+    shape_4n = galsim.hsm.EstimateShear(image4n,reconv1PSF, guess_sig_PSF = 1.0, shear_est = "regauss")
     
     # The first two of these three shape measurements should agree!
     if shear1_step != 0. and shear2_step == 0.:
 
-        de1_g1_est = 0.5*(res_g1.corrected_e1 - res_mg1.corrected_e1)/shear1_step
-        de1_g1_rec = (shape_4.corrected_e1 - shape_3.corrected_e1)/shear1_step
-        de1_g1_tru = (shape_1.corrected_e1 - shape_0.corrected_e1)/shear1_step
+        de1_g1_est = 0.5 * (res_g1.corrected_e1 - res_mg1.corrected_e1)/shear1_step
+        de1_g1_rec =  (shape_4.corrected_e1 - shape_3.corrected_e1)/shear1_step
+        de1_g1_tru = 0.5 * (shape_1.corrected_e1 - shape_0.corrected_e1)/shear1_step
         print "True R1:", de1_g1_tru
         print "Estimated R1:", de1_g1_est
         print "True Reconv R1", de1_g1_rec
-            
+        return de1_g1_tru, de1_g1_est, de1_g1_rec
+                    
     # The first two of these three shape measurements should agree!
     if shear2_step != 0. and shear1_step == 0.:
-        de2_g2_est = 0.5*(res_g1.corrected_e2 - res_mg1.corrected_e2)/shear2_step
-        de2_g2_rec = (shape_4.corrected_e2 - shape_3.corrected_e2)/shear2_step
-        de2_g2_tru = (shape_1.corrected_e2 - shape_0.corrected_e2)/shear2_step
+        de2_g2_est = 0.5* (res_g1.corrected_e2 - res_mg1.corrected_e2)/shear2_step
+        de2_g2_rec =   (shape_4.corrected_e2 - shape_3.corrected_e2)/shear2_step
+        de2_g2_tru = 0.5*  (shape_1.corrected_e2 - shape_0.corrected_e2)/shear2_step
         print "True R2:", de2_g2_tru
         print "Estimated R2:", de2_g2_est
         print "True Reconv R2", de2_g2_rec
+        return de2_g2_tru, de2_g2_est, de2_g2_rec
+    
     if size is True:
         # Now for some other diagnostics. Do our image centroids shift at
         # all?
@@ -183,24 +191,20 @@ def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, 
         return dx_1, dx_m, dx_r
 
 
-    
-    if shear1_step != 0. and shear2_step == 0.:
-        return de1_g1_tru, de1_g1_est, de1_g1_rec
-    elif shear2_step != 0. and shear1_step == 0.:
-        return de2_g2_tru, de2_g2_est, de2_g2_rec
+
 
 
 
 
 
 def main(argv):
-    npts = 20
-    e_arr =  np.linspace(-0.5, 0.5, npts)
+    npts = 40
+    e_arr =  np.linspace(-0.75, 0.75, npts)
     R_true_arr = e_arr*0.
     R_est_arr = e_arr*0.
     R_rec_arr = e_arr*0.
-    shear1_step = 0.0
-    shear2_step = 0.01
+    shear1_step = 0.01
+    shear2_step = 0.0
     e1_intrinsic = 0.
     e2_intrinsic = 0.
     
@@ -209,7 +213,7 @@ def main(argv):
     thing =  metacal_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic, shear1_step = shear1_step, shear2_step = shear2_step, doplot=True)
 
     for i, this_e in zip(xrange(npts), e_arr):
-        R_true, R_est, R_rec = metacal_diagnose(e1_intrinsic = 0., e2_intrinsic = this_e,  shear1_step = shear1_step, shear2_step = shear2_step, size = False, do_centroid = False)
+        R_true, R_est, R_rec = metacal_diagnose(e1_intrinsic = this_e, e2_intrinsic = 0.,  shear1_step = shear1_step, shear2_step = shear2_step, size = False, do_centroid = False)
         R_true_arr[i] = R_true
         R_est_arr[i] = R_est
         R_rec_arr[i] = R_rec
@@ -223,8 +227,8 @@ def main(argv):
     #plt.axhline(2,color='black',linestyle='--')
     ax1.legend(loc='best')
 
-    ax2.plot(e_arr, R_est_arr - R_true_arr, label = "R_est - R_true")
-    ax2.plot(e_arr, R_rec_arr - R_true_arr, label = "R_reconv - R_true")
+    ax2.plot(e_arr, R_est_arr - R_true_arr, label = "R_est - R_true", color = "blue")
+    ax2.plot(e_arr, R_rec_arr - R_true_arr, label = "R_reconv - R_true", color = "green")
     ax2.axhline(0,color='black',linestyle='--')
     ax2.legend(loc='best')
     plt.show()
