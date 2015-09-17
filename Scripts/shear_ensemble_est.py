@@ -6,12 +6,40 @@ import optparse
 import numpy as np
 import glob
 from astropy.io import fits
+import re
+import galsim
 
-def getAllCatalogs( path = '../Great3/', mc_type = None ):
+def get_object_size(entry):
 
+    
+    psf_size = 0.2
+    psfObj = galsim.Gaussian(fwhm=psf_size)
+    image = galsim.Image(51,51,scale=0.25)
 
+    if entry['bulge_flux'] > 0.:
+        bulge = galsim.Sersic(entry['bulge_n'], flux = entry['bulge_flux'], half_light_radius = entry['bulge_hlr'])
+        bulge.applyShear(q = entry['bulge_q'], beta =entry['bulge_beta_radians']*galsim.radians)
+        bulgeConv = galsim.Convolve([bulge,psfObj])
+        bulgeConv.drawImage(image=image,add_to_image=True)
+
+    if entry['disk_flux'] > 0.:
+        disk = galsim.Exponential(flux = entry['disk_flux'],half_light_radius = entry['disk_hlr'])
+        disk.applyShear(q=entry['disk_q'],beta=entry['disk_beta_radians']*galsim.radians)
+        diskConv = galsim.Convolve([disk,psfObj])
+        diskConv.drawImage(image=image, add_to_image = True)
+    
+    xx,yy = np.meshgrid(np.arange(51)-25, np.arange(51)-25)
+    sigma = np.sqrt( np.sum( image.array * (xx**2 + yy **2) ) / np.sum(image.array)  )
+    if not np.isfinite(sigma):
+        stop
+    return sigma
+
+    
+def getAllCatalogs( path = '../Great3/', mc_type = None, sn_cut = None ):
+
+    globalPath = path
     if mc_type=='regauss':
-        path = path+'Outputs-Regauss/cgc_metacal_regauss_fix*.fits'
+        path = path+'Outputs-Regauss-BugFix/output_catalog*.fits'
         truthFile = 'cgc-truthtable.txt'
     elif mc_type=='regauss-sym':
         path = path+'Outputs-Regauss-SymNoise/cgc_metacal_symm*.fits'
@@ -23,45 +51,79 @@ def getAllCatalogs( path = '../Great3/', mc_type = None ):
         path = path+'Outputs-CGN-Regauss/cgc_metacal_moments*.fits'
         truthFile = 'cgc-truthtable.txt'
     elif mc_type=='moments':
-        path = path+'Outputs-Moments/output_catalog*.fits'
+        path = path+'Outputs-Moments/cgc_metacal_moments*.fits'
         truthFile = 'cgc-truthtable.txt'
     elif mc_type=='noaber-regauss-sym':
         path = path+'Outputs-Regauss-NoAber-SymNoise/cgc_noaber_metacal_symm*.fits'
         truthFile = 'cgc-noaber-truthtable.txt'
     elif mc_type=='noaber-regauss':
-        path = path+'Outputs-Regauss-NoAber/cgc_noaber_metacal*.fits'
+        path = path+'Outputs-Regauss-NoAber-Bugfix/cgc_noaber_metacalfix_regauss*.fits'
+        truthFile = 'cgc-noaber-truthtable.txt'
+    elif mc_type=='cgc-noaber-precise':
+        path = path+'Outputs-Regauss-NoAber-HighPrec/cgc_noaber_precise3_metacal*.fits'
         truthFile = 'cgc-noaber-truthtable.txt'
     elif mc_type == 'rgc-regauss':
-        path = path+'Outputs-Real-Regauss/rgc_metacal-*.fits'
+        path = path+'Outputs-Real-Regauss-BugFix/output_catalog*.fits'
         truthFile = 'rgc-truthtable.txt'
     elif mc_type == 'rgc-noaber-regauss':
-        path = path+'Outputs-Real-NoAber-Regauss/rgc_noaber_metacal*.fits'
+        path = path+'Outputs-Real-NoAber-Regauss-BugFix/rgc_noaber_metacalfix_regauss*.fits'
         truthFile = 'rgc-noaber-truthtable.txt'
+    elif mc_type == 'rgc-ksb':
+        path= path+'Outputs-Real-KSB/output_catalog*.fits'
+        truthFile = 'rgc-truthtable.txt'
     elif mc_type=='rgc-fixedaber-regauss':
-        path = path+'Outputs-RGC-Regauss-FixedAber/rgc_fixedaber_metacal*.fits'
-        #truthFile = 'rgc-fixedaber-dummytable.txt'
+        path = path+'Outputs-Real-Regauss-FixedAber-BugFix/rgc_fixedaber_metacalfix_regauss*.fits'
         truthFile = 'rgc-fixedaber-truthtable.txt'
+
     else:
         raise RuntimeError('Unrecognized mc_type: %s'%mc_type)
 
-    
-
+    if sn_cut is not None:
+        truthPath = globalPath+'Truth/'
+        if mc_type == 'rgc-noaber-regauss':
+            truthPath = truthPath+'rgc-noaber/'
+        if (mc_type == 'noaber-regauss') or (mc_type == 'cgc-noaber-precise'):
+            truthPath = truthPath+'cgc-noaber/'
+        if (mc_type == 'regauss') or (mc_type == 'regauss-bugfix'):
+            truthPath = truthPath+'cgc/'
+            
     catFiles = glob.glob(path)
     if len(catFiles) == 0:
         raise RuntimeError("No catalogs found with path %s!"%path)
     catalogs = []
+    #alltruth = []
     for thisFile in catFiles:
-        if mc_type=='moments':
+
             # Here I was investigating the possibility that I'd
             # regressed the galaxy shapes against the wrong psf
             # ellipticity. I've disabled this for the time being.
-            this_catalog = fits.getdata(thisFile)
-            this_catalog['a1'] = this_catalog['a1']#/2.
-            this_catalog['a2'] = this_catalog['a2']#/2.
-            catalogs.append(this_catalog)
+        this_catalog = fits.getdata(thisFile)
+        keep  =   (this_catalog['g1'] != -10) & (this_catalog['g2'] != -10) & (this_catalog['weight'] > 0)
+        this_catalog = this_catalog[keep]
+        if mc_type=='moments':
+            this_catalog['a1'] = this_catalog['a1']/2.
+            this_catalog['a2'] = this_catalog['a2']/2.
+            
         else:
-            catalogs.append( fits.getdata(thisFile) )
+            this_catalog = fits.getdata(thisFile)
+            keep  =   (this_catalog['g1'] != -10) & (this_catalog['g2'] != -10) & (this_catalog['weight'] > 0)
+            this_catalog = this_catalog[keep]
+        if sn_cut is not None:
+            # Parse thisFile to figure out where the truth catalog
+            # lives.
+            pattern = re.compile("-(\d*).fits")
+            thisField = pattern.findall(thisFile)[0]
+            thisTruthFile = truthPath + 'subfield_catalog-'+thisField+'.fits'
+            truthCat = fits.getdata(thisTruthFile)
+            keep  =   (truthCat['gal_sn'] > (sn_cut) )
+            use = np.in1d(this_catalog['id'],truthCat[keep]['id'])
+            this_catalog = this_catalog[use]
+            truthCat = truthCat[use]
 
+        catalogs.append(this_catalog)
+    #cat = np.hstack(catalogs)
+    #truth = np.hstack(alltruth)
+    #stop
     return catalogs, truthFile
 
 
@@ -75,10 +137,10 @@ def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False, mc_type = 
     r1 = []
     r2 = []
     for catalog in catalogs:
-        e1_corr.append(catalog.g1 - catalog.c1 - catalog.a1*catalog.psf_e1)
-        e2_corr.append(catalog.g2 - catalog.c2 - catalog.a2*catalog.psf_e2)
-        r1.append(catalog.R1)
-        r2.append(catalog.R2)
+        e1_corr.append(catalog['g1'] - catalog['c1'] - catalog['a1']*catalog['psf_e1'])
+        e2_corr.append(catalog['g2'] - catalog['c2']- catalog['a2']*catalog['psf_e2'])
+        r1.append(catalog['R1'])
+        r2.append(catalog['R2'])
     e1_corr = np.hstack(e1_corr)
     e2_corr = np.hstack(e2_corr)
     r1 = np.hstack(r1)
@@ -178,7 +240,7 @@ def linear_estimator(data = None, null = None, deriv = None, cinv = None):
         return est, var
 
     
-def doInference(catalogs=None, nbins=None):
+def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
 
     print '  About to build prior...'
     bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg = \
@@ -201,43 +263,66 @@ def doInference(catalogs=None, nbins=None):
     covar2_scaled = - np.outer( e2_prior_hist, e2_prior_hist) * ( np.ones( (e2_prior_hist.size, e2_prior_hist.size) ) - np.diag(np.ones(e2_prior_hist.size) ) ) + np.diag( e2_prior_hist * (1 - e2_prior_hist) )
     
     for catalog,i in zip(catalogs, xrange(len(catalogs) )):
+
+
+        if mean is False:
+            this_e1_hist, _ = np.histogram(catalog['g1'] - catalog['c1'] - catalog['a1']*catalog['psf_e1'] , bins = bin_edges )
+            this_e1_hist = this_e1_hist * 1./catalog.size
+            this_e2_hist, _ = np.histogram(catalog['g2'] - catalog['c2'] - catalog['a2']*catalog['psf_e2'], bins = bin_edges )
+            this_e2_hist = this_e2_hist * 1./catalog.size
         
-        this_e1_hist, _ = np.histogram(catalog.g1 - catalog.c1 - catalog.a1*catalog.psf_e1 , bins = bin_edges )
-        this_e1_hist = this_e1_hist * 1./catalog.size
-        this_e2_hist, _ = np.histogram(catalog.g2 - catalog.c2 - catalog.a2*catalog.psf_e2, bins = bin_edges )
-        this_e2_hist = this_e2_hist * 1./catalog.size
-        
-        # covar_hist = N_obj  * covar; but we divide hist by N_obj, so divide covar_hist by N_obj*N_obj
-        this_covar1 = covar1_scaled * 1./catalog.size
-        this_covar2 = covar2_scaled * 1./catalog.size
+            # covar_hist = N_obj  * covar; but we divide hist by N_obj, so divide covar_hist by N_obj*N_obj
+            this_covar1 = covar1_scaled * 1./catalog.size
+            this_covar2 = covar2_scaled * 1./catalog.size
     
-        # Try making a covariance matrix from just this field?
-        this_field_covar1 = ( - np.outer( this_e1_hist, this_e1_hist) * ( np.ones( (this_e1_hist.size, this_e1_hist.size) ) - np.diag(np.ones(this_e1_hist.size) ) ) + np.diag( this_e1_hist * (1 - this_e1_hist) ) ) / catalog.size
-        this_field_covar2 =  (- np.outer( this_e2_hist, this_e2_hist) * ( np.ones( (this_e2_hist.size, this_e2_hist.size) ) - np.diag(np.ones(this_e2_hist.size) ) ) + np.diag( this_e2_hist * (1 - this_e2_hist) ) ) / catalog.size
-        try:
-            this_cinv1 = np.linalg.pinv(this_field_covar1)
-            this_cinv2 = np.linalg.pinv(this_field_covar2)
-        except:
-            this_cinv1 = np.linalg.inv(this_field_covar1)
-            this_cinv2 = np.linalg.inv(this_field_covar2)
+            # Try making a covariance matrix from just this field?
+            this_field_covar1 = ( - np.outer( this_e1_hist, this_e1_hist) * ( np.ones( (this_e1_hist.size, this_e1_hist.size) ) - np.diag(np.ones(this_e1_hist.size) ) ) + np.diag( this_e1_hist * (1 - this_e1_hist) ) ) / catalog.size
+            this_field_covar2 =  (- np.outer( this_e2_hist, this_e2_hist) * ( np.ones( (this_e2_hist.size, this_e2_hist.size) ) - np.diag(np.ones(this_e2_hist.size) ) ) + np.diag( this_e2_hist * (1 - this_e2_hist) ) ) / catalog.size
+            try:
+                this_cinv1 = np.linalg.pinv(this_field_covar1)
+                this_cinv2 = np.linalg.pinv(this_field_covar2)
+            except:
+                this_cinv1 = np.linalg.inv(this_field_covar1)
+                this_cinv2 = np.linalg.inv(this_field_covar2)
 
-        # Get derivatives for this shear field.
-        #_, _, _, this_de1_dg, this_de2_dg = buildPrior([catalog], nbins=nbins, bins = bin_edges)
+            # Get derivatives for this shear field.
+            #_, _, _, this_de1_dg, this_de2_dg = buildPrior([catalog], nbins=nbins, bins = bin_edges)
 
-        gamma1_raw[i] = linear_estimator(data=this_e1_hist, null=e1_prior_hist, deriv=de1_dg)
-        gamma2_raw[i] = linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv=de2_dg) 
-        this_g1_opt, this_g1_var = \
-            linear_estimator(data=this_e1_hist, null=e1_prior_hist, deriv= de1_dg, cinv=this_cinv1)
-        this_g2_opt, this_g2_var = \
-            linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv= de2_dg, cinv=this_cinv2) 
+            gamma1_raw[i] = linear_estimator(data=this_e1_hist, null=e1_prior_hist, deriv=de1_dg)
+            gamma2_raw[i] = linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv=de2_dg) 
+            this_g1_opt, this_g1_var = \
+                linear_estimator(data=this_e1_hist, null=e1_prior_hist, deriv= de1_dg, cinv=this_cinv1)
+            this_g2_opt, this_g2_var = \
+                linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv= de2_dg, cinv=this_cinv2)
+            if plotFile is not None:
+                fig, (ax1, ax2) = plt.subplots(nrows=1, ncols = 3, figsize = (14,7))
+                linear_bin_edges = np.linspace(-15,15,100)
+                linear_bin_centers = (linear_bin_edges[0:-1] + linear_bin_edges[1:])/2.
+                ax1.semilogy(linear_bin_centers, e1_prior_hist, label = 'e1 prior')
+                ax1.semilogy(linear_bin_centers, this_e1_hist, label = 'this_e1')
+                ax1.legend(loc='best')
+                ax1.axvline(bin_edges,color='red')
+                ax1.plot((bin_edges[0:-1] + bin_edges[1:])/2., de1_dg)
+                ax1.plot((bin_edges[0:-1] + bin_edges[1:])/2., de2_dg)
+                fig.savefig(plotFile)
+        
+        elif mean is True:
+            this_g1_opt =  np.average(catalog['g1'] - catalog['c1'] - catalog['a1'] * catalog['psf_e1'], weights = catalog['weight']) \
+               / np.average(catalog['R1'], weights = catalog['weight'])
+            this_g2_opt =  np.average(catalog['g2'] - catalog['c2'] - catalog['a2'] * catalog['psf_e2'], weights = catalog['weight']) \
+              / np.average(catalog['R2'], weights = catalog['weight'])
+            this_g1_var =  np.average(  ( ( catalog['g1'] - catalog['c1'] - catalog['a1'] * catalog['psf_e1']) - this_g1_opt )**2, weights = catalog['weight']) *1./ len(catalog)
+            this_g2_var =  np.average(  ( ( catalog['g2'] - catalog['c2'] - catalog['a2'] * catalog['psf_e2']) - this_g2_opt )**2, weights = catalog['weight']) *1./ len(catalog)
+
+                            
         gamma1_opt[i] = this_g1_opt
         gamma2_opt[i] = this_g2_opt
         gamma1_var[i] = this_g1_var
         gamma2_var[i] = this_g2_var
 
-        e1_hist_desheared, _ = np.histogram(catalog.g1 - catalog.R1 * this_g1_opt - catalog.c1 - catalog.a1*catalog.psf_e1 , bins = bin_edges )
+        e1_hist_desheared, _ = np.histogram(catalog['g1'] - catalog['R1'] * this_g1_opt - catalog['c1'] - catalog['a1']*catalog['psf_e1'] , bins = bin_edges )
         e1_hist_desheared = e1_hist_desheared * 1./catalog.size
-        e2_hist_desheared, _ = np.histogram(catalog.g2 - catalog.R2 * this_g2_opt - catalog.c2 - catalog.a2*catalog.psf_e2, bins = bin_edges )
+        e2_hist_desheared, _ = np.histogram(catalog['g2'] - catalog['R2'] * this_g2_opt - catalog['c2'] - catalog['a2']*catalog['psf_e2'], bins = bin_edges )
         e2_hist_desheared = e2_hist_desheared * 1./catalog.size
         
 
@@ -282,12 +367,38 @@ def bootstrapCoeffErr(shear_model,A,B,sigma, n_resample = 10000):
 
     return m,a,c,sigma_m, sigma_a, sigma_c
 
-def getCalibCoeff(g_true = None, g_meas=None, g_var=None, psf_e=None, bootstrap = False):
+def jackknifeCoeffErr(shear_model,A,B,sigma):
+    from scipy.optimize import curve_fit
+    all_indices = np.arange(sigma.size)
+    m = np.empty(sigma.size)
+    a = np.empty(sigma.size)
+    c = np.empty(sigma.size)
+    for i in xrange(sigma.size):
+        this_A = np.delete(A,i,axis=1)
+        this_B = np.delete(B,i)
+        this_sigma = np.delete(sigma,i)
+        (this_m, this_a, this_c), _ = curve_fit(shear_model, this_A, this_B, sigma=this_sigma)
+        m[i] = this_m
+        a[i] = this_a
+        c[i] = this_c
+    sigma_m = np.std(m) * ( len(m) - 1 ) *1./(len(m))
+    sigma_a = np.std(a) * ( len(m) - 1 ) *1./(len(m))
+    sigma_c = np.std(c) * ( len(m) - 1 ) *1./(len(m))
+    m = np.mean(m)
+    a = np.mean(a)
+    c = np.mean(c)
+
+    return m,a,c,sigma_m, sigma_a, sigma_c
+
+
+def getCalibCoeff(g_true = None, g_meas=None, g_var=None, psf_e=None, errType = None):
     from scipy.optimize import curve_fit
     A = np.column_stack([g_true, psf_e, np.ones_like(psf_e)]).transpose()
     B = g_meas - g_true
-    if bootstrap:
-        m,a,c, sig_m, sig_a, sig_c = bootstrapCoeffErr(shear_model,A,B, np.sqrt(g_var), n_resample = 1000)
+    if errType is 'bootstrap':
+        m,a,c, sig_m, sig_a, sig_c = bootstrapCoeffErr(shear_model,A,B, np.sqrt(g_var), n_resample = 400)
+    if errType is 'jackknife':
+        m,a,c, sig_m, sig_a, sig_c = jackknifeCoeffErr(shear_model,A,B, np.sqrt(g_var))
     else:
         ret_val, covar = curve_fit(shear_model, A, B, sigma=np.sqrt(g_var))
         m=ret_val[0]
@@ -333,16 +444,16 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
 
 
     if logLcut is not None:
-        outliers =  ((obsTable['e1_logL'] <= logLcut) & (obsTable['e2_logL'] <= logLcut) ) | ( (obsTable['psf_e1'] == -10) | (obsTable['psf_e2'] == -10) )
+        outliers =  ((obsTable['e1_logL'] <= logLcut) & (obsTable['e2_logL'] <= logLcut) ) #| ( (obsTable['psf_e1'] == -10) | (obsTable['psf_e2'] == -10) )
         kept = ~outliers
     else:
         outliers = ( (obsTable['psf_e1'] == -10) | (obsTable['psf_e2'] == -10) )
         kept = ~outliers
 
     coeff1 = getCalibCoeff(g_true = truthTable[kept]['g1'], g_meas=obsTable[kept]['g1'], g_var=obsTable[kept]['g1var'],
-                           psf_e=obsTable[kept]['psf_e1'], bootstrap = True)
+                           psf_e=obsTable[kept]['psf_e1'], errType = 'bootstrap')
     coeff2 = getCalibCoeff(g_true = truthTable[kept]['g2'], g_meas=obsTable[kept]['g2'], g_var=obsTable[kept]['g2var'],
-                           psf_e=obsTable[kept]['psf_e2'], bootstrap = True)
+                           psf_e=obsTable[kept]['psf_e2'], errType = 'bootstrap')
 
     import matplotlib.pyplot as plt
     if not use_errors:
@@ -392,7 +503,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax3.axhline(0.,linestyle='--',color='red')
         ax3.plot(truthTable['g1'],coeff1[0]*truthTable['g1'] + coeff1[2],linestyle='--',color='cyan')
         ax3.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')
-        ax3.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
+        ax3.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
         
         ax4.plot(truthTable['g2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
         if logLcut is not None:
@@ -400,7 +511,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax4.axhline(0.,linestyle='--',color='red')
         ax4.plot(truthTable['g2'],coeff2[0]*truthTable['g2'] + coeff2[2],linestyle='--',color='cyan')
         ax4.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')        
-        ax4.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
+        ax4.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
 
         ax5.plot(obsTable['e1_logL'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
         ax5.set_xlabel('multinomial log likelihood')
@@ -426,7 +537,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax7.axhline(0.,linestyle='--',color='red')
         ax7.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
         ax7.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
-        #ax7.set_xlim([-0.03,0.03])
+        #ax7.set_xlim([-0.01,0.03])
         ax7.set_title('psf trend (e1)')
         
         ax8.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
@@ -466,7 +577,7 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
         if 'regauss' in mc:
             calib1 = 2*(1 - np.var(catalog['g1'][np.abs(catalog['g1']) <= 3]))
             calib2 = 2*(1 - np.var(catalog['g2'][np.abs(catalog['g2']) <= 3]))
-        elif 'moments' in mc:
+        elif 'moments' in mc or 'ksb' in mc:
             calib1 = 2.
             calib2 = 2.
         else:
@@ -488,9 +599,9 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
                       np.percentile( np.concatenate( (obsTable['g1'], obsTable['g2']) ), 50))
 
     coeff1 = getCalibCoeff(g_true = truthTable['g1'], g_meas=obsTable['g1'], g_var=obsTable['err1']**2,
-                           psf_e=obsTable['psf_e1'], bootstrap = True)
+                           psf_e=obsTable['psf_e1'], errType = 'bootstrap')
     coeff2 = getCalibCoeff(g_true = truthTable['g2'], g_meas=obsTable['g2'], g_var=obsTable['err2']**2,
-                           psf_e=obsTable['psf_e2'], bootstrap = True)
+                           psf_e=obsTable['psf_e2'], errType = 'bootstrap')
 
     
     fig,((ax1,ax2), (ax3,ax4), (ax5,ax6)) = plt.subplots(nrows=3, ncols=2,figsize=(14,21))
@@ -501,7 +612,7 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
     ax1.set_ylabel('g1 (est)')
     ax1.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5]),
                  (0.01,-0.03))
-    ax1.set_ylim([-shear_range, shear_range])
+    #ax1.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
     
     ax2.errorbar(truthTable['g2'],obsTable['g2'],obsTable['err2'],linestyle='.')
     ax2.plot(truthTable['g2'],truthTable['g2'],'--',color='red')
@@ -510,31 +621,37 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
     ax2.set_ylabel('g2 (est)')
     ax2.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]),
                  (0.01,-0.03))
-    ax2.set_ylim([-shear_range, shear_range])
+    #ax2.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
     
     ax3.plot(truthTable['g1'], obsTable['g1'] - truthTable['g1'],'.')
     ax3.plot(truthTable['g1'],coeff1[0]*truthTable['g1'] + coeff1[2],linestyle='--',color='cyan')
     ax3.set_xlabel('g1 (truth)')
     ax3.set_ylabel('g1 (est) - g1 (truth)')
-    ax3.set_ylim([-shear_range, shear_range])
+    ax3.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
     ax3.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
+    ax3.axhline(0.,linestyle='--',color='red')
     
     ax4.plot(truthTable['g2'], obsTable['g2'] - truthTable['g2'],'.')
     ax4.plot(truthTable['g2'],coeff2[0]*truthTable['g2'] + coeff2[2],linestyle='--',color='cyan')
-
-    ax4.set_ylim([-shear_range, shear_range])
+    ax4.set_ylim([-0.03,0.03])#.set_ylim([-shear_range, shear_range])
     ax4.set_xlabel('g2 (truth)')
     ax4.set_ylabel('g2 (est) - g2 (truth)')
     ax4.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
+    ax4.axhline(0.,linestyle='--',color='red')
 
+    
     ax5.plot(obsTable['psf_e1'], obsTable['g1'] - truthTable['g1'],'.')
     ax5.plot(obsTable['psf_e1'],coeff1[1]*obsTable['psf_e1'] + coeff1[2],linestyle='--',color='cyan')
     ax5.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
+    ax5.axhline(0.,linestyle='--',color='red')
+    ax5.set_xlabel('psf_e1')
     
     ax6.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g2'],'.')
     ax6.plot(obsTable['psf_e2'],coeff2[1]*obsTable['psf_e2'] + coeff2[2],linestyle='--',color='cyan')
     ax6.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
-    
+    ax6.axhline(0.,linestyle='--',color='red')
+    ax6.set_xlabel('psf_e2')
+        
     fig.savefig(mc+'-no_corrections')
         
 def calculate_likelihood_cut(fieldstr = None, mc=None):
@@ -610,8 +727,9 @@ def main(argv):
     import argparse
 
     description = """Analyze MetaCalibration outputs from Great3 and Great3++ simulations."""
-    mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym', 'noaber-regauss','rgc-regauss','rgc-noaber-regauss','rgc-fixedaber-regauss']
+    mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym','noaber-regauss','rgc-regauss','rgc-noaber-regauss','rgc-fixedaber-regauss', 'rgc-ksb','cgc-noaber-precise']
     # Note: The above line needs to be consistent with the choices in getAllCatalogs.
+    method_choices = ["regauss","ksb"]
     
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("--path", dest="path", type=str, default="../Great3/",
@@ -625,15 +743,22 @@ def main(argv):
     parser.add_argument("-p", "--percentile_cut", dest="percentile_cut",
                         help="percentile",type= float, default = 10)
     parser.add_argument("-dp", "--doplot", dest = "doplot", action="store_true")
+    parser.add_argument("-sn", "--snos_cut", dest="sn_cut",
+                        help="percentile",type= float, default = 0)
+    #parser.add_argument("-a","--algorithm", dest="algorithm"
+
     args = parser.parse_args(argv[1:])
-    
+    if args.sn_cut > 0:
+        sn_cut = args.sn_cut
+    else:
+        sn_cut = None
     path = args.path
     mc_type = args.mc_type
     nbins = args.nbins
     outfile = args.outfile
     print 'Getting catalogs from path %s and mc_type %s'%(path, mc_type)
     print 'Using %i bins for inference'% (nbins)
-    catalogs, truthfile = getAllCatalogs(path=path, mc_type=mc_type)
+    catalogs, truthfile = getAllCatalogs(path=path, mc_type=mc_type,sn_cut = sn_cut)
     print 'Got %d catalogs, doing inference'%len(catalogs)
     field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL = \
         doInference(catalogs=catalogs, nbins=nbins)

@@ -10,6 +10,7 @@ import sys
 import time
 import os
 import optparse
+import math
 import numpy
 import socket
 
@@ -199,7 +200,7 @@ def getPS(record, gal_im, ps_size, starfield_image=None):
         psf_subimage = starfield_image[bounds]
         return subimage, psf_subimage
 
-def checkFailures(shear_results, responsivity_stat):
+def checkFailures(shear_results, responsivity_stat, shear_est = "regauss"):
     """Routine to check for shape measurement failures which should be flagged as such.
 
     Arguments:
@@ -216,10 +217,12 @@ def checkFailures(shear_results, responsivity_stat):
     # Compare resolution factor with galsim.hsm.HSMParams.failed_moments or look for other obvious
     # oddities in shears, quoted errors, etc.
     hsmparams = galsim.hsm.HSMParams()
+
     for index in range(n_gal):
-        test_e = numpy.sqrt(
-            shear_results[index].corrected_e1**2 + shear_results[index].corrected_e2**2
-            )
+        if shear_est == "regauss":
+            test_e = numpy.sqrt(shear_results[index].corrected_e1**2 + shear_results[index].corrected_e2**2)
+        elif shear_est == "ksb":
+            test_e = numpy.sqrt(shear_results[index].corrected_g1**2 + shear_results[index].corrected_g2**2)
         if shear_results[index].resolution_factor == hsmparams.failed_moments or \
                 shear_results[index].corrected_shape_err < 0 or test_e > 4. or \
                 shear_results[index].corrected_shape_err > 0.5 or \
@@ -293,14 +296,14 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
     # Create a GSObj from the psf image.
     l5 = galsim.Lanczos(5, True, 1.0E-4)
     l52d = galsim.InterpolantXY(l5)
-    psf = galsim.InterpolatedImage(psfImage, x_interpolant = l52d)
+    psf = galsim.InterpolatedImage(psfImage)
 
     # Deconvolve the pixel from the PSF.
     pixInv = galsim.Deconvolve(pixel)
     psfNoPixel = galsim.Convolve([psf , pixInv])
 
     # Increase the size of the PSF by 2*shear
-    psfGrownNoPixel = psfNoPixel.dilate(1 + 2*numpy.max([g1,g2]))
+    psfGrownNoPixel = psfNoPixel.dilate(1 + 2*math.sqrt(g1**2 + g2**2))
 
     # Convolve the grown psf with the pixel
     psfGrown = galsim.Convolve(psfGrownNoPixel,pixel)
@@ -316,16 +319,21 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
     return psfGrownImage
 
 
-def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1=0.01, g2=0.0, variance=1.,
+def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1=0.0, g2=0.0, variance=1.,
                             g1psf=0., g2psf=0.):
     
     pixel = psfImage.scale
-    l5 = galsim.Lanczos(5, True, 1.0E-4)
+    l5 = galsim.Lanczos(5, True, 1.0E-6)
     l52d = galsim.InterpolantXY(l5)
+
+    
     # Turn the provided image arrays into GSObjects
-    galaxy = galsim.InterpolatedImage(galaxyImage, x_interpolant = l52d)
-    psf = galsim.InterpolatedImage(psfImage, x_interpolant = l52d)
-    psfTarget = galsim.InterpolatedImage(psfImageTarget, x_interpolant = l52d)
+    # pad factor may be important here (increase to 6?)
+    # also, look at k-space interpolant
+
+    galaxy = galsim.InterpolatedImage(galaxyImage)
+    psf = galsim.InterpolatedImage(psfImage)
+    psfTarget = galsim.InterpolatedImage(psfImageTarget)
     
     # Remove the psf from the galaxy
     psfInv = galsim.Deconvolve(psf)
@@ -466,7 +474,7 @@ def EstimateAllShearsStar(args):
 
 def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catalog", output_type="fits",
                       clobber=True, sn_weight=False, calib_factor=0.98, coadd=False,
-                      variable_psf_dir=""):
+                      variable_psf_dir="", shear_est = "regauss"):
     """Main driver for all routines in this file, and the implementation of most of the command-line
     interface.
 
@@ -618,48 +626,61 @@ def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catal
         
 
         res = galsim.hsm.EstimateShear(unsheared1Galaxy, reconv1PSF, sky_var=float(sky_var),
-                                       guess_sig_PSF = guess_sig, shear_est="regauss",  **default_shear_kwds)
+                                       guess_sig_PSF = guess_sig, shear_est= shear_est,  **default_shear_kwds)
 
         shear_results.append(res)
         try:
             sky_var = float(sky_var)
             # Things needed for multiplicative bias etc.
             res_g1 = galsim.hsm.EstimateShear(sheared1Galaxy, reconv1PSF, sky_var=sky_var,
-                                              guess_sig_PSF = guess_sig, shear_est="regauss")
+                                              guess_sig_PSF = guess_sig, shear_est=shear_est)
 
             res_g2 = galsim.hsm.EstimateShear(sheared2Galaxy, reconv2PSF, sky_var=sky_var,
-                                              guess_sig_PSF = guess_sig, shear_est="regauss")
+                                              guess_sig_PSF = guess_sig, shear_est=shear_est)
 
             res_mg1 = galsim.hsm.EstimateShear(shearedm1Galaxy, reconvm1PSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="regauss")
+                                               guess_sig_PSF = guess_sig, shear_est=shear_est)
 
             res_mg2 = galsim.hsm.EstimateShear(shearedm2Galaxy, reconvm2PSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="regauss")
+                                               guess_sig_PSF = guess_sig, shear_est=shear_est)
             # Things needed for additive bias
             res_g1p = galsim.hsm.EstimateShear(unsheared1PGalaxy, reconv1PPSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="regauss")
+                                               guess_sig_PSF = guess_sig, shear_est=shear_est)
             res_g2p = galsim.hsm.EstimateShear(unsheared2PGalaxy, reconv2PPSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="regauss")
+                                               guess_sig_PSF = guess_sig, shear_est=shear_est)
             res_mg1p = galsim.hsm.EstimateShear(unshearedm1PGalaxy, reconvm1PPSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="regauss")
+                                               guess_sig_PSF = guess_sig, shear_est=shear_est)
             res_mg2p = galsim.hsm.EstimateShear(unshearedm2PGalaxy, reconvm2PPSF, sky_var=sky_var,
-                                               guess_sig_PSF = guess_sig, shear_est="regauss")
+                                               guess_sig_PSF = guess_sig, shear_est=shear_est)
             psf_mom = galsim.hsm.FindAdaptiveMom(reconv1PSF)
             
             # Get most of what we need to make a derivative, i.e., (distortion with +g applied) -
             # (distortion with -g applied).  Then divide by 2 since we're doing a 2-sided
             # derivative.  Later, we'll sum these up with weights, and divide by the applied shear.
             # This is for multiplicative bias:
-            de1_g1 = 0.5*(res_g1.corrected_e1 - res_mg1.corrected_e1)/0.01
-            de2_g2 = 0.5*(res_g2.corrected_e2 - res_mg2.corrected_e2)/0.01
-            # Basic systematics correction for regauss oddities:
-            c1 = 0.5 * (res_g1.corrected_e1 + res_mg1.corrected_e1) - res.corrected_e1
-            c2 = 0.5 * (res_g2.corrected_e2 + res_mg2.corrected_e2) - res.corrected_e2
-#            if numpy.random.randomu() <= 0.1:
-#                print "measured responsivity: ",de1_g1
-            # This is the new stuff for additive PSF anisotropy correction:
-            de1_dpg1 = 0.5*(res_g1p.corrected_e1 - res_mg1p.corrected_e1)/0.01
-            de2_dpg2 = 0.5*(res_g2p.corrected_e2 - res_mg2p.corrected_e2)/0.01
+            if shear_est == "regauss":
+                de1_g1 = 0.5*(res_g1.corrected_e1 - res_mg1.corrected_e1)/0.01
+                de2_g2 = 0.5*(res_g2.corrected_e2 - res_mg2.corrected_e2)/0.01
+                # Basic systematics correction for measurement oddities:
+                c1 = 0.5 * (res_g1.corrected_e1 + res_mg1.corrected_e1) - res.corrected_e1
+                c2 = 0.5 * (res_g2.corrected_e2 + res_mg2.corrected_e2) - res.corrected_e2
+                #if numpy.random.randomu() <= 0.1:
+                #                print "measured responsivity: ",de1_g1
+                # This is the new stuff for additive PSF anisotropy correction:
+                de1_dpg1 = 0.5*(res_g1p.corrected_e1 - res_mg1p.corrected_e1)/0.01
+                de2_dpg2 = 0.5*(res_g2p.corrected_e2 - res_mg2p.corrected_e2)/0.01
+            elif shear_est == "ksb":
+                de1_g1 = 0.5*(res_g1.corrected_g1 - res_mg1.corrected_g1)/0.01
+                de2_g2 = 0.5*(res_g2.corrected_g2 - res_mg2.corrected_g2)/0.01            
+                # Basic systematics correction for measurement oddities:
+                c1 = 0.5 * (res_g1.corrected_g1 + res_mg1.corrected_g1) - res.corrected_g1
+                c2 = 0.5 * (res_g2.corrected_g2 + res_mg2.corrected_g2) - res.corrected_g2
+                #if numpy.random.randomu() <= 0.1:
+                #                print "measured responsivity: ",de1_g1
+                # This is the new stuff for additive PSF anisotropy correction:
+                de1_dpg1 = 0.5*(res_g1p.corrected_g1 - res_mg1p.corrected_g1)/0.01
+                de2_dpg2 = 0.5*(res_g2p.corrected_g2 - res_mg2p.corrected_g2)/0.01
+                
             responsivity_stat.append(1)
             responsivity_1.append(de1_g1)
             responsivity_2.append(de2_g2)
@@ -684,7 +705,7 @@ def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catal
     log("...Time per object=%f s, total time for loop=%f s"%(dt/n_gal,dt))
 
     # First figure out which objects have failures.
-    use_shape = checkFailures(shear_results, responsivity_stat)
+    use_shape = checkFailures(shear_results, responsivity_stat, shear_est = shear_est)
     n_success = numpy.round(use_shape.sum())
     log("Number with successful measurements: %d, or %f percent"%
         (n_success,100*float(n_success)/n_gal))
@@ -761,8 +782,13 @@ def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catal
     use_index = 0
 
     for index in range(n_gal):
-        g1[index] = shear_results[index].corrected_e1
-        g2[index] = shear_results[index].corrected_e2
+        if shear_est == "regauss":
+            g1[index] = shear_results[index].corrected_e1
+            g2[index] = shear_results[index].corrected_e2
+        elif shear_est == "ksb":
+            g1[index] = shear_results[index].corrected_g1
+            g2[index] = shear_results[index].corrected_g2
+            
         if sn_weight:
             weight[index] = use_weight[use_index]
         if not use_shape[index]:
@@ -809,6 +835,11 @@ def main(argv):
                       help="Directory in which to find variable PSF models; only use this option for a variable PSF branch!")
     parser.add_option("--quiet", dest="quiet", action='store_true', default=False,
                       help="Don't print progress statements")
+    parser.add_option("--single", dest="single", action='store_true', default=False,
+                      help="Don't call Pool.Map")
+    parser.add_option("--algorithm","-a", dest="algorithm", default="regauss",
+                      choices = ["regauss","ksb"], help="metcalibration catalog type to use")
+
     opts, args = parser.parse_args()
     try:
         subfield, sim_dir, output_dir = args
@@ -839,7 +870,7 @@ def main(argv):
     else:
         verbose = True
 
-    if 'compute' in socket.gethostname() or 'coma' in socket.gethostname():
+    if ('compute' in socket.gethostname() or 'coma' in socket.gethostname()) or opts.single:
         # Just use one CPU on the coma cluster, since we've already made this whole thing
         # embarrassingly parallel by farming out each subfield to a single CPU.
         EstimateAllShears(
@@ -850,7 +881,8 @@ def main(argv):
             sn_weight=sn_weight,
             calib_factor=opts.calib_factor,
             coadd=opts.coadd,
-            variable_psf_dir=opts.variable_psf_dir
+            variable_psf_dir=opts.variable_psf_dir,
+            shear_est = opts.algorithm
             )
     else:
         # Run on all available CPUs.

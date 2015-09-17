@@ -12,9 +12,10 @@ pro metacal_diagnose
 
 ; Go get the files.
 ;--------------------------------------------------
+  template_const = '/n/des/huff.791/Great3/Outputs-Regauss-BugFix/output_catalog*.fits'
 ;  template_const = '/n/des/huff.791/Great3/Outputs-Regauss/cgc_metacal_regauss_fix*.fits'
 ;  template_const = '/n/des/huff.791/Great3/Outputs-Regauss-SymNoise/output_catalog-*.fits'
-  template_const = '../Great3/Outputs-Regauss-SymNoise/cgc_metacal_symm-*.fits'
+;  template_const = '../Great3/Outputs-Regauss-SymNoise/cgc_metacal_symm-*.fits'
   files_const = file_search(template_const,count=ctc)
 
   
@@ -45,7 +46,8 @@ pro metacal_diagnose
 
 ; Now loop over the file list and make diagnostic plots for each one.
 ; Read in the shear table for the CGC branch.
-  readcol,'cgc-truthtable-all.txt',truth_field_id,truth_g1,truth_g2,epoch,truth_psf_g1,truth_psf_g2
+  readcol,'cgc-truthtable.txt',truth_field_id,truth_g1,truth_g2;,epoch,truth_psf_g1,truth_psf_g2
+  readcol,'cgc-psf-truth.txt',none, truth_psf_g1, truth_psf_g2, subfield_index
   psopen,'cgc-metacal-res_check',xsize=7,ysize=7,/inches,/color
   prepare_plots,/color
   bias1 = fltarr(nfiles)
@@ -56,6 +58,7 @@ pro metacal_diagnose
   g2_arr = fltarr(nfiles)
   psf1_arr = fltarr(nfiles)
   psf2_arr = fltarr(nfiles)
+
 
   for i = 0,nfiles-1 do begin
      ncat = mrdfits(files_none[i],1)
@@ -83,6 +86,23 @@ pro metacal_diagnose
      psf1_arr[i] = psf_g1
      psf2_arr[i] = psf_g2
   
+     if n_elements(all_r1_true) eq 0 then begin
+        all_r1_meas = ccat.r1
+        all_r2_meas = ccat.r2
+        all_r1_true = de1_dg1
+        all_r2_true = de2_dg2
+        all_weight = ccat.weight
+        all_g1 = g1_arr
+        all_g2 = g2_arr
+     endif else begin
+        all_r1_meas = [all_r1_meas, ccat.r1]
+        all_r2_meas = [all_r2_meas, ccat.r2]
+        all_r1_true = [all_r1_true, de1_dg1]
+        all_r2_true = [all_r2_true, de2_dg2]
+        all_g1 = [all_g1, g1_arr]
+        all_g2 = [all_g2, g2_arr]
+     endelse
+
 
 ;  Now make some plots.
      ;window,0
@@ -103,7 +123,7 @@ pro metacal_diagnose
   endfor
   psclose
   prepare_plots,/reset
-
+  stop
   badfields = [93,97,150]
   for i = 0,nfiles-1 do begin
      ncat = mrdfits(files_none[i],1)
