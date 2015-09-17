@@ -39,18 +39,17 @@ Department of Physics, The Ohio State University, OH 43210, USA}
 
 \begin{abstract}
   One of the major limiting sources of systematic error in forthcoming
-  weak lensing measurements is
-  systematic uncertainty in the quantitative relationship between the
-  distortions due to gravitational lensing and
-  the measurable properties of galaxy images. We present a
-  statistically principled, general solution to this problem. Our
-  technique infers calibration parameters for an arbitrary shape
-  measuremtoent technique by modifying the real images to simulate the
-  effects a known shear. We test our results on simulated timages from
-  the Great3 shear calibration challenge, and show that the method
-  eliminates calibration biases for a variety of shape measurement
-  techniques at the level of precision measurable with the available
-  Great3 simulations. 
+  weak lensing measurements is systematic uncertainty in the
+  quantitative relationship between the distortions due to
+  gravitational lensing and the measurable properties of galaxy
+  images. We present a statistically principled, general solution to
+  this problem. Our technique infers calibration parameters for an
+  arbitrary shape measuremtoent technique by modifying the real images
+  to simulate the effects a known shear. We test our results on
+  simulated timages from the Great3 shear calibration challenge, and
+  show that the method eliminates calibration biases for a variety of
+  shape measurement techniques at the level of precision measurable
+  with the available Great3 simulations.
 \end{abstract}
 
 
@@ -71,17 +70,17 @@ Weak lensing measurements are thus a core part of the international
 cosmology program, and a key science driver for many wide-field
 astronomical astronomical surveys (KiDS, DES, SuMIRE,
 LSST\footnote{\url{http://www.lsst.org/lsst/}},
-  Euclid\footnote{\url{http://sci.esa.int/euclid/}\url{http://www.euclid-ec.org}}
-  \citep{2011arXiv1110.3193L},
+Euclid\footnote{\url{http://sci.esa.int/euclid/}\url{http://www.euclid-ec.org}}
+\citep{2011arXiv1110.3193L},
 WFIRST-AFTA\footnote{\url{http://wfirst.gsfc.nasa.gov}}
-\citep{2009arXiv0912.0201L ,2011arXiv1110.3193,2015arXiv150303757S}).
+\citep{2009arXiv0912.0201L,2011arXiv1110.3193L,2015arXiv150303757S}).
 
 Despite this investment, it is not yet clear that the statistical
 power of these measurements will ultimately be matched by their
 accuracy. There are several sources of systematic uncertainty that may
 turn out to be larger than the statistical errors of these
-experiments. One of the largest such systematic error sources is
-the {\it shear calibration bias}, the quantitative realationship between
+experiments. One of the largest such systematic error sources is the
+{\it shear calibration bias}, the quantitative realationship between
 the gravitational lensing signal and its chief observables.
 
 The major physical effect studied by weak lensing surveys is the
@@ -202,7 +201,8 @@ convolved with some seeing kernel $P(\mathbf{x})$.
 
 In an ideal world, we would vary the gravitational shear experienced
 by the image before is smeared by $P$, constructing the counterfactual
-image $I'(\mathbf{x}| {\boldsymbol \gamma})$: \begin{equation}
+image $I'(\mathbf{x}| {\boldsymbol \gamma})$:
+\begin{equation}
   I'({\mathbf{x}}) = P \otimes\left( \hat{\mathbf{s}}G\right)
 \end{equation}
 
@@ -235,48 +235,111 @@ Our chosen procedure for producing a sheared counterfactual image is
 \hat{\mathbf{A}}  = \Gamma \otimes \left[ \hat{\mathbf{s}} \left(P^{-1} I \right)\right].
 \end{equation}
 
-This procedure clearly requires a good model for $P$, but so do all shear measurements. PSF model mis-specification errors enter at the same order in measurements on the resulting image that they would in an unmodified image.
+This procedure clearly requires a good model for $P$, but so do all
+shear measurements. PSF model mis-specification errors enter at the
+same order in measurements on the resulting image that they would in
+an unmodified image.
 
-Once the counterfactual image $I'(\mathbf{x}|\gamma)$ with $\|{\boldsymbol \gamma}\| << 1$ has been created, the galaxy detection and shear measurement pipeline should be run. This provides a measure of the shear sensitivity for an image with the PSF $\Gamma$, not an image with the psf $P$. This requires that the full measurement -- not just the sensitivity analysis -- be run on a third image $I'(\mathbf{x}|\gamma=0)$, so that the numerical derivative $\frac{\partial I'}{\partial \gamma}$ is well-defined.
+Once the counterfactual image $I'(\mathbf{x}|\gamma)$ with
+$\|{\boldsymbol \gamma}\| << 1$ has been created, the galaxy detection
+and shear measurement pipeline should be run. This provides a measure
+of the shear sensitivity for an image with the PSF $\Gamma$, not an
+image with the psf $P$. This requires that the full measurement -- not
+just the sensitivity analysis -- be run on a third image
+$I'(\mathbf{x}|\gamma=0)$, so that the numerical derivative
+$\frac{\partial I'}{\partial \gamma}$ is well-defined.
 
-This procedure introduces correlated, anisotropic noise, which can produce a systematic multiplicative shear bias. If the noise properties of the initial image are known, the noise anistropy can be removed with additional anisotropic noise. As we describe below, we have not found noise isotropization to be a necessary step.
+This procedure introduces correlated, anisotropic noise, which can
+produce a systematic multiplicative shear bias. If the noise
+properties of the initial image are known, the noise anistropy can be
+removed with additional anisotropic noise. As we describe below, we
+have not found noise isotropization to be a necessary step.
 
-MetaCalibration can be used to mitigate other systematics as well. Even those measurement methods with the highest scores in the Great3 lensing challenge were unable to completely remove the effects of psf ellipticity on the inferred shear. We can introduce an artifical PSF anisotropy by replace $\Gamma$ with a PSF containing the desired synthetic distortion.  We show below that reconstructing images with added PSF ellipticity, rather than added shear, allow us to de-trend the effects of psf anisotropy. A similar approach could be used to measure calibration biases arising from any effect -- signal or systematic error --  which can be simulated by perturbing the images as above.
+MetaCalibration can be used to mitigate other systematics as
+well. Even those measurement methods with the highest scores in the
+Great3 lensing challenge were unable to completely remove the effects
+of psf ellipticity on the inferred shear. We can introduce an
+artifical PSF anisotropy by replace $\Gamma$ with a PSF containing the
+desired synthetic distortion.  We show below that reconstructing
+images with added PSF ellipticity, rather than added shear, allow us
+to de-trend the effects of psf anisotropy. A similar approach could be
+used to measure calibration biases arising from any effect -- signal
+or systematic error -- which can be simulated by perturbing the images
+as above.
 
 \section{Implementation}
-We have created a simple pipeline that takes as inputs postage stamps of the galaxy and psf model, and returns a set of modified images, as described below. A shape measurement code -- the details of which MetaCalibration is agnostic about -- returns shear or shape estimates for each of the modified images. The resulting set of shapes is used to derive calibration and psf biases for each galaxy. These parameters, along with a shape prior inferred from the full ensemble of shapes, are used to derive a mean shear per field. Virtually any measurement method can be embedded in this loop, and as long as it is sensitive to the shear and not catastrophically biased, the linear shear and psf calibration biases will be removed. MetaCalibration can also calibrate away shear selection biases, so long as detection is performed inside the procedure.
+We have created a simple pipeline that takes as inputs postage stamps
+of the galaxy and psf model, and returns a set of modified images, as
+described below. A shape measurement code -- the details of which
+MetaCalibration is agnostic about -- returns shear or shape estimates
+for each of the modified images. The resulting set of shapes is used
+to derive calibration and psf biases for each galaxy. These
+parameters, along with a shape prior inferred from the full ensemble
+of shapes, are used to derive a mean shear per field. Virtually any
+measurement method can be embedded in this loop, and as long as it is
+sensitive to the shear and not catastrophically biased, the linear
+shear and psf calibration biases will be removed. MetaCalibration can
+also calibrate away shear selection biases, so long as detection is
+performed inside the procedure.
 
 \subsection{Image Modification}
-We use GalSim\footnote{\url{https://github.com/GalSim-developers/GalSim}}
-\citep{2015A&C....10..121R} to manipulate the images and to generate simulations for validation. For
-each galaxy, we create nine modified images: two for each shear component, two for each psf
-ellipticity component, and one for the final measurement. We run the provided shape measurement
-pipeline on each of these images, and the results are used to construct a set of finite difference
-estimates of calibration and psf biases.
+We use
+GalSim\footnote{\url{https://github.com/GalSim-developers/GalSim}}
+\citep{2015A&C....10..121R} to manipulate the images and to generate
+simulations for validation. For each galaxy, we create nine modified
+images: two for each shear component, two for each psf ellipticity
+component, and one for the final measurement. We run the provided
+shape measurement pipeline on each of these images, and the results
+are used to construct a set of finite difference estimates of
+calibration and psf biases.
 
-This sort of image manipulation is very similar the simulation design goals of the GalSim project,
-so we rely on the rigorous testing of the image convolution, interpolation, and resampling
-algorithms the development team performed to enable the Great3 shear testing simulations.  From the
-perspective of numerical validation, the tests in section 9 of \cite{2015A&C....10..121R} illustrate
-that GalSim can accurately render sheared images of quite complex galaxy and PSF light profiles with
-its default settings that control numerical accuracy.
+This sort of image manipulation is very similar the simulation design
+goals of the GalSim project, so we rely on the rigorous testing of the
+image convolution, interpolation, and resampling algorithms the
+development team performed to enable the Great3 shear testing
+simulations.  From the perspective of numerical validation, the tests
+in section 9 of \cite{2015A&C....10..121R} illustrate that GalSim can
+accurately render sheared images of quite complex galaxy and PSF light
+profiles with its default settings that control numerical accuracy.
 
-For each galaxy and psf postage stamp, we first create an Interpolated Image object. This object is deconvolved by the psf model (including the pixel response). For the shear finite differences, we apply a small shear $\Delta\gamma$ (typically 1\%) to the resulting deconvolved image. The original psf is dilated by twice the shear distortion, and then re-convolved with the sheared deconvolved image. This reconvolved, sheared image is then passed to the shape measurement routine, along with the newly dilated psf. For the psf sensitivity, we follow a similar procedure, but shear the dilated psf image, rather than the deconvolved galaxy image. Finally, we create a reconvolved image with no added shear, on which we'll perform the final shape measurement. 
+For each galaxy and psf postage stamp, we first create an Interpolated
+Image object. This object is deconvolved by the psf model (including
+the pixel response). For the shear finite differences, we apply a
+small shear $\Delta\gamma$ (typically 1\%) to the resulting
+deconvolved image. The original psf is dilated by twice the shear
+distortion, and then re-convolved with the sheared deconvolved
+image. This reconvolved, sheared image is then passed to the shape
+measurement routine, along with the newly dilated psf. For the psf
+sensitivity, we follow a similar procedure, but shear the dilated psf
+image, rather than the deconvolved galaxy image. Finally, we create a
+reconvolved image with no added shear, on which we'll perform the
+final shape measurement.
 
-Shape measurements on these images are used to derive shear calibration and psf biases {introduced by the chosen shape measurement method}. The shapes measured from the  sheared reconvolved images, $\vec{e}_{+}$ and $\vec{e}_{-}$, admit a straightforward finite-difference estimate of the multiplicative shear calibration
+Shape measurements on these images are used to derive shear
+calibration and psf biases {introduced by the chosen shape measurement
+  method}. The shapes measured from the sheared reconvolved images,
+$\vec{e}_{+}$ and $\vec{e}_{-}$, admit a straightforward
+finite-difference estimate of the multiplicative shear calibration
 \begin{align}
 R &= \frac{\partial \vec{e}}{\partial \vec{\gamma}}  \\
  &=\frac{\vec{e}_{+} - \vec{e}_{-}}{2\Delta\gamma}
 \end{align}
 Additive biases introduced by the shape measurement are related to the sum of these two quantities:
 \begin{align}
-\vec{c} &= \frac{\vec{e}_{+} + \vec{e}_{-}}{2 \Delta\gamma} - \vec{e}
+\vec{c} &= \frac{\vec{e}_{+} + \vec{e}_{-}}{2} - \vec{e}
 \end{align}
-and if the shape measurement algorithm does not perfectly remove psf ellipticity, then the shapes measured from shearing the psf ($\vec{e}_{+,\rm psf}$ and $\vec{e}_{+,\rm psf}$) allows calculation of at least the linear-order residual psf ellipticity biases:
+and if the shape measurement algorithm does not perfectly remove psf
+ellipticity, then the shapes measured from shearing the psf
+($\vec{e}_{+,\rm psf}$ and $\vec{e}_{+,\rm psf}$) allows calculation
+of at least the linear-order residual psf ellipticity biases:
 \begin{align}
 R_{\rm psf} = \frac{\vec{e}_{+\rm psf} - \vec{e}_{-,\rm psf}}{2\Delta\gamma}.
 \end{align}
-The result of this is a catalog of shear responsibities, psf responsivities, and additive biases for every galaxy. A histogram of these quantities is shown in figure~\ref{fig:calibhist}. The derived biases and responsivities are very noisy, so attention must be paid to how inference is performed on the full ensemble of galaxies.
+The result of this is a catalog of shear responsibities, psf
+responsivities, and additive biases for every galaxy. A histogram of
+these quantities is shown in figure~\ref{fig:calibhist}. The derived
+biases and responsivities are very noisy, so attention must be paid to
+how inference is performed on the full ensemble of galaxies.
 
 
 
@@ -286,33 +349,56 @@ The result of this is a catalog of shear responsibities, psf responsivities, and
 
 
 \subsection{MetaCalibrating the Ensemble}
-We test the MetaCalibration procedure on two different shear estimation methods -- {\sc regauss} and {\sc KSB} -- each of which has known calibration biases [REF; also see figure XXX]. For each of these methods, we use the entire ensemble of validation simulations to build a prior the {\it unlensed} shape distribution, $p_0(\vec{e})$. There is no guarantee that the average shear over the ensemble is actually sufficiently small, however, so we symmetrize this prior distribution by averaging the raw prior with its reflection about $\vec{e}=0$. The newly symmetrized prior is $p_{0,\rm sym}$. The model for each field is
+We test the MetaCalibration procedure on two different shear
+estimation methods -- {\sc regauss} and {\sc KSB} -- each of which has
+known calibration biases [REF; also see figure XXX]. For each of these
+methods, we use the entire ensemble of validation simulations to build
+a prior the {\it unlensed} shape distribution, $p_0(\vec{e})$. There
+is no guarantee that the average shear over the ensemble is actually
+sufficiently small, however, so we symmetrize this prior distribution
+by averaging the raw prior with its reflection about $\vec{e}=0$. The
+newly symmetrized prior is $p_{0,\rm sym}$. The model for each field
+is
 \begin{align}
 \vec{e}_{\rm meas} = \vec{e}_{0} + R_{\rm psf} \vec{e}_{\rm psf} + R\vec{\gamma} + \vec{c}
 \label{eqn:edist_model}
 \end{align}
-where $e_{\rm meas}$ is the vector of measured ellipticities, and the constants $R_{\rm psf}$, $R$, and $c$ have been determined separately for each galaxy, as described above, during the image modification step. This prior is then used to construct a linear estimator for the shapes, as follows.
+where $e_{\rm meas}$ is the vector of measured ellipticities, and the
+constants $R_{\rm psf}$, $R$, and $c$ have been determined separately
+for each galaxy, as described above, during the image modification
+step. This prior is then used to construct a linear estimator for the
+shapes, as follows.
 
-If the measured shape distribution $n(\vec{e}_{\rm meas})$ is linear in the shear, then we can write
+If the measured shape distribution $n(\vec{e}_{\rm meas})$ is linear
+in the shear, then we can write
 \begin{align}
 \frac{n(\vec{e}_{\rm meas})}{N_{tot}} = p_{0,\rm sym}(\vec{e}) + \vec{\gamma}\cdot \partial_{\gamma} p_{0,\rm sym}(\vec{e})
 \end{align}
-It will be convenient to discretize this distribution into a histogram. If the probability of a galaxy ending up in the $i^{\rm th}$ shape histogram bin is $q_i$, then the likelihood function for an observed histogram is exactly the multinomial likelihood
+It will be convenient to discretize this distribution into a
+histogram. If the probability of a galaxy ending up in the $i^{\rm
+  th}$ shape histogram bin is $q_i$, then the likelihood function for
+an observed histogram is exactly the multinomial likelihood
 \begin{align}
 p( \left\{N_i\right\} |\left\{ q_i\right\} ) = \frac{N_{\rm tot}!}{\prod\limits_i (N_i!)}\prod\limits_j q_j^{N_j}
 \label{eqn:multnomial}
 \end{align}
-where $N_{\rm tot} = \sum\limits_i N_i$ is the total number of samples in the histogram.
-The covariance matrix for the bin amplitudes this histogram is
+where $N_{\rm tot} = \sum\limits_i N_i$ is the total number of samples
+in the histogram.  The covariance matrix for the bin amplitudes this
+histogram is
 \begin{align}
 {\rm cov}(N_i, N_j) = C_{ij} = \begin{cases}
   q_i(1-q_i)\sum\limits_i N_i, & i=j \\
   -q_iq_j \sum\limits_i N_i, & i \neq j.
 \end{cases}
 \end{align}
-To make the notation for what follows less cumbersome, let the normalized histogram be $h_i = N_i / \sum\limits_i N_i$, and its first derivative with respect to the shear be $\vec{\Delta}_h=\partial_{\gamma}\vec{h}_{\rm fid}$.
+To make the notation for what follows less cumbersome, let the
+normalized histogram be $h_i = N_i / \sum\limits_i N_i$, and its first
+derivative with respect to the shear be
+$\vec{\Delta}_h=\partial_{\gamma}\vec{h}_{\rm fid}$.
 
-Given a measured shape histogram with some unknown shear and a fiducial, unlensed shape histogram, the (component-wise) minimum-variance estimator for $\gamma$ is
+Given a measured shape histogram with some unknown shear and a
+fiducial, unlensed shape histogram, the (component-wise)
+minimum-variance estimator for $\gamma$ is
 \begin{align}
 \hat{\gamma} = \frac{\vec{\Delta}_h^T C^{-1}\left( \vec{h}_{\rm meas} - \vec{h}_{\rm fid}\right)} {\vec{\Delta}_h^TC^{-1}\vec{\Delta}_h},
 \label{eqn:hist_est}
@@ -323,13 +409,28 @@ and it has variance
 \label{eqn:hist_est_var}
 \end{align}
 
-This method for shear inference has as its tunable parameter only the histogram binning scheme, about which more below. Once we've chosen a suitable scheme, we then bin the prior into equal-number bins and calculate its shear derivative using equation \ref{eqn:edist_model}\footnote{We add a small shear $\vec{\gamma}$, then rebin.}. We calculate a shape histogram with these bins for each separate field, and evaluate equations~\ref{eqn:hist_est} and \ref{eqn:hist_est_var}.
+This method for shear inference has as its tunable parameter only the
+histogram binning scheme, about which more below. Once we've chosen a
+suitable scheme, we then bin the prior into equal-number bins and
+calculate its shear derivative using equation
+\ref{eqn:edist_model}\footnote{We add a small shear $\vec{\gamma}$,
+  then rebin.}. We calculate a shape histogram with these bins for
+each separate field, and evaluate equations~\ref{eqn:hist_est} and
+\ref{eqn:hist_est_var}.
 
-\toplotemh{Show the shape of the estimator, while somehow accurately conveying the histogram binning scheme, for the three shape measurement methods.}
+\toplotemh{Show the shape of the estimator, while somehow accurately
+  conveying the histogram binning scheme, for the three shape
+  measurement methods.}
 \begin{figure}
 \includegraphics[width=0.45\textwidth]{./Plots/regauss-r-histogram.png}
 \includegraphics[width=0.45\textwidth]{./Plots/regauss-a-histogram.png}
-\caption{{\bf Top:} Normalized distribution of meta-calibration shear responsivities from Regaussianization, on the Control-Ground-Constrant branch of the GREAT3 simulations.  {\bf Bottom:} Distribution of meta-calibration psf ellipticity responsivities from Regaussianization, on the Control-Ground-Constrant branch of the GREAT3 simulations. Vertical red dashed lines are drawn at zero for reference in both panels.}
+\caption{{\bf Top:} Normalized distribution of meta-calibration shear
+  responsivities from Regaussianization, on the
+  Control-Ground-Constrant branch of the GREAT3 simulations.  {\bf
+    Bottom:} Distribution of meta-calibration psf ellipticity
+  responsivities from Regaussianization, on the
+  Control-Ground-Constrant branch of the GREAT3 simulations. Vertical
+  red dashed lines are drawn at zero for reference in both panels.}
 \label{fig:calibhist}
 \end{figure}
 
@@ -338,95 +439,126 @@ This method for shear inference has as its tunable parameter only the histogram 
 \includegraphics[width=0.3\textwidth]{./Plots/regauss-opt-shear_plots-prior_derivs.png}
 \includegraphics[width=0.3\textwidth]{./Plots/ksb-opt-shear_plots-prior_derivs.png}
 \caption{I do not like these figures. Treat them as placeholders for now.\\
-Constructing the histogram estimator for the three shape measurement methods. {\bf Top} panels show measured shape distribution for the regauss ({\bf left}) and {\bf right} ksb algorithms. Vertical red lines show bin edges for a scheme with 20 bins, as used in the estimation. {\bf Bottom} panels show the derivative $\frac{d\,p(e)}{d{e}}$ for each of the histograms. Abscissa are truncated at $\pm 4$, but the estimator runs over bins including all objects. To stabilize the estimator, we set the values of the histogram derivatives in the outermost two bins to zero.}
+  Constructing the histogram estimator for the three shape measurement
+  methods. {\bf Top} panels show measured shape distribution for the
+  regauss ({\bf left}) and {\bf right} ksb algorithms. Vertical red
+  lines show bin edges for a scheme with 20 bins, as used in the
+  estimation. {\bf Bottom} panels show the derivative
+  $\frac{d\,p(e)}{d{e}}$ for each of the histograms. Abscissa are
+  truncated at $\pm 4$, but the estimator runs over bins including all
+  objects. To stabilize the estimator, we set the values of the
+  histogram derivatives in the outermost two bins to zero.}
 \label{fig:estimator}
 \end{figure*}
 
-If we have a poor model for the unlensed histogram, $h_{\rm fid}$, then the results will be biased. We can evaulate the distance from each field to the unlensed prior using equation~\ref{eqn:multnomial}, taking the probabilities $q_i$ from the unlensed prior and the histogram amplitudes from the current field, {after correcting for the estimated shear}. If the shear response measured for the unlensed prior is correct, then the performance of the estimator will depend only on the similarity of the prior to the measurement field. The likelihood can then be used as an objective criterion for the quality of the inference. 
+If we have a poor model for the unlensed histogram, $h_{\rm fid}$,
+then the results will be biased. We can evaulate the distance from
+each field to the unlensed prior using equation~\ref{eqn:multnomial},
+taking the probabilities $q_i$ from the unlensed prior and the
+histogram amplitudes from the current field, {after correcting for the
+  estimated shear}. If the shear response measured for the unlensed
+prior is correct, then the performance of the estimator will depend
+only on the similarity of the prior to the measurement field. The
+likelihood can then be used as an objective criterion for the quality
+of the inference.
 
 \subsection{Relationship to previous implementations}
 
-As shown in the GREAT3 results paper \citep{2015MNRAS.450.2963M}, an early version of
-metacalibration was used in the GREAT3 challenge.  That implementation differs from the one
-presented here and released publicly in association with this paper in two important ways: the model
-for systematics was simpler than the one presented below (in particular, it neglected additive
-systematics entirely) and the method for inferring shears from an ensemble of objects was entirely
-different.  These differences are of sufficient importance that the GREAT3 results (especially the
-ones for additive systematics) are not relevant to the implementation described here.
+As shown in the GREAT3 results paper \citep{2015MNRAS.450.2963M}, an
+early version of metacalibration was used in the GREAT3 challenge.
+That implementation differs from the one presented here and released
+publicly in association with this paper in two important ways: the
+model for systematics was simpler than the one presented below (in
+particular, it neglected additive systematics entirely) and the method
+for inferring shears from an ensemble of objects was entirely
+different.  These differences are of sufficient importance that the
+GREAT3 results (especially the ones for additive systematics) are not
+relevant to the implementation described here.
 
 
 \section{Testing Framework}
 
 \subsection{Estimation Algorithms}
 
-Since the metacalibration method can in principle be used to calibrate shears from any per-object
-shear algorithm, we chose three easily available shear estimation methods, all of which are
-implemented in GalSim.  Two of these methods are more traditional shear estimation methods that have
-somewhat different assumptions but are both based on object moments.  One method is not a standard
-shear estimation method at all: we use linear combinations of the directly observed second moments
-without correcting for the PSF at all.  In principle, the information about how those respond to
-shear should be determined by metacalibration to correctly infer the shear.  THe difference in this
-case is that instead of providing a small correction to the outputs of a PSF correction method, we
-rely on metacalibration to do the entirety of the PSF correction, which is a very stringent test.
+Since the metacalibration method can in principle be used to calibrate
+shears from any per-object shear algorithm, we chose three easily
+available shear estimation methods, all of which are implemented in
+GalSim.  Two of these methods are more traditional shear estimation
+methods that have somewhat different assumptions but are both based on
+object moments.  One method is not a standard shear estimation method
+at all: we use linear combinations of the directly observed second
+moments without correcting for the PSF at all.  In principle, the
+information about how those respond to shear should be determined by
+metacalibration to correctly infer the shear.  THe difference in this
+case is that instead of providing a small correction to the outputs of
+a PSF correction method, we rely on metacalibration to do the entirety
+of the PSF correction, which is a very stringent test.
 
 \subsubsection{Regaussianization}
 
- Re-Gaussianization \citep{2003MNRAS.343..459H} is a PSF correction method based on the use of the
- moments of the image and of the PSF to correct for the effects of the PSF on the galaxy shapes. It
- includes corrections for the non-Gaussianity of the galaxy profile
- \citep{2002AJ....123..583B,2003MNRAS.343..459H} and of the PSF (to first order in the PSF
- non-Gaussianity). The performance of this algorithm has been extensively studied in real data and
- simulations
- \citep[e.g.,][]{2005MNRAS.361.1287M,2012MNRAS.420.1518M,2013MNRAS.432.1544M,2015MNRAS.450.2963M}.
+Re-Gaussianization \citep{2003MNRAS.343..459H} is a PSF correction
+method based on the use of the moments of the image and of the PSF to
+correct for the effects of the PSF on the galaxy shapes. It includes
+corrections for the non-Gaussianity of the galaxy profile
+\citep{2002AJ....123..583B,2003MNRAS.343..459H} and of the PSF (to
+first order in the PSF non-Gaussianity). The performance of this
+algorithm has been extensively studied in real data and simulations
+\citep[e.g.,][]{2005MNRAS.361.1287M,2012MNRAS.420.1518M,2013MNRAS.432.1544M,2015MNRAS.450.2963M}.
 
-The outputs of the re-Gaussianization algorithm are PSF-corrected ``distortions'', which for an
-object with purely elliptical isophotes with minor-to-major axis ratio $q$ and position angle
-$\theta$ with respect to the $x$ axis in pixel coordinates would be defined as
+The outputs of the re-Gaussianization algorithm are PSF-corrected
+``distortions'', which for an object with purely elliptical isophotes
+with minor-to-major axis ratio $q$ and position angle $\theta$ with
+respect to the $x$ axis in pixel coordinates would be defined as
 \begin{equation}
 (e_1, e_2) = \frac{1-q^2}{1+q^2}\left(\cos{2\theta},\sin{2\theta}\right).
 \end{equation}
-As discussed in \cite{2002AJ....123..583B}, the response of a distribution of galaxies with some intrinsic
-distribution of distortions $p(e)$ to a shear is nonlinear in a way that depends on the $p(e)$
-itself.  Conceptually, we can think of an ensemble shear estimator using re-Gaussianization outputs
-as
+As discussed in \cite{2002AJ....123..583B}, the response of a
+distribution of galaxies with some intrinsic distribution of
+distortions $p(e)$ to a shear is nonlinear in a way that depends on
+the $p(e)$ itself.  Conceptually, we can think of an ensemble shear
+estimator using re-Gaussianization outputs as
 \begin{equation}
 \hat{\gamma}_j = \frac{\langle e_j\rangle}{\mathrm{d}\langle e_j\rangle/\mathrm{d}\gamma_j}
 \end{equation}
-where the denominator gives the response of the ensemble average distortion to a shear (often called
-the responsivity).  Estimators of this shear responsivity use the observed galaxy $p(e)$ and its
-moments, and for typical $p(e)$, the denominator is around $1.7$--$1.8$.
+where the denominator gives the response of the ensemble average
+distortion to a shear (often called the responsivity).  Estimators of
+this shear responsivity use the observed galaxy $p(e)$ and its
+moments, and for typical $p(e)$, the denominator is around
+$1.7$--$1.8$.
 
 \subsubsection{KSB}
 
-The KSB method \citep{1995ApJ...449..460K} parametrises galaxies and stars according to their
-weighted quadrupole moments.  The main assumption of the KSB method is that the PSF 
-can be described as a small but highly anisotropic distortion
-convolved with a large circularly symmetric function. 
-With that assumption, the shear can be recovered to
-first-order from the observed ellipticity of each galaxy via
+The KSB method \citep{1995ApJ...449..460K} parametrises galaxies and
+stars according to their weighted quadrupole moments.  The main
+assumption of the KSB method is that the PSF can be described as a
+small but highly anisotropic distortion convolved with a large
+circularly symmetric function.  With that assumption, the shear can be
+recovered to first-order from the observed ellipticity of each galaxy
+via
 \begin{equation} \label{eqn:weight}
 \gamma=P_{\gamma}^{-1}\left(e^{\rm obs}-\frac{P^{\rm sm}}{P^{\rm sm*}}e^{*}\right),
 \end{equation}
 where asterisks indicate quantities that should be measured from the
-PSF model at that galaxy position, $P^{\rm sm}$ is the
-smear polarisability (see \citealt{2006MNRAS.368.1323H} for definitions) 
-and $P_\gamma$ is the correction to the shear
-polarisability that includes the smearing with the isotropic component
-of the PSF. The ellipticities are constructed from 
-weighted quadrupole moments, and the other quantities involve
-higher order moments. A  circular Gaussian weight 
-of scale length $r_g$ is used, where $r_g$ is galaxy
-size.
+PSF model at that galaxy position, $P^{\rm sm}$ is the smear
+polarisability (see \citealt{2006MNRAS.368.1323H} for definitions) and
+$P_\gamma$ is the correction to the shear polarisability that includes
+the smearing with the isotropic component of the PSF. The
+ellipticities are constructed from weighted quadrupole moments, and
+the other quantities involve higher order moments. A circular Gaussian
+weight of scale length $r_g$ is used, where $r_g$ is galaxy size.
 
-The KSB method returns a per-object estimate of the shears $(\hat{\gamma}_1, \hat{\gamma}_2)$. We can use
-metacalibration to infer the shear while removing multiplicative and additive biases in the method.
+The KSB method returns a per-object estimate of the shears
+$(\hat{\gamma}_1, \hat{\gamma}_2)$. We can use metacalibration to
+infer the shear while removing multiplicative and additive biases in
+the method.
 
 \subsubsection{Linear Moments}
 
-As mentioned previously, the third method we use does not involve PSF-corrected galaxy shapes.
-Instead, we use linear combinations of the second moments of galaxy images.  The motivation behind
-this choice is as follows.  One way to estimate the distortion $(e_1,e_2)$ is via combinations of
-the second moments of the light profile,
+As mentioned previously, the third method we use does not involve
+PSF-corrected galaxy shapes.  Instead, we use linear combinations of
+the second moments of galaxy images.  The motivation behind this
+choice is as follows.  One way to estimate the distortion $(e_1,e_2)$
+is via combinations of the second moments of the light profile,
 \begin{equation}
 \langle x_i\rangle = \frac{\int x_i w({\mathbf x}) I({\mathbf x}) \mathrm{d}^2{\mathbf x}}{\int w({\mathbf x}) I({\mathbf x}) \mathrm{d}^2{\mathbf x}}
 \end{equation}
@@ -439,76 +571,98 @@ for $i,j=1,2$, and finally
 e_1 = \frac{M_{11}-M_{22}}{M_{11}+M_{22}}, \qquad e_2 \frac{2M_{12}}{M_{11}+M_{22}}.
 \end{equation}
 
-One source of noise in traditional moments based methods is the division of two noisy quantities in
-Eq.~\ref{eq:moments-div}, typically followed by further division by other noisy quantities to remove
-the dilution of the galaxy shape by the PSF.  Thus, as a final example of a statistic that we will
-attempt to use as a calibrated shear estimator with metacalibration, we define the following linear
+One source of noise in traditional moments based methods is the
+division of two noisy quantities in Eq.~\ref{eq:moments-div},
+typically followed by further division by other noisy quantities to
+remove the dilution of the galaxy shape by the PSF.  Thus, as a final
+example of a statistic that we will attempt to use as a calibrated
+shear estimator with metacalibration, we define the following linear
 combinations of moments:
 \begin{equation}
 \hat{M}_i = (M_{11}-M_{22}, 2M_{12}).
 \end{equation}
 
-Clearly these moments include a number of nuisance quantities, like the galaxy flux and size.  They
-also do not include any PSF correction whatsoever.  In principle, metacalibration should be able to
+Clearly these moments include a number of nuisance quantities, like
+the galaxy flux and size.  They also do not include any PSF correction
+whatsoever.  In principle, metacalibration should be able to
 nonetheless determine the response of this statistic to shear,
-$\mathrm{d}\hat{M}_i/\mathrm{d}\gamma$, and produce a reliable shear estimate, provided that the
-model for the predominant sources of systematics follows that in Eq.~\ref{eqn:edist_model}.  This is
-a quite stringent test of the metacalibration method.
+$\mathrm{d}\hat{M}_i/\mathrm{d}\gamma$, and produce a reliable shear
+estimate, provided that the model for the predominant sources of
+systematics follows that in Eq.~\ref{eqn:edist_model}.  This is a
+quite stringent test of the metacalibration method.
 
 \subsection{Simulated Images}
 
-We use the GREAT3 simulation framework as the source of simulated images that we use for testing
-purposes.  For more detail about that simulation framework, see the GREAT3 handbook
-\citep{2014ApJS..212....5M} and results paper \citep{2015MNRAS.450.2963M}, or the publicly
-available software\footnote{\url{https://github.com/barnabytprowe/great3-public}}.
+We use the GREAT3 simulation framework as the source of simulated
+images that we use for testing purposes.  For more detail about that
+simulation framework, see the GREAT3 handbook
+\citep{2014ApJS..212....5M} and results paper
+\citep{2015MNRAS.450.2963M}, or the publicly available
+software\footnote{\url{https://github.com/barnabytprowe/great3-public}}.
 
-In brief, we use simulated ``branches'' containing 200 ``subfields''.  Each subfield contains $10^4$
-galaxies placed on a $100\times 100$ grid; the galaxies in a given subfield all have the same
-(unknown) shear and the same known PSF.  The galaxy population within a subfield follows a
-distribution of signal-to-noise ratio, size, ellipticity, and morphology based on that in the {\it
-  Hubble Space Telescope} ({\it HST}) COSMOS survey
-\citep{2007ApJS..172..196K,2007ApJS..172....1S,2007ApJS..172...38S}, roughly approximating a galaxy
-sample with a depth of $I<25$.  To ensure that most methods will be able to measure all galaxies, an
-effective signal-to-noise cut of $\gtrsim 12$ and a minimal resolution cut was imposed (resulting in
-different sets of galaxies in subfields that have different-sized PSFs).  90$^\circ$ rotated pairs
-of galaxies were included, to cancel out shape noise \citep{2007MNRAS.376...13M}.  The PSF in the
-simulations comes from the combination of an optics model from a ground-based telescope, along with
-a Kolmogorov PSF with a typical ellipticity variance.  Thus, the galaxy and PSF properties are
-non-trivially complicated.  The noise is stationary Gaussian noise.  The
-ultimate goal is to estimate the average shear in each subfield in an unbiased way, without any
-multiplicative bias or correlations with the per-subfield PSF ellipticity.
+In brief, we use simulated ``branches'' containing 200 ``subfields''.
+Each subfield contains $10^4$ galaxies placed on a $100\times 100$
+grid; the galaxies in a given subfield all have the same (unknown)
+shear and the same known PSF.  The galaxy population within a subfield
+follows a distribution of signal-to-noise ratio, size, ellipticity,
+and morphology based on that in the {\it Hubble Space Telescope} ({\it
+  HST}) COSMOS survey
+\citep{2007ApJS..172..196K,2007ApJS..172....1S,2007ApJS..172...38S},
+roughly approximating a galaxy sample with a depth of $I<25$.  To
+ensure that most methods will be able to measure all galaxies, an
+effective signal-to-noise cut of $\gtrsim 12$ and a minimal resolution
+cut was imposed (resulting in different sets of galaxies in subfields
+that have different-sized PSFs).  90$^\circ$ rotated pairs of galaxies
+were included, to cancel out shape noise \citep{2007MNRAS.376...13M}.
+The PSF in the simulations comes from the combination of an optics
+model from a ground-based telescope, along with a Kolmogorov PSF with
+a typical ellipticity variance.  Thus, the galaxy and PSF properties
+are non-trivially complicated.  The noise is stationary Gaussian
+noise.  The ultimate goal is to estimate the average shear in each
+subfield in an unbiased way, without any multiplicative bias or
+correlations with the per-subfield PSF ellipticity.
 
-One important distinction between GREAT3 and the real Universe that we will have to consider is the
-mean shear.  In a real patch of sky comparable to the size of a large survey, the expected mean
-shear is zero.  In GREAT3, while lensing shears $g_1$ and $g_2$ are drawn from a distribution with
-zero mean, the fact that there are only 200 subfields means that effectively only 200 draws from
-that distribution were made, and that is not enough to have an effective mean shear of zero.  Thus,
-for all of the results below, we will take the averages of the true shears per component as a known
-quantity instead of doing a fully blind analysis, since the deviation of those quantities from zero
-is just due to the artificial nature of the simulation design.
+One important distinction between GREAT3 and the real Universe that we
+will have to consider is the mean shear.  In a real patch of sky
+comparable to the size of a large survey, the expected mean shear is
+zero.  In GREAT3, while lensing shears $g_1$ and $g_2$ are drawn from
+a distribution with zero mean, the fact that there are only 200
+subfields means that effectively only 200 draws from that distribution
+were made, and that is not enough to have an effective mean shear of
+zero.  Thus, for all of the results below, we will take the averages
+of the true shears per component as a known quantity instead of doing
+a fully blind analysis, since the deviation of those quantities from
+zero is just due to the artificial nature of the simulation design.
 
-We consider two sets of galaxy populations.  One comes directly from {\it HST} images, and includes
-a process to remove the HST PSF before shearing (both operations being carried out in Fourier space)
-and convolving with the final target PSF \citep{2012MNRAS.420.1518M}.  The other galaxy population
-consists of simple parametric representations of those {\it HST} images.  These populations have the
-same effective distributions of size, ellipticity, and so on, but one includes realistic galaxy
-morphology while the other only includes such realism as can be captured by the sum of two
-S\'{e}rsic profiles.  In the language of GREAT3, we use simulations corresponding to
-control-ground-constant (describing the parametric galaxy sample, ground-based simulated data, with
-a constant per-subfield shear) and real$\_$galaxy-ground-constant (the realistic galaxy sample),
-denoted CGC and RGC.
+We consider two sets of galaxy populations.  One comes directly from
+{\it HST} images, and includes a process to remove the HST PSF before
+shearing (both operations being carried out in Fourier space) and
+convolving with the final target PSF \citep{2012MNRAS.420.1518M}.  The
+other galaxy population consists of simple parametric representations
+of those {\it HST} images.  These populations have the same effective
+distributions of size, ellipticity, and so on, but one includes
+realistic galaxy morphology while the other only includes such realism
+as can be captured by the sum of two S\'{e}rsic profiles.  In the
+language of GREAT3, we use simulations corresponding to
+control-ground-constant (describing the parametric galaxy sample,
+ground-based simulated data, with a constant per-subfield shear) and
+real$\_$galaxy-ground-constant (the realistic galaxy sample), denoted
+CGC and RGC.
 
 
 \subsubsection{Control Ground Constant without Aberrations}
 
-Before analyzing the GREAT3 results, we analyze a newly-generated set of simulations that is closely
-analogous to the GREAT3 CGC branch (parametric galaxy profiles), but with one modification to avoid
-a problem raised in the results paper \citep{2015MNRAS.450.2963M}.  There, it was noted that the CGC
-branch has a number of outlier fields related to unusually large optical PSF aberrations,
-specifically defocus and trefoil.  Thus, our first simulated dataset is designed exactly like CGC
-but with all aberrations in the optical PSF set to zero, to ensure reasonable consistency of data
-quality.  Note that the atmospheric PSF is still drawn from a distribution of seeing values for each
-subfield.
+Before analyzing the GREAT3 results, we analyze a newly-generated set
+of simulations that is closely analogous to the GREAT3 CGC branch
+(parametric galaxy profiles), but with one modification to avoid a
+problem raised in the results paper \citep{2015MNRAS.450.2963M}.
+There, it was noted that the CGC branch has a number of outlier fields
+related to unusually large optical PSF aberrations, specifically
+defocus and trefoil.  Thus, our first simulated dataset is designed
+exactly like CGC but with all aberrations in the optical PSF set to
+zero, to ensure reasonable consistency of data quality.  Note that the
+atmospheric PSF is still drawn from a distribution of seeing values
+for each subfield.
 
 \towriteemh{Performance expectations on this branch.}
 \towriteemh{Briefly summarize calibration results for this branch.}
@@ -537,8 +691,9 @@ refer to this branch as ``RGC without aberrations''.
 
 \subsubsection{Control Ground Constant}
 
-After testing metacalibration on the simulations without aberrations, we now turn to the actual
-GREAT3 simulated data in the CGC branch, including parametric galaxies.
+After testing metacalibration on the simulations without aberrations,
+we now turn to the actual GREAT3 simulated data in the CGC branch,
+including parametric galaxies.
 
 \towriteemh{Performance expectations on this branch.}
 \towriteemh{Briefly summarize calibration results for this branch.}
@@ -552,7 +707,8 @@ GREAT3 simulated data in the CGC branch, including parametric galaxies.
 
 \subsubsection{Real Ground Constant}
 
-Next, we analyze the actual GREAT3 simulations in the RGC branch, with realistic galaxy morphology.
+Next, we analyze the actual GREAT3 simulations in the RGC branch, with
+realistic galaxy morphology.
 
 \towriteemh{Performance expectations on this branch.}
 \towriteemh{Briefly summarize calibration results for this branch.}
@@ -565,21 +721,24 @@ Next, we analyze the actual GREAT3 simulations in the RGC branch, with realistic
 
 \subsubsection{Real Ground Constant with constant aberrations}
 
-One issue of concern is how to understand outlier fields.  In GREAT3, there was a concern that some
-outliers were due to failure of our model for interpreting the per-object shapes in fields that had
-large aberrations. {\it Eric, should I add a plot showing why we came to these conclusions, i.e.,
-  the distributions of defocus and so on for outliers?  Or just paraphrase its conclusions?} 
-{\bf Yes, I think that would be helpful.}  
+One issue of concern is how to understand outlier fields.  In GREAT3,
+there was a concern that some outliers were due to failure of our
+model for interpreting the per-object shapes in fields that had large
+aberrations. {\it Eric, should I add a plot showing why we came to
+  these conclusions, i.e., the distributions of defocus and so on for
+  outliers?  Or just paraphrase its conclusions?}  {\bf Yes, I think
+  that would be helpful.}
 
 \begin{figure}
-\includegraphics[width=0.5\linewidth]{./Plots/rgc-fixedaber-regauss-opt-shear_plots.png}
-\caption{Results of metacalibration for regauss on RGC with large fixed aberrations. }
+  \includegraphics[width=0.5\linewidth]{./Plots/rgc-fixedaber-regauss-opt-shear_plots.png}
+  \caption{Results of metacalibration for regauss on RGC with large
+    fixed aberrations. }
 \end{figure}
 
-As a
-way to understand this, we generated a version of RGC that had quite large aberrations that were
-identical in each field: specifically defocus of $0.5$ waves and one component of trefoil of $0.1$
-wave.
+As a way to understand this, we generated a version of RGC that had
+quite large aberrations that were identical in each field:
+specifically defocus of $0.5$ waves and one component of trefoil of
+$0.1$ wave.
 
 \towriteemh{Performance expectations on this branch.}
 \towriteemh{Briefly summarize calibration results for this branch.}

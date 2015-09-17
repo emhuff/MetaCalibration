@@ -1,4 +1,4 @@
-\begin{thebibliography}{24}
+\begin{thebibliography}{26}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 
 \bibitem[{{Bartelmann} \& {Schneider}(2001)}]{2001PhR...340..291B}
@@ -57,6 +57,11 @@
 {Laureijs}, R., {Amiaux}, J., {Arduini}, S., {Augu{\`e}res}, J.~.,
   {Brinchmann}, J., {Cole}, R., {Cropper}, M., {Dabin}, C., {Duvet}, L.,
   {Ealet}, A., \& et~al. 2011, ArXiv e-prints (1110.3193)
+
+\bibitem[{{LSST Science Collaborations} \& {LSST
+  Project}(2009)}]{2009arXiv0912.0201L}
+{LSST Science Collaborations} \& {LSST Project}. 2009, ArXiv e-prints
+  (0912.0201), \url{http://www.lsst.org/lsst/scibook}
 
 \bibitem[{{Mandelbaum} {et~al.}(2012){Mandelbaum}, {Hirata}, {Leauthaud},
   {Massey}, \& {Rhodes}}]{2012MNRAS.420.1518M}
@@ -140,6 +145,28 @@
 {Scoville}, N., {Aussel}, H., {Brusa}, M., {Capak}, P., {Carollo}, C.~M.,
   {Elvis}, M., {Giavalisco}, M., {Guzzo}, L., {Hasinger}, G., \& et~al.
   2007{\natexlab{b}}, \apjs, 172, 1
+
+\bibitem[{{Spergel} {et~al.}(2015){Spergel}, {Gehrels}, {Baltay}, {Bennett},
+  {Breckinridge}, {Donahue}, {Dressler}, {Gaudi}, {Greene}, {Guyon}, {Hirata},
+  {Kalirai}, {Kasdin}, {Macintosh}, {Moos}, {Perlmutter}, {Postman},
+  {Rauscher}, {Rhodes}, {Wang}, {Weinberg}, {Benford}, {Hudson}, {Jeong},
+  {Mellier}, {Traub}, {Yamada}, {Capak}, {Colbert}, {Masters}, {Penny},
+  {Savransky}, {Stern}, {Zimmerman}, {Barry}, {Bartusek}, {Carpenter}, {Cheng},
+  {Content}, {Dekens}, {Demers}, {Grady}, {Jackson}, {Kuan}, {Kruk}, {Melton},
+  {Nemati}, {Parvin}, {Poberezhskiy}, {Peddie}, {Ruffa}, {Wallace}, {Whipple},
+  {Wollack}, \& {Zhao}}]{2015arXiv150303757S}
+{Spergel}, D., {Gehrels}, N., {Baltay}, C., {Bennett}, D., {Breckinridge}, J.,
+  {Donahue}, M., {Dressler}, A., {Gaudi}, B.~S., {Greene}, T., {Guyon}, O.,
+  {Hirata}, C., {Kalirai}, J., {Kasdin}, N.~J., {Macintosh}, B., {Moos}, W.,
+  {Perlmutter}, S., {Postman}, M., {Rauscher}, B., {Rhodes}, J., {Wang}, Y.,
+  {Weinberg}, D., {Benford}, D., {Hudson}, M., {Jeong}, W.-S., {Mellier}, Y.,
+  {Traub}, W., {Yamada}, T., {Capak}, P., {Colbert}, J., {Masters}, D.,
+  {Penny}, M., {Savransky}, D., {Stern}, D., {Zimmerman}, N., {Barry}, R.,
+  {Bartusek}, L., {Carpenter}, K., {Cheng}, E., {Content}, D., {Dekens}, F.,
+  {Demers}, R., {Grady}, K., {Jackson}, C., {Kuan}, G., {Kruk}, J., {Melton},
+  M., {Nemati}, B., {Parvin}, B., {Poberezhskiy}, I., {Peddie}, C., {Ruffa},
+  J., {Wallace}, J.~K., {Whipple}, A., {Wollack}, E., \& {Zhao}, F. 2015, ArXiv
+  e-prints
 
 \bibitem[{{Weinberg} {et~al.}(2013){Weinberg}, {Mortonson}, {Eisenstein},
   {Hirata}, {Riess}, \& {Rozo}}]{2013PhR...530...87W}
