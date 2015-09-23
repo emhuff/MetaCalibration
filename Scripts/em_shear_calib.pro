@@ -187,10 +187,10 @@ pro em_shear_calib
 ;common ellipticity_prior_models,model_e1,model_e2,cat
 ; Go and get the shear calibration files.
 ;template = "../Great3/Outputs-Moments/cgc_metacal_moments-*.fits"
-;template = "../Great3/Outputs-Regauss/cgc_metacal_regauss_fix-*.fits"
+template = "../Great3/Outputs-Regauss/cgc_metacal_regauss_fix-*.fits"
 ;template = "../Great3/Outputs-Regauss-SymNoise/cgc_metacal_symm-*.fits"
 ;template = "../Great3/Outputs-Regauss-NoAber/cgc_noaber_metacal-*.fits"
-template = "../Great3/Outputs-Regauss-NoAber-SymNoise/cgc_noaber_metacal_symm-*.fits"
+;template = "../Great3/Outputs-Regauss-NoAber-SymNoise/cgc_noaber_metacal_symm-*.fits"
 ;template = "../Great3/Outputs-KSB/output_catalog-*.fits"
 ;template = "../Great3/Outputs/Control-Ground-Constant/output_catalog-*.fits"
 ;template = "../Great3/Outputs-Real-Regauss/output_catalog*.fits"
@@ -227,7 +227,7 @@ model_e2 = model_initialize(e2_prior ,bad=-10)
 ;Check to see if the priors make sense.
 z = -10 + 20*findgen(1000)/999.
 y = model_compute(model_e1,z)
-psopen,'prior-regauss-noaber-symn-shear',xsize=6,ysize=6,/inches
+psopen,'prior-regauss-shear',xsize=6,ysize=6,/inches
 prepare_plots,/color
 plot,z,y,/ylog,xr=[-20,20],thick=3
 peak = max(model_e1.y)
@@ -278,10 +278,10 @@ outlierThresh = 3.
 ; Make plots showing how the distribution shifts when shear is
 ; applied.
 
-;readcol,'cgc-truthtable.txt',id_true,g1,g2
-readcol,'cgc-noaber-truthtable.txt',id_true,g1,g2
+readcol,'cgc-truthtable.txt',id_true,g1,g2
+;readcol,'cgc-noaber-truthtable.txt',id_true,g1,g2
 
-psopen,'metacal-regauss-noaber-symn-distributions',xsize=8,ysize=5,/inches,/color
+psopen,'metacal-regauss-distributions',xsize=8,ysize=5,/inches,/color
 prepare_plots,/color
 badfields = [93,97,150,160]
 
@@ -353,14 +353,14 @@ for i = 0,ct-1 do begin
 endfor
 psclose
 
-forprint,text='Great3-metaCal-CGC-regauss-noaber-symn.txt',id,field_shear[*,0],field_shear[*,1],converged,/nocomment
+forprint,text='Great3-metaCal-CGC-regauss.txt',id,field_shear[*,0],field_shear[*,1],converged,/nocomment
 
 
 
 ;readcol,'cgc-truthtable.txt',id_true,g1,g2
 readcol,'cgc-noaber-truthtable.txt',id_true,g1,g2
 
-forprint, text = 'metaCal-outlier-diagnostics-regauss-noaber-symn.txt', id, field_shear[*,0], g1, psf_e1, field_shear[*,1], g2, psf_e2, $
+forprint, text = 'metaCal-outlier-diagnostics-regauss.txt', id, field_shear[*,0], g1, psf_e1, field_shear[*,1], g2, psf_e2, $
           converged, ksstat1, ksstat2, outlierFrac1, outlierFrac2, width = 1000, comment = "id   g1 (est)    g1 (true)     psf e1    g2 (est)    g2 (true)    psf e2    converged    ks1    ks2    outlierFrac (|g1|>2)  outlierFrac (|g2|>2)"
 
 
@@ -377,7 +377,7 @@ field_shear = field_shear[use,*]
 
 match,id_true,id,ind_true,ind_mc
 match,id_true,id_cut, ind_cut, ind_mn
-psopen,'metaCalResults-regauss-noaber-symn',xsize=8,ysize=8,/inches,/color
+psopen,'metaCalResults-regauss',xsize=8,ysize=8,/inches,/color
 prepare_plots,/color
 
 coeff1 = linfit(g1[ind_true],field_shear[ind_mc,0],y=y1)
@@ -435,7 +435,7 @@ zz1 = aa1 ## xx1
 zz2 = aa2 ## xx2
 
 
-psopen,'metaCalResults-regauss-noaber-symn-sigClipped',xsize=7,ysize=7,/inches,/color
+psopen,'metaCalResults-regauss-sigClipped',xsize=7,ysize=7,/inches,/color
 prepare_plots,/color
 
 plot,g1[ind_true],field_shear[ind_mc,0],ps=6,xtitle='g_1 (true)', ytitle='g_1 (recovered)', yr=[-0.1,0.1]
@@ -459,7 +459,7 @@ xyouts,0.2,0.2,string(form='("m, b = ",F0," ",F0,"  !9 + !6  ",F0," ",F0 )',xx2[
 psclose
 
 ; Is there any residual psf dependence?
-psopen,'metaCalResults-regauss-noaber-symn-psf_dependence',xsize=6,ysize=6,/inches,/color
+psopen,'metaCalResults-regauss-psf_dependence',xsize=6,ysize=6,/inches,/color
 prepare_plots,/color
  plot,psf_e1[ind_mc],field_shear[ind_mc,0]-g1[ind_true],ps=1,xtitle='!3psf_e1',ytitle='g_1 (measured) - g_1 (true)',xmargin=[14,4],yr=[-0.015,0.015],/ystyle
 
@@ -468,7 +468,7 @@ psclose
 
 ; Can we predict which fields are likely to be bad by comparing them
 ; with the ellipticity prior?
-psopen,'metaCalResults-regauss-noaber-symn-ks',xsize=8,ysize=8,/inches,/color
+psopen,'metaCalResults-regauss-ks',xsize=8,ysize=8,/inches,/color
 prepare_plots
 plot,ksstat1[use[ind_mc]],field_shear[ind_mc,0]-g1[ind_true],ps=1,xtitle='(dis-)similarity to prior',ytitle='g_1 (measured) - g_1 (true)',charsize=2.,xmargin=[14,4],/xlog
 vline,1e-5,color=200,line=2

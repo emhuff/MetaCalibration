@@ -451,9 +451,9 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         kept = ~outliers
 
     coeff1 = getCalibCoeff(g_true = truthTable[kept]['g1'], g_meas=obsTable[kept]['g1'], g_var=obsTable[kept]['g1var'],
-                           psf_e=obsTable[kept]['psf_e1'], errType = 'bootstrap')
+                           psf_e=obsTable[kept]['psf_e1'], errType =None)# 'bootstrap')
     coeff2 = getCalibCoeff(g_true = truthTable[kept]['g2'], g_meas=obsTable[kept]['g2'], g_var=obsTable[kept]['g2var'],
-                           psf_e=obsTable[kept]['psf_e2'], errType = 'bootstrap')
+                           psf_e=obsTable[kept]['psf_e2'], errType =None)# 'bootstrap')
 
     import matplotlib.pyplot as plt
     if not use_errors:
@@ -536,7 +536,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
             ax7.plot(obsTable[outliers]['psf_e1'],obsTable[outliers]['g1'] - truthTable[outliers]['g1'],'s',color='red')
         ax7.axhline(0.,linestyle='--',color='red')
         ax7.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
-        ax7.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
+        ax7.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
         #ax7.set_xlim([-0.01,0.03])
         ax7.set_title('psf trend (e1)')
         
@@ -548,7 +548,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax8.axhline(0.,linestyle='--',color='red')
         ax8.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
         ax8.set_title('psf trend (e2)')
-        ax8.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
+        ax8.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
         #ax8.set_xlim([-0.03,0.03])
         fig.savefig(figName)
         print 'Found coeff:\n m1 = %.4f +/- %.4f \n a1 = %.4f +/- %.4f \n c1 = %.4f +/- %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5])
@@ -606,6 +606,7 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
     
     fig,((ax1,ax2), (ax3,ax4), (ax5,ax6)) = plt.subplots(nrows=3, ncols=2,figsize=(14,21))
     ax1.errorbar(truthTable['g1'],obsTable['g1'],obsTable['err1'],linestyle='.')
+    ax1.plot(truthTable['g1'],(1+coeff1[0])*truthTable['g1'] + coeff1[2],linestyle='--',color='cyan')
     ax1.plot(truthTable['g1'],truthTable['g1'],linestyle='--',color='red')
     ax1.set_title('g1')
     ax1.set_xlabel('g1 (truth)')
@@ -615,6 +616,7 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
     #ax1.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
     
     ax2.errorbar(truthTable['g2'],obsTable['g2'],obsTable['err2'],linestyle='.')
+    ax2.plot(truthTable['g2'],(1+coeff2[0])*truthTable['g2'] + coeff2[2],linestyle='--',color='cyan')
     ax2.plot(truthTable['g2'],truthTable['g2'],'--',color='red')
     ax2.set_title('g2')
     ax2.set_xlabel('g2 (truth)')
@@ -645,12 +647,14 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
     ax5.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
     ax5.axhline(0.,linestyle='--',color='red')
     ax5.set_xlabel('psf_e1')
+    ax5.set_ylim([-0.03,0.03])
     
     ax6.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g2'],'.')
     ax6.plot(obsTable['psf_e2'],coeff2[1]*obsTable['psf_e2'] + coeff2[2],linestyle='--',color='cyan')
     ax6.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
     ax6.axhline(0.,linestyle='--',color='red')
     ax6.set_xlabel('psf_e2')
+    ax6.set_ylim([-0.03,0.03])
         
     fig.savefig(mc+'-no_corrections')
         
@@ -729,8 +733,7 @@ def main(argv):
     description = """Analyze MetaCalibration outputs from Great3 and Great3++ simulations."""
     mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym','noaber-regauss','rgc-regauss','rgc-noaber-regauss','rgc-fixedaber-regauss', 'rgc-ksb','cgc-noaber-precise']
     # Note: The above line needs to be consistent with the choices in getAllCatalogs.
-    method_choices = ["regauss","ksb"]
-    
+
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("--path", dest="path", type=str, default="../Great3/",
                         help="path to MetaCalibration output catalogs")
@@ -745,7 +748,6 @@ def main(argv):
     parser.add_argument("-dp", "--doplot", dest = "doplot", action="store_true")
     parser.add_argument("-sn", "--snos_cut", dest="sn_cut",
                         help="percentile",type= float, default = 0)
-    #parser.add_argument("-a","--algorithm", dest="algorithm"
 
     args = parser.parse_args(argv[1:])
     if args.sn_cut > 0:
@@ -761,7 +763,7 @@ def main(argv):
     catalogs, truthfile = getAllCatalogs(path=path, mc_type=mc_type,sn_cut = sn_cut)
     print 'Got %d catalogs, doing inference'%len(catalogs)
     field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL = \
-        doInference(catalogs=catalogs, nbins=nbins)
+        doInference(catalogs=catalogs, nbins=nbins, mean=False)
     field_str = makeFieldStructure(field_id=field_id, g1raw = g1raw, g2raw = g2raw, g1opt = g1opt, g2opt = g2opt,
                                    g1var = g1var, g2var = g2var, psf_e1 = psf_e1, psf_e2 = psf_e2,
                                    e1_logL = e1_logL, e2_logL = e2_logL)

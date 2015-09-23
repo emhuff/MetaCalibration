@@ -40,8 +40,8 @@ def size_mom(image= None, weight = None):
 
 def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, shear2_step = 0., psf_size =
                      1.0, sersic_index = 4., pixscale = 0.2,
-                     galaxy_size = 2.0, doplot = False, size = False,
-                     do_centroid = False):
+                     galaxy_size = 2.50, doplot = False, size = False,
+                     do_centroid = False, noise = False):
 
 
     image_size = np.ceil(125 * (0.3/pixscale))
@@ -69,9 +69,15 @@ def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, 
     # Make an image of the psf
     psf_im = psf.drawImage(image=galsim.Image(image_size,image_size,scale=pixscale) )
 
+    image_noised = image.copy()
+    if noise is not False:
+        snr = float(noise)
+        image_noised.addNoiseSNR(galsim.noise.GaussianNoise(),snr)
+
+    
     # Copied straight from MetaCalGreat3Wrapper.py
-    sheared1Galaxy, unsheared1Galaxy, reconv1PSF = mcG3.metaCalibrate(image, psf_im, g1 = shear1_step, g2 = shear2_step)
-    shearedm1Galaxy, unshearedm1Galaxy, reconvm1PSF = mcG3.metaCalibrate(image, psf_im, g1 =  -shear1_step, g2 = - shear2_step)
+    sheared1Galaxy, unsheared1Galaxy, reconv1PSF = mcG3.metaCalibrate(image_noised, psf_im, g1 = shear1_step, g2 = shear2_step)
+    shearedm1Galaxy, unshearedm1Galaxy, reconvm1PSF = mcG3.metaCalibrate(image_noised, psf_im, g1 =  -shear1_step, g2 = - shear2_step)
 
     
     # Make an interpolated image of the psf.
@@ -121,10 +127,11 @@ def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, 
         '''
 
     # Now measure the shapes of the metacal galaxies.
-    res_g1  = galsim.hsm.EstimateShear(sheared1Galaxy,  reconv1PSF,  guess_sig_PSF = 1.0, shear_est="regauss")
-    res_mg1 = galsim.hsm.EstimateShear(shearedm1Galaxy, reconvm1PSF ,guess_sig_PSF = 1.0, shear_est="regauss")
-    res_ng1 = galsim.hsm.EstimateShear(unsheared1Galaxy, reconvm1PSF ,guess_sig_PSF = 1.0, shear_est="regauss")
-
+    res_g1  = galsim.hsm.EstimateShear(sheared1Galaxy,  reconv1PSF,  guess_sig_PSF = 1.0, shear_est="regauss", strict=False)
+    res_mg1 = galsim.hsm.EstimateShear(shearedm1Galaxy, reconvm1PSF ,guess_sig_PSF = 1.0, shear_est="regauss", strict=False)
+    res_ng1 = galsim.hsm.EstimateShear(unsheared1Galaxy, reconvm1PSF ,guess_sig_PSF = 1.0, shear_est="regauss",strict=False)
+    
+        
     # Then measure the change in shape of the original galaxy, when the
     # true shear is changed.
     shape_0 = galsim.hsm.EstimateShear(image2n,psf_im, guess_sig_PSF = 1.0, shear_est = "regauss")
@@ -139,21 +146,21 @@ def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, 
     if shear1_step != 0. and shear2_step == 0.:
 
         de1_g1_est = 0.5 * (res_g1.corrected_e1 - res_mg1.corrected_e1)/shear1_step
-        de1_g1_rec =  (shape_4.corrected_e1 - shape_3.corrected_e1)/shear1_step
+        de1_g1_rec = 0.5 * (shape_4.corrected_e1 - shape_4n.corrected_e1)/shear1_step
         de1_g1_tru = 0.5 * (shape_1.corrected_e1 - shape_0.corrected_e1)/shear1_step
-        print "True R1:", de1_g1_tru
-        print "Estimated R1:", de1_g1_est
-        print "True Reconv R1", de1_g1_rec
+        print "   True R1:", de1_g1_tru
+        print "   Estimated R1:", de1_g1_est
+        print "   True Reconv R1", de1_g1_rec
         return de1_g1_tru, de1_g1_est, de1_g1_rec
                     
     # The first two of these three shape measurements should agree!
     if shear2_step != 0. and shear1_step == 0.:
-        de2_g2_est = 0.5* (res_g1.corrected_e2 - res_mg1.corrected_e2)/shear2_step
-        de2_g2_rec =   (shape_4.corrected_e2 - shape_3.corrected_e2)/shear2_step
-        de2_g2_tru = 0.5*  (shape_1.corrected_e2 - shape_0.corrected_e2)/shear2_step
-        print "True R2:", de2_g2_tru
-        print "Estimated R2:", de2_g2_est
-        print "True Reconv R2", de2_g2_rec
+        de2_g2_est = 0.5 * (res_g1.corrected_e2 - res_mg1.corrected_e2)/shear2_step
+        de2_g2_rec = 0.5 * (shape_4.corrected_e2 - shape_3.corrected_e2)/shear2_step
+        de2_g2_tru = 0.5 *  (shape_1.corrected_e2 - shape_0.corrected_e2)/shear2_step
+        print "   True R2:", de2_g2_tru
+        print "   Estimated R2:", de2_g2_est
+        print "   True Reconv R2", de2_g2_rec
         return de2_g2_tru, de2_g2_est, de2_g2_rec
     
     if size is True:
@@ -198,25 +205,58 @@ def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, 
 
 
 def main(argv):
-    npts = 40
-    e_arr =  np.linspace(-0.75, 0.75, npts)
+    npts = 20
+    n_iter = 100
+    e_arr =  np.linspace(-0.5, 0.5, npts)
     R_true_arr = e_arr*0.
     R_est_arr = e_arr*0.
+    R_sig_arr = e_arr * 0.
     R_rec_arr = e_arr*0.
     shear1_step = 0.01
     shear2_step = 0.0
     e1_intrinsic = 0.
     e2_intrinsic = 0.
-    
+    noise = False # set to False for no noise.
 
     
     thing =  metacal_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic, shear1_step = shear1_step, shear2_step = shear2_step, doplot=True)
 
+    
     for i, this_e in zip(xrange(npts), e_arr):
-        R_true, R_est, R_rec = metacal_diagnose(e1_intrinsic = this_e, e2_intrinsic = 0.,  shear1_step = shear1_step, shear2_step = shear2_step, size = False, do_centroid = False)
+        if noise is False:
+            R_true, R_est, R_rec = metacal_diagnose(e1_intrinsic = this_e, e2_intrinsic = 0.,  shear1_step = shear1_step, shear2_step = shear2_step, size = False, do_centroid = False)
+        else:
+            R_true = 0.
+            R_est = 0.
+            R_rec = 0.
+            R_sig = 0.
+            print "iterating to beat down noise:"
+            print "-----------------------------"
+            n_result = 0
+            while n_result < n_iter:
+                try:
+                    this_R_true, this_R_est, this_R_rec = metacal_diagnose(e1_intrinsic = this_e, e2_intrinsic = 0., \
+                                                                            shear1_step = shear1_step, shear2_step = shear2_step, \
+                                                                            size = False, do_centroid = False, noise=noise)
+                    R_true = R_true + this_R_true * 1./n_iter
+                    R_est  = R_est  + this_R_est  * 1./n_iter
+                    R_rec  = R_rec  + this_R_rec  * 1./n_iter
+                    R_sig = R_sig + (R_est - R_rec)**2 * 1./n_iter
+                    n_result = n_result+1
+                    print "iter: ",n_result, " of ", n_iter
+                except:
+                    "something went wrong..."
+                    pass
+
+        print "true R:", R_true
+        print "avg. estimated R2:", R_est
+        print "True reconv R2", R_rec
+        print "______________________________"
+        
         R_true_arr[i] = R_true
         R_est_arr[i] = R_est
         R_rec_arr[i] = R_rec
+        #R_sig_arr[i] = np.sqrt(R_sig)
 
 
     fig, (ax1, ax2) = plt.subplots(nrows=1, ncols = 2, figsize = (14,7))
@@ -225,10 +265,13 @@ def main(argv):
     ax1.plot(e_arr, R_rec_arr, label="R_reconv")
     ax1.axvline(0,color='black',linestyle='--')
     #plt.axhline(2,color='black',linestyle='--')
+    print "Noise in MetaCal (per obj.): ", np.sqrt(np.mean(R_sig_arr**2))
     ax1.legend(loc='best')
-
-    ax2.plot(e_arr, R_est_arr - R_true_arr, label = "R_est - R_true", color = "blue")
-    ax2.plot(e_arr, R_rec_arr - R_true_arr, label = "R_reconv - R_true", color = "green")
+    if noise is False:
+        ax2.plot(e_arr, R_est_arr - R_rec_arr, label = "R_est - R_rec", color = "blue")
+    else:
+        ax2.errorbar(e_arr, R_est_arr - R_rec_arr, yerr = R_sig_arr, fmt = '.')
+    ax2.set_ylim([-0.1,0.1])
     ax2.axhline(0,color='black',linestyle='--')
     ax2.legend(loc='best')
     plt.show()
