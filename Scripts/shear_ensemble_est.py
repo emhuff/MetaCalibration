@@ -746,6 +746,7 @@ def main(argv):
     parser.add_argument("-p", "--percentile_cut", dest="percentile_cut",
                         help="percentile",type= float, default = 10)
     parser.add_argument("-dp", "--doplot", dest = "doplot", action="store_true")
+    parser.add_argument("-a", "--do_all", dest = "do_all", action="store_true", default = False)
     parser.add_argument("-sn", "--snos_cut", dest="sn_cut",
                         help="percentile",type= float, default = 0)
 
@@ -754,34 +755,62 @@ def main(argv):
         sn_cut = args.sn_cut
     else:
         sn_cut = None
-    path = args.path
-    mc_type = args.mc_type
-    nbins = args.nbins
-    outfile = args.outfile
-    print 'Getting catalogs from path %s and mc_type %s'%(path, mc_type)
-    print 'Using %i bins for inference'% (nbins)
-    catalogs, truthfile = getAllCatalogs(path=path, mc_type=mc_type,sn_cut = sn_cut)
-    print 'Got %d catalogs, doing inference'%len(catalogs)
-    field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL = \
-        doInference(catalogs=catalogs, nbins=nbins, mean=False)
-    field_str = makeFieldStructure(field_id=field_id, g1raw = g1raw, g2raw = g2raw, g1opt = g1opt, g2opt = g2opt,
-                                   g1var = g1var, g2var = g2var, psf_e1 = psf_e1, psf_e2 = psf_e2,
-                                   e1_logL = e1_logL, e2_logL = e2_logL)
-    calculate_likelihood_cut(fieldstr = field_str, mc= mc_type)
-    print 'Writing field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_qe2, e1_logL, e2_logL to file %s'%outfile
-    out_data = np.column_stack((field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL))
-    np.savetxt(outfile, out_data, fmt='%d %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
-    logLcut = np.min( (np.percentile(e1_logL,args.percentile_cut), np.percentile(e2_logL,args.percentile_cut)) )
-    if args.doplot:
-        print "Making plots..."
-        no_correction_plots(catalogs= catalogs,truthtable = truthfile, mc= mc_type)
-        makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
-                  psf_e1 = psf_e1, psf_e2 = psf_e2, g1var=  g1var, g2var = g2var,
-                  e1_logL = e1_logL, e2_logL = e2_logL, catalogs = catalogs,
-                  truthFile = truthfile,figName=mc_type+'-opt-shear_plots', logLcut = logLcut)
-        print "wrote plots to "+mc_type+'-opt-shear_plots.png'
+        path = args.path
 
-        
+    if args.do_all is False:
+        mc_type = args.mc_type
+        nbins = args.nbins
+        outfile = args.outfile
+        print 'Getting catalogs from path %s and mc_type %s'%(path, mc_type)
+        print 'Using %i bins for inference'% (nbins)
+        catalogs, truthfile = getAllCatalogs(path=path, mc_type=mc_type,sn_cut = sn_cut)
+        print 'Got %d catalogs, doing inference'%len(catalogs)
+        field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL = \
+            doInference(catalogs=catalogs, nbins=nbins, mean=False)
+        field_str = makeFieldStructure(field_id=field_id, g1raw = g1raw, g2raw = g2raw, g1opt = g1opt, g2opt = g2opt,
+                                    g1var = g1var, g2var = g2var, psf_e1 = psf_e1, psf_e2 = psf_e2,
+                                    e1_logL = e1_logL, e2_logL = e2_logL)
+        calculate_likelihood_cut(fieldstr = field_str, mc= mc_type)
+        print 'Writing field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_qe2, e1_logL, e2_logL to file %s'%outfile
+        out_data = np.column_stack((field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL))
+        np.savetxt(outfile, out_data, fmt='%d %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
+        logLcut = np.min( (np.percentile(e1_logL,args.percentile_cut), np.percentile(e2_logL,args.percentile_cut)) )
+        if args.doplot:
+            print "Making plots..."
+            no_correction_plots(catalogs= catalogs,truthtable = truthfile, mc= mc_type)
+            makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
+                    psf_e1 = psf_e1, psf_e2 = psf_e2, g1var=  g1var, g2var = g2var,
+                    e1_logL = e1_logL, e2_logL = e2_logL, catalogs = catalogs,
+                    truthFile = truthfile,figName=mc_type+'-opt-shear_plots', logLcut = logLcut)
+            print "wrote plots to "+mc_type+'-opt-shear_plots.png'
+    else:
+        final_mc_choices = ['regauss', 'ksb', 'moments','noaber-regauss','rgc-regauss',\
+                         'rgc-noaber-regauss','rgc-fixedaber-regauss', 'rgc-ksb']
+        final_cuts = [10, 10, 10, 0, 10, 0, 10, 10]
+        for mc_type, percentile_cut in zip(final_mc_choices, final_cuts):
+            nbins = args.nbins
+            outfile = args.outfile
+            print 'Getting catalogs from path %s and mc_type %s'%(path, mc_type)
+            print 'Using %i bins for inference'% (nbins)
+            catalogs, truthfile = getAllCatalogs(path=path, mc_type=mc_type,sn_cut = sn_cut)
+            print 'Got %d catalogs, doing inference'%len(catalogs)
+            field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL = \
+                doInference(catalogs=catalogs, nbins=nbins, mean=False)
+            field_str = makeFieldStructure(field_id=field_id, g1raw = g1raw, g2raw = g2raw, g1opt = g1opt, g2opt = g2opt,\
+                                           g1var = g1var, g2var = g2var, psf_e1 = psf_e1, psf_e2 = psf_e2,\
+                                           e1_logL = e1_logL, e2_logL = e2_logL)
+            print 'Writing field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_qe2, e1_logL, e2_logL to file %s'%outfile
+            out_data = np.column_stack((field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL))
+            np.savetxt(outfile, out_data, fmt='%d %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
+            logLcut = np.min( (np.percentile(e1_logL,percentile_cut), np.percentile(e2_logL,percentile_cut)) )
+            print "Making plots..."
+            no_correction_plots(catalogs= catalogs,truthtable = truthfile, mc= mc_type)
+            makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),\
+                    psf_e1 = psf_e1, psf_e2 = psf_e2, g1var=  g1var, g2var = g2var,\
+                    e1_logL = e1_logL, e2_logL = e2_logL, catalogs = catalogs,\
+                    truthFile = truthfile,figName=mc_type+'-opt-shear_plots', logLcut = logLcut)
+            print "wrote plots to "+mc_type+'-opt-shear_plots.png'
+
         
 if __name__ == "__main__":
     import pdb, traceback
