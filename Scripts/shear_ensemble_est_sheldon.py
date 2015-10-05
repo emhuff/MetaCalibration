@@ -43,7 +43,7 @@ def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3rere
         this_catalog['c1'] = data[keep]['exp_mcal_c'][:,0]
         this_catalog['c2'] = data[keep]['exp_mcal_c'][:,1]
         this_catalog['weight'] = np.zeros(np.sum(keep))+1.
-        catalogs.append(data[keep])
+        catalogs.append(this_catalog[keep])
     return catalogs
 
     return catalogs, truthFile
