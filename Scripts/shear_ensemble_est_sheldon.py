@@ -21,6 +21,7 @@ def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3rere
     catalogs = []
     cat_dtype =  np.dtype([('g1','>f8'),('R1','>f8'),('a1','>f8'),('c1','>f8'), ('psf_e1','>f8'),('g2','>f8'),('R2','>f8'),('a2','>f8'),('c2','>f8'), ('psf_e2','>f8'),('weight','>f8')])
     for thisfield in fields:
+        filename = path + thisfield
         if subsample is True:
             data = esutil.io.read(filename, rows=[np.arange(nrows)], \
                                columns=['exp_mcal_g','exp_mcal_R', 'exp_mcal_Rpsf','exp_mcal_gpsf','exp_mcal_c','exp_flags'], ext=1)
@@ -684,7 +685,7 @@ def main(argv):
         outfile = args.outfile
         print 'Getting catalogs from path %s and mc_type %s'%(path, mc_type)
         print 'Using %i bins for inference'% (nbins)
-        catalogs = getAllCatalogs(path=path)
+        catalogs = getAllCatalogs()
         print 'Got %d catalogs, doing inference'%len(catalogs)
         field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL = \
             doInference(catalogs=catalogs, nbins=nbins, mean=False)
