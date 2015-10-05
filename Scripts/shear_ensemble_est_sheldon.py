@@ -19,8 +19,8 @@ def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3rere
               "mcal-v07s01/collated/mcal-v07s01.fits",\
               "mcal-v08s01/collated/mcal-v08s01.fits"]
     catalogs = []
-    cat_dtype =  np.dtype([('g1','>f8'),('R1','>f8'),('a1','>f8'),('c1','>f8'), ('psf_e1','>f8'),('g2','>f8'),('R2','>f8'),('a2','>f8'),('c2','>f8'), ('psf_e2','>f8'),('weight','>f8')])
-    for thisfield in fields:
+    cat_dtype =  np.dtype([('id','>i8'),('g1','>f8'),('R1','>f8'),('a1','>f8'),('c1','>f8'), ('psf_e1','>f8'),('g2','>f8'),('R2','>f8'),('a2','>f8'),('c2','>f8'), ('psf_e2','>f8'),('weight','>f8')])
+    for thisfield,field_id in zip(fields, np.arange(fields)):
         filename = path + thisfield
         if subsample is True:
             data = esutil.io.read(filename, rows=[np.arange(nrows)], \
@@ -32,6 +32,7 @@ def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3rere
                                columns=['exp_mcal_g','exp_mcal_R', 'exp_mcal_Rpsf','exp_mcal_gpsf','exp_mcal_c','exp_flags'], ext=1)
             keep = data['exp_flags'] == 0
         this_catalog = np.empty(np.sum(keep), dtype = cat_dtype)
+        this_catalog['id'] = 1000000 * field_id 
         this_catalog['g1'] = data[keep]['exp_mcal_g'][:,0]
         this_catalog['g2'] = data[keep]['exp_mcal_g'][:,1]
         this_catalog['R1'] = data[keep]['exp_mcal_R'][:,0,0]
