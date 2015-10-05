@@ -9,121 +9,42 @@ from astropy.io import fits
 import re
 import galsim
 
-def get_object_size(entry):
 
     
-    psf_size = 0.2
-    psfObj = galsim.Gaussian(fwhm=psf_size)
-    image = galsim.Image(51,51,scale=0.25)
+def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3reredux/', subsample = True, nrows = 100000 ):
 
-    if entry['bulge_flux'] > 0.:
-        bulge = galsim.Sersic(entry['bulge_n'], flux = entry['bulge_flux'], half_light_radius = entry['bulge_hlr'])
-        bulge.applyShear(q = entry['bulge_q'], beta =entry['bulge_beta_radians']*galsim.radians)
-        bulgeConv = galsim.Convolve([bulge,psfObj])
-        bulgeConv.drawImage(image=image,add_to_image=True)
 
-    if entry['disk_flux'] > 0.:
-        disk = galsim.Exponential(flux = entry['disk_flux'],half_light_radius = entry['disk_hlr'])
-        disk.applyShear(q=entry['disk_q'],beta=entry['disk_beta_radians']*galsim.radians)
-        diskConv = galsim.Convolve([disk,psfObj])
-        diskConv.drawImage(image=image, add_to_image = True)
-    
-    xx,yy = np.meshgrid(np.arange(51)-25, np.arange(51)-25)
-    sigma = np.sqrt( np.sum( image.array * (xx**2 + yy **2) ) / np.sum(image.array)  )
-    if not np.isfinite(sigma):
-        stop
-    return sigma
-
-    
-def getAllCatalogs( path = '../Great3/', mc_type = None, sn_cut = None ):
-
-    globalPath = path
-    if mc_type=='regauss':
-        path = path+'Outputs-Regauss-BugFix/output_catalog*.fits'
-        truthFile = 'cgc-truthtable.txt'
-    elif mc_type=='regauss-sym':
-        path = path+'Outputs-Regauss-SymNoise/cgc_metacal_symm*.fits'
-        truthFile = 'cgc-truthtable.txt'
-    elif mc_type=='ksb':
-        path = path+'Outputs-KSB/output_catalog*.fits'
-        truthFile = 'cgc-truthtable.txt'
-    elif mc_type=='none-regauss':
-        path = path+'Outputs-CGN-Regauss/cgc_metacal_moments*.fits'
-        truthFile = 'cgc-truthtable.txt'
-    elif mc_type=='moments':
-        path = path+'Outputs-Moments/cgc_metacal_moments*.fits'
-        truthFile = 'cgc-truthtable.txt'
-    elif mc_type=='noaber-regauss-sym':
-        path = path+'Outputs-Regauss-NoAber-SymNoise/cgc_noaber_metacal_symm*.fits'
-        truthFile = 'cgc-noaber-truthtable.txt'
-    elif mc_type=='noaber-regauss':
-        path = path+'Outputs-Regauss-NoAber-Bugfix/cgc_noaber_metacalfix_regauss*.fits'
-        truthFile = 'cgc-noaber-truthtable.txt'
-    elif mc_type=='cgc-noaber-precise':
-        path = path+'Outputs-Regauss-NoAber-HighPrec/cgc_noaber_precise3_metacal*.fits'
-        truthFile = 'cgc-noaber-truthtable.txt'
-    elif mc_type == 'rgc-regauss':
-        path = path+'Outputs-Real-Regauss-BugFix/output_catalog*.fits'
-        truthFile = 'rgc-truthtable.txt'
-    elif mc_type == 'rgc-noaber-regauss':
-        path = path+'Outputs-Real-NoAber-Regauss-BugFix/rgc_noaber_metacalfix_regauss*.fits'
-        truthFile = 'rgc-noaber-truthtable.txt'
-    elif mc_type == 'rgc-ksb':
-        path= path+'Outputs-Real-KSB/output_catalog*.fits'
-        truthFile = 'rgc-truthtable.txt'
-    elif mc_type=='rgc-fixedaber-regauss':
-        path = path+'Outputs-Real-Regauss-FixedAber-BugFix/rgc_fixedaber_metacalfix_regauss*.fits'
-        truthFile = 'rgc-fixedaber-truthtable.txt'
-
-    else:
-        raise RuntimeError('Unrecognized mc_type: %s'%mc_type)
-
-    if sn_cut is not None:
-        truthPath = globalPath+'Truth/'
-        if mc_type == 'rgc-noaber-regauss':
-            truthPath = truthPath+'rgc-noaber/'
-        if (mc_type == 'noaber-regauss') or (mc_type == 'cgc-noaber-precise'):
-            truthPath = truthPath+'cgc-noaber/'
-        if (mc_type == 'regauss') or (mc_type == 'regauss-bugfix'):
-            truthPath = truthPath+'cgc/'
-            
-    catFiles = glob.glob(path)
-    if len(catFiles) == 0:
-        raise RuntimeError("No catalogs found with path %s!"%path)
+    fields = ["mcal-v05s02/collated/mcal-v05s02.fits",\
+              "mcal-v06s01/collated/mcal-v06s01.fits",\
+              "mcal-v07s01/collated/mcal-v07s01.fits",\
+              "mcal-v08s01/collated/mcal-v08s01.fits"]
     catalogs = []
-    #alltruth = []
-    for thisFile in catFiles:
-
-            # Here I was investigating the possibility that I'd
-            # regressed the galaxy shapes against the wrong psf
-            # ellipticity. I've disabled this for the time being.
-        this_catalog = fits.getdata(thisFile)
-        keep  =   (this_catalog['g1'] != -10) & (this_catalog['g2'] != -10) & (this_catalog['weight'] > 0)
-        this_catalog = this_catalog[keep]
-        if mc_type=='moments':
-            this_catalog['a1'] = this_catalog['a1']/2.
-            this_catalog['a2'] = this_catalog['a2']/2.
+    cat_dtype =  np.dtype([('g1','>f8'),('R1','>f8'),('a1','>f8'),('c1','>f8'), ('psf_e1','>f8'),('g2','>f8'),('R2','>f8'),('a2','>f8'),('c2','>f8'), ('psf_e2','>f8'),('weight','>f8')])
+    for thisfield in fields:
+        if subsample is True:
+            data = fitsio.read(filename, rows=[np.arange(nrows)], \
+                               columns=['exp_mcal_g','exp_mcal_R', 'exp_mcal_Rpsf','exp_mcal_gpsf','exp_mcal_c','exp_flags'], ext=1)
+            keep = data['exp_flags'] == 0
             
         else:
-            this_catalog = fits.getdata(thisFile)
-            keep  =   (this_catalog['g1'] != -10) & (this_catalog['g2'] != -10) & (this_catalog['weight'] > 0)
-            this_catalog = this_catalog[keep]
-        if sn_cut is not None:
-            # Parse thisFile to figure out where the truth catalog
-            # lives.
-            pattern = re.compile("-(\d*).fits")
-            thisField = pattern.findall(thisFile)[0]
-            thisTruthFile = truthPath + 'subfield_catalog-'+thisField+'.fits'
-            truthCat = fits.getdata(thisTruthFile)
-            keep  =   (truthCat['gal_sn'] > (sn_cut) )
-            use = np.in1d(this_catalog['id'],truthCat[keep]['id'])
-            this_catalog = this_catalog[use]
-            truthCat = truthCat[use]
+            data = fitsio.read(filename, \
+                               columns=['exp_mcal_g','exp_mcal_R', 'exp_mcal_Rpsf','exp_mcal_gpsf','exp_mcal_c','exp_flags'], ext=1)
+            keep = data['exp_flags'] == 0
+        this_catalog = np.empty(np.sum(keep), dtype = cat_dtype)
+        this_catalog['g1'] = data[keep]['exp_mcal_g'][:,0]
+        this_catalog['g2'] = data[keep]['exp_mcal_g'][:,1]
+        this_catalog['R1'] = data[keep]['exp_mcal_R'][:,0,0]
+        this_catalog['R2'] = data[keep]['exp_mcal_R'][:,1,1]
+        this_catalog['a1'] = data[keep]['exp_mcal_Rpsf'][:,0]
+        this_catalog['a2'] = data[keep]['exp_mcal_Rpsf'][:,1]
+        this_catalog['psf_e1'] = data[keep]['exp_mcal_gpsf'][:,0]
+        this_catalog['psf_e2'] = data[keep]['exp_mcal_gpsf'][:,0]
+        this_catalog['c1'] = data[keep]['exp_mcal_c'][:,0]
+        this_catalog['c2'] = data[keep]['exp_mcal_c'][:,1]
+        this_catalog['weight'] = np.zeros(np.sum(keep))+1.
+        catalogs.append(data[keep])
+    return catalogs
 
-        catalogs.append(this_catalog)
-    #cat = np.hstack(catalogs)
-    #truth = np.hstack(alltruth)
-    #stop
     return catalogs, truthFile
 
 
@@ -731,13 +652,13 @@ def main(argv):
     import argparse
 
     description = """Analyze MetaCalibration outputs from Great3 and Great3++ simulations."""
-    mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym','noaber-regauss','rgc-regauss','rgc-noaber-regauss','rgc-fixedaber-regauss', 'rgc-ksb','cgc-noaber-precise']
+    mc_choices =['g3redux']
     # Note: The above line needs to be consistent with the choices in getAllCatalogs.
 
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("--path", dest="path", type=str, default="../Great3/",
                         help="path to MetaCalibration output catalogs")
-    parser.add_argument("-mc","--mc_type", dest="mc_type", type=str, default="regauss",
+    parser.add_argument("-mc","--mc_type", dest="mc_type", type=str, default="g3redux",
                         choices = mc_choices, help="metcalibration catalog type to use")
     parser.add_argument("-n", "--nbins", dest = "nbins", type = int, default= 20,
                         help = "number of bins to use in histogram estimator.")
@@ -763,14 +684,13 @@ def main(argv):
         outfile = args.outfile
         print 'Getting catalogs from path %s and mc_type %s'%(path, mc_type)
         print 'Using %i bins for inference'% (nbins)
-        catalogs, truthfile = getAllCatalogs(path=path, mc_type=mc_type,sn_cut = sn_cut)
+        catalogs = getAllCatalogs(path=path, mc_type=mc_type,sn_cut = sn_cut)
         print 'Got %d catalogs, doing inference'%len(catalogs)
         field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL = \
             doInference(catalogs=catalogs, nbins=nbins, mean=False)
         field_str = makeFieldStructure(field_id=field_id, g1raw = g1raw, g2raw = g2raw, g1opt = g1opt, g2opt = g2opt,
                                     g1var = g1var, g2var = g2var, psf_e1 = psf_e1, psf_e2 = psf_e2,
                                     e1_logL = e1_logL, e2_logL = e2_logL)
-        calculate_likelihood_cut(fieldstr = field_str, mc= mc_type)
         print 'Writing field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_qe2, e1_logL, e2_logL to file %s'%outfile
         out_data = np.column_stack((field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL))
         np.savetxt(outfile, out_data, fmt='%d %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
