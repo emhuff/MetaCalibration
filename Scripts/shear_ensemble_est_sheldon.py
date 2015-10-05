@@ -8,7 +8,7 @@ import glob
 from astropy.io import fits
 import re
 import galsim
-
+import esutil
 
     
 def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3reredux/', subsample = True, nrows = 100000 ):
