@@ -20,7 +20,7 @@ def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3rere
               "mcal-v08s01/collated/mcal-v08s01.fits"]
     catalogs = []
     cat_dtype =  np.dtype([('id','>i8'),('g1','>f8'),('R1','>f8'),('a1','>f8'),('c1','>f8'), ('psf_e1','>f8'),('g2','>f8'),('R2','>f8'),('a2','>f8'),('c2','>f8'), ('psf_e2','>f8'),('weight','>f8')])
-    for thisfield,field_id in zip(fields, np.arange(fields)):
+    for thisfield,field_id in zip(fields, np.arange(len(fields))):
         filename = path + thisfield
         if subsample is True:
             data = esutil.io.read(filename, rows=[np.arange(nrows)], \
