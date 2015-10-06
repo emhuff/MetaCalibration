@@ -51,7 +51,8 @@ def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3rere
 
 
 
-def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False, mc_type = None):
+def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False,\
+               mc_type = None, sym = True):
     # Get a big master list of all the ellipticities in all fields.
     # Sadly you cannot retain column identity when using hstack, so we have to do the manipulations
     # for each catalog to get a list of e1 arrays to stack.
@@ -68,10 +69,14 @@ def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False, mc_type = 
     e2_corr = np.hstack(e2_corr)
     r1 = np.hstack(r1)
     r2 = np.hstack(r2)
-    e1prior = np.hstack( (e1_corr, -e1_corr ) )
-    e2prior = np.hstack( (e2_corr, -e2_corr ) )
+    if sym:
+        e1prior = np.hstack( (e1_corr, -e1_corr ) )
+        e2prior = np.hstack( (e2_corr, -e2_corr ) )
+    else:
+        e1prior = e1_corr
+        e2prior = e2_corr
     all_e = np.hstack( (e1prior, e2prior))
-
+        
     # Define bins.  np.percentile cannot take a list of percentile levels, so we have to stupidly
     # loop over the percentile levels we want.
     if bins is None:
@@ -226,7 +231,7 @@ def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
                 linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv= de2_dg, cinv=this_cinv2)
             if plotFile is not None:
                 fig, (ax1, ax2) = plt.subplots(nrows=1, ncols = 2, figsize = (14,7))
-                _, this_e1_hist, this_e2_hist, _, _ = buildPrior(catalog, bins=linear_bin_edges)
+                _, this_e1_hist, this_e2_hist, _, _ = buildPrior(catalog, bins=linear_bin_edges,sym=False)
                 
                 # Finally, make a version with the shear and psf effects subtracted off.
                 
