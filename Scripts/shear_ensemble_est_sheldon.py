@@ -690,7 +690,7 @@ def main(argv):
         outfile = args.outfile
         print 'Getting catalogs from path %s and mc_type %s'%(path, mc_type)
         print 'Using %i bins for inference'% (nbins)
-        catalogs = getAllCatalogs(subsample = False)
+        catalogs = getAllCatalogs(subsample = True)
         print 'Got %d catalogs, doing inference'%len(catalogs)
         field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL = \
             doInference(catalogs=catalogs, nbins=nbins, mean=False, plotfile = "es_g3redux_histograms")
