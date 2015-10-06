@@ -187,6 +187,7 @@ def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
 
     if plotFile is not None:
         from matplotlib.backends.backend_pdf import PdfPages
+        import matplotlib.pyplot as plt
         pp = PdfPages(plotFile)
     
     for catalog,i in zip(catalogs, xrange(len(catalogs) )):
