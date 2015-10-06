@@ -223,7 +223,7 @@ def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
             this_g2_opt, this_g2_var = \
                 linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv= de2_dg, cinv=this_cinv2)
             if plotFile is not None:
-                fig, (ax1, ax2) = plt.subplots(nrows=1, ncols = 3, figsize = (14,7))
+                fig, (ax1, ax2) = plt.subplots(nrows=1, ncols = 2, figsize = (14,7))
                 linear_bin_edges = np.linspace(-15,15,100)
                 linear_bin_centers = (linear_bin_edges[0:-1] + linear_bin_edges[1:])/2.
                 ax1.semilogy(linear_bin_centers, e1_prior_hist, label = 'e1 prior')
