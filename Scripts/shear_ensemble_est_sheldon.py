@@ -230,7 +230,7 @@ def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
             this_g2_opt, this_g2_var = \
                 linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv= de2_dg, cinv=this_cinv2)
             if plotFile is not None:
-                fig, (ax1, ax2) = plt.subplots(nrows=1, ncols = 3, figsize = (21,7))
+                fig, (ax1, ax2) = plt.subplots(nrows=1, ncols = 2, figsize = (21,7))
                 _, this_e1_hist, this_e2_hist, _, _ = buildPrior(catalog, bins=linear_bin_edges,sym=False)
                 e1_hist_desheared, _ = np.histogram(catalog['g1'] - catalog['R1'] * this_g1_opt - catalog['c1'] - catalog['a1']*catalog['psf_e1'] , bins = bin_edges )
                 e1_hist_desheared = e1_hist_desheared * 1./catalog.size
