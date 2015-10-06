@@ -115,10 +115,7 @@ def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False, mc_type = 
     e2_prior_hist_mod_m, _  = np.histogram(
         np.hstack( (e2_corr - r2*dg, -e2_corr - (r2*dg) ) ),  bins=bin_edges)
     e2_prior_hist_mod_m = e2_prior_hist_mod_m * 1./e2prior.size
-    #e2_prior_hist_mod = (e2_prior_hist_mod_p - e2_prior_hist_mod_m)/2.
     
-    #de1_dg = ( e1_prior_hist_mod_p - e1_prior_hist) / (dg)
-    #de2_dg = ( e2_prior_hist_mod_p - e2_prior_hist) / (dg)
     de1_dg = ( e1_prior_hist_mod_p - e1_prior_hist_mod_m) / (2*dg)
     de2_dg = ( e2_prior_hist_mod_p - e2_prior_hist_mod_m) / (2*dg)
     de1_dg[-1] = 0.
@@ -226,6 +223,11 @@ def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
                 fig, (ax1, ax2) = plt.subplots(nrows=1, ncols = 2, figsize = (14,7))
                 linear_bin_edges = np.linspace(-15,15,100)
                 linear_bin_centers = (linear_bin_edges[0:-1] + linear_bin_edges[1:])/2.
+                _, this_e1_hist, this_e2_hist, _, _ = buildPrior(catalog, bins=linear_bin_edges)
+
+                # Finally, make a version with the shear and psf effects subtracted off.
+                
+                
                 ax1.semilogy(linear_bin_centers, e1_prior_hist, label = 'e1 prior')
                 ax1.semilogy(linear_bin_centers, this_e1_hist, label = 'this_e1')
                 ax1.legend(loc='best')
