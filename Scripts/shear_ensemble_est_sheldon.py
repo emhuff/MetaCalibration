@@ -244,7 +244,7 @@ def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
 
                 ax1.legend(loc='best')
                 ax2.plot(linear_bin_centers, this_e1_hist - prior_alt_e1_hist,label='this field - prior')
-                ax2.plot(linear_bin_centers, e1_hist_desheared - prior_alt_e1,label = 'desheared - prior')
+                ax2.plot(linear_bin_centers, e1_hist_desheared - prior_alt_e1_hist,label = 'desheared - prior')
 
                 fig.savefig(pp, format="pdf")
         
