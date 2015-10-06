@@ -237,7 +237,7 @@ def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
                 ax1.plot((bin_edges[0:-1] + bin_edges[1:])/2., de1_dg)
                 ax1.plot((bin_edges[0:-1] + bin_edges[1:])/2., de2_dg)
                 fig.savefig(pp, format="pdf")
-        
+                pp.close()
         elif mean is True:
             this_g1_opt =  np.average(catalog['g1'] - catalog['c1'] - catalog['a1'] * catalog['psf_e1'], weights = catalog['weight']) \
                / np.average(catalog['R1'], weights = catalog['weight'])
