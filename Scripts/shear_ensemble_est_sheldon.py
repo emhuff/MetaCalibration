@@ -237,7 +237,7 @@ def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
                 ax2.plot((bin_edges[0:-1] + bin_edges[1:])/2., de1_dg)
                 ax2.plot((bin_edges[0:-1] + bin_edges[1:])/2., de2_dg)
                 fig.savefig(pp, format="pdf")
-                pp.close()
+        
         elif mean is True:
             this_g1_opt =  np.average(catalog['g1'] - catalog['c1'] - catalog['a1'] * catalog['psf_e1'], weights = catalog['weight']) \
                / np.average(catalog['R1'], weights = catalog['weight'])
@@ -267,8 +267,8 @@ def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
         field_id[i] = catalog[0]['id'] / 1000000
         psf_e1[i] = np.median(catalog['psf_e1'])
         psf_e2[i] = np.median(catalog['psf_e2'])
-
-
+    
+    pp.close()
     return field_id, gamma1_raw, gamma2_raw, gamma1_opt, gamma2_opt, gamma1_var, gamma2_var, psf_e1, psf_e2, field_e1_logL, field_e2_logL
 
 
