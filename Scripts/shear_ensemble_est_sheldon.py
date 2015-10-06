@@ -230,17 +230,22 @@ def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
             this_g2_opt, this_g2_var = \
                 linear_estimator(data=this_e2_hist, null=e2_prior_hist, deriv= de2_dg, cinv=this_cinv2)
             if plotFile is not None:
-                fig, (ax1, ax2) = plt.subplots(nrows=1, ncols = 2, figsize = (14,7))
+                fig, (ax1, ax2) = plt.subplots(nrows=1, ncols = 3, figsize = (21,7))
                 _, this_e1_hist, this_e2_hist, _, _ = buildPrior(catalog, bins=linear_bin_edges,sym=False)
-                
+                e1_hist_desheared, _ = np.histogram(catalog['g1'] - catalog['R1'] * this_g1_opt - catalog['c1'] - catalog['a1']*catalog['psf_e1'] , bins = bin_edges )
+                e1_hist_desheared = e1_hist_desheared * 1./catalog.size
+
                 # Finally, make a version with the shear and psf effects subtracted off.
                 
                 
                 ax1.plot(linear_bin_centers, prior_alt_e1_hist, label = 'e1 prior')
                 ax1.plot(linear_bin_centers, this_e1_hist, label = 'this_e1')
+                ax1.plot(linear_bin_centers, e1_hist_desheared, label = 'e1_unsheared')
+
                 ax1.legend(loc='best')
-                ax2.plot((bin_edges[0:-1] + bin_edges[1:])/2., de1_dg)
-                ax2.plot((bin_edges[0:-1] + bin_edges[1:])/2., de2_dg)
+                ax2.plot(linear_bin_centers, this_e1_hist - prior_alt_e1_hist,label='this field - prior')
+                ax2.plot(linear_bin_centers, e1_hist_desheared - prior_alt_e1,label = 'desheared - prior')
+
                 fig.savefig(pp, format="pdf")
         
         elif mean is True:
