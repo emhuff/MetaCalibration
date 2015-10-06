@@ -234,8 +234,8 @@ def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
                 ax1.plot(linear_bin_centers, prior_alt_e1_hist, label = 'e1 prior')
                 ax1.plot(linear_bin_centers, this_e1_hist, label = 'this_e1')
                 ax1.legend(loc='best')
-                ax1.plot((bin_edges[0:-1] + bin_edges[1:])/2., de1_dg)
-                ax1.plot((bin_edges[0:-1] + bin_edges[1:])/2., de2_dg)
+                ax2.plot((bin_edges[0:-1] + bin_edges[1:])/2., de1_dg)
+                ax2.plot((bin_edges[0:-1] + bin_edges[1:])/2., de2_dg)
                 fig.savefig(pp, format="pdf")
                 pp.close()
         elif mean is True:
