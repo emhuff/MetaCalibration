@@ -16,7 +16,7 @@ def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3rere
 
     fields = ["mcal-v05s03/collated/mcal-v05s03.fits",
               "mcal-v06s02/collated/mcal-v06s02.fits",
-              "mcal-v07s02/collated/mcal-v07s02.fits",
+              "mcal-v07s02/collated/mcal-v07s02.fits ",
               "mcal-v08s02/collated/mcal-v08s02.fits"]
     catalogs = []
     cat_dtype =  np.dtype([('id','>i8'),('g1','>f8'),('R1','>f8'),('a1','>f8'),('c1','>f8'), ('psf_e1','>f8'),('g2','>f8'),('R2','>f8'),('a2','>f8'),('c2','>f8'), ('psf_e2','>f8'),('weight','>f8')])
@@ -38,10 +38,10 @@ def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3rere
         this_catalog['R2'] = data[keep]['exp_mcal_R'][:,1,1]
         this_catalog['a1'] = data[keep]['exp_mcal_Rpsf'][:,0]
         this_catalog['a2'] = data[keep]['exp_mcal_Rpsf'][:,1]
-        this_catalog['psf_e1'] = 0.#data[keep]['exp_mcal_gpsf'][:,0]
-        this_catalog['psf_e2'] = 0.#data[keep]['exp_mcal_gpsf'][:,0]
-        this_catalog['c1'] = 0.#data[keep]['exp_mcal_c'][:,0]
-        this_catalog['c2'] = 0.#data[keep]['exp_mcal_c'][:,1]
+        this_catalog['psf_e1'] = data[keep]['exp_mcal_gpsf'][:,0]
+        this_catalog['psf_e2'] = data[keep]['exp_mcal_gpsf'][:,0]
+        this_catalog['c1'] = data[keep]['exp_mcal_c'][:,0]
+        this_catalog['c2'] = data[keep]['exp_mcal_c'][:,1]
         this_catalog['weight'] = np.zeros(np.sum(keep))+1.
         catalogs.append(this_catalog)
     return catalogs
@@ -69,7 +69,7 @@ def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False,\
     r1 = np.hstack(r1)
     r2 = np.hstack(r2)
     if sym:
-        e1prior = np.hstack( (e1_corr, -e1_corr ) )
+        e1prior = np.hstack( (e2_corr, -e2_corr ) )
         e2prior = np.hstack( (e2_corr, -e2_corr ) )
     else:
         e1prior = e1_corr
