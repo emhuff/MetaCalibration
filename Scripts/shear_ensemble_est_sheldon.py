@@ -16,7 +16,7 @@ def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3rere
 
     fields = ["mcal-v05s03/collated/mcal-v05s03.fits",
               "mcal-v06s02/collated/mcal-v06s02.fits",
-              "mcal-v07s02/collated/mcal-v07s02.fits ",
+              "mcal-v07s02/collated/mcal-v07s02.fits",
               "mcal-v08s02/collated/mcal-v08s02.fits"]
     catalogs = []
     cat_dtype =  np.dtype([('id','>i8'),('g1','>f8'),('R1','>f8'),('a1','>f8'),('c1','>f8'), ('psf_e1','>f8'),('g2','>f8'),('R2','>f8'),('a2','>f8'),('c2','>f8'), ('psf_e2','>f8'),('weight','>f8')])
