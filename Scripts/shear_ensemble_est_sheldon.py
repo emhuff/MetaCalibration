@@ -40,8 +40,8 @@ def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3rere
         this_catalog['a2'] = data[keep]['exp_mcal_Rpsf'][:,1]
         this_catalog['psf_e1'] = 0.#data[keep]['exp_mcal_gpsf'][:,0]
         this_catalog['psf_e2'] = 0.#data[keep]['exp_mcal_gpsf'][:,0]
-        this_catalog['c1'] = #data[keep]['exp_mcal_c'][:,0]
-        this_catalog['c2'] = #data[keep]['exp_mcal_c'][:,1]
+        this_catalog['c1'] = 0.#data[keep]['exp_mcal_c'][:,0]
+        this_catalog['c2'] = 0.#data[keep]['exp_mcal_c'][:,1]
         this_catalog['weight'] = np.zeros(np.sum(keep))+1.
         catalogs.append(this_catalog)
     return catalogs
