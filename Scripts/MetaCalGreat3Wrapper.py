@@ -316,13 +316,14 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
     # Draw to an ImageD object, and then return.
     psfGrownImage = galsim.ImageD(psfImage.bounds)
     psfGrownImage=psfGrown.drawImage(image=psfGrownImage, scale=pixelscale, method='no_pixel')
-    return psfGrownImage
+    #return psfGrownImage
+    return psfGrown
 
 
-def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1=0.0, g2=0.0, variance=1.,
+def metaCalibrateReconvolve(galaxyImage, psfImage, psfTarget, g1=0.0, g2=0.0, variance=1.,
                             g1psf=0., g2psf=0.):
     
-    pixel = psfImage.scale
+    pixel = galaxyImage.scale
     l5 = galsim.Lanczos(5, True, 1.0E-6)
     l52d = galsim.InterpolantXY(l5)
 
@@ -333,7 +334,7 @@ def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1=0.0, g2=0.
 
     galaxy = galsim.InterpolatedImage(galaxyImage,x_interpolant=l52d)
     psf = galsim.InterpolatedImage(psfImage,x_interpolant=l52d)
-    psfTarget = galsim.InterpolatedImage(psfImageTarget,x_interpolant=l52d)
+    #psfTarget = galsim.InterpolatedImage(psfImageTarget,x_interpolant=l52d)
     
     # Remove the psf from the galaxy
     psfInv = galsim.Deconvolve(psf)
@@ -388,20 +389,25 @@ def metaCalibrate(galaxyImage, psfImage, g1 = 0.01, g2 = 0.00, gal_shear = True,
     
     # First, work out the target psf, which changes depending on whether we're shearing the galaxy
     # or PSF.  So, propagate that kwarg through.
-    targetPSFImage = getTargetPSF(psfImage, pixelscale, g1 = g1, g2 = g2, gal_shear=gal_shear)
-    
+    targetPSFObj = getTargetPSF(psfImage, pixelscale, g1 = g1, g2 = g2, gal_shear=gal_shear)
+    targetPSFImage = galsim.ImageD(psfImage.bounds)
+    targetPSFImage =  targetPSFObj.draw(image= targetPSFImage,
+                                        #method= 'no_pixel',
+                                        scale= psfImage.scale)
     if gal_shear:
         # Then, produce the reconvolved images, with and without shear.
         reconvSheared = metaCalibrateReconvolve(
-            galaxyImage, psfImage, targetPSFImage, g1=g1, g2=g2, variance=variance, g1psf=0., g2psf=0.)
+            galaxyImage, psfImage, targetPSFObj, g1=g1, g2=g2, variance=variance, g1psf=0., g2psf=0.)
         reconvUnsheared = metaCalibrateReconvolve(
-            galaxyImage, psfImage, targetPSFImage, g1=0.0, g2=0.0, variance=variance, g1psf=0., g2psf=0.)
+            galaxyImage, psfImage, targetPSFObj, g1=0.0, g2=0.0, variance=variance, g1psf=0., g2psf=0.)
+        
         return reconvSheared, reconvUnsheared, targetPSFImage
     else:
         # We really only have to produce one image since the galaxy isn't sheared.
         reconvUnsheared = \
-            metaCalibrateReconvolve(galaxyImage, psfImage, targetPSFImage, g1=0.0,
+            metaCalibrateReconvolve(galaxyImage, psfImage, targetPSFObj, g1=0.0,
                                     g2=0.0, variance=variance, g1psf=g1, g2psf=g2)
+            
         return reconvUnsheared, reconvUnsheared, targetPSFImage
 
 
