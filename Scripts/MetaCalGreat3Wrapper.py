@@ -391,9 +391,9 @@ def metaCalibrate(galaxyImage, psfImage, g1 = 0.01, g2 = 0.00, gal_shear = True,
     # or PSF.  So, propagate that kwarg through.
     targetPSFObj = getTargetPSF(psfImage, pixelscale, g1 = g1, g2 = g2, gal_shear=gal_shear)
     targetPSFImage = galsim.ImageD(psfImage.bounds)
-    targetPSFImage =  targetPSFObj.draw(image= targetPSFImage,
-                                        #method= 'no_pixel',
-                                        scale= psfImage.scale)
+    targetPSFImage =  targetPSFObj.drawImage(image= targetPSFImage,
+                                             method= 'no_pixel',
+                                             scale= psfImage.scale)
     if gal_shear:
         # Then, produce the reconvolved images, with and without shear.
         reconvSheared = metaCalibrateReconvolve(
