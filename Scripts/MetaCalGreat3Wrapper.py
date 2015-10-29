@@ -296,7 +296,7 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
     # Create a GSObj from the psf image.
     l5 = galsim.Lanczos(5, True, 1.0E-4)
     l52d = galsim.InterpolantXY(l5)
-    psf = galsim.InterpolatedImage(psfImage)
+    psf = galsim.InterpolatedImage(psfImage,x_interpolant=l52d)
 
     # Deconvolve the pixel from the PSF.
     pixInv = galsim.Deconvolve(pixel)
@@ -331,9 +331,9 @@ def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1=0.0, g2=0.
     # pad factor may be important here (increase to 6?)
     # also, look at k-space interpolant
 
-    galaxy = galsim.InterpolatedImage(galaxyImage)
-    psf = galsim.InterpolatedImage(psfImage)
-    psfTarget = galsim.InterpolatedImage(psfImageTarget)
+    galaxy = galsim.InterpolatedImage(galaxyImage,x_interpolant=l52d)
+    psf = galsim.InterpolatedImage(psfImage,x_interpolant=l52d)
+    psfTarget = galsim.InterpolatedImage(psfImageTarget,x_interpolant=l52d)
     
     # Remove the psf from the galaxy
     psfInv = galsim.Deconvolve(psf)

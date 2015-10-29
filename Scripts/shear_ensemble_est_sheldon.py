@@ -7,7 +7,6 @@ import numpy as np
 import glob
 from astropy.io import fits
 import re
-import galsim
 import esutil
 
     
