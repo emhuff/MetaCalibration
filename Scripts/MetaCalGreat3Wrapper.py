@@ -472,9 +472,9 @@ def EstimateAllShearsStar(args):
     # Python's pool.map seems only to want to deal with functions of a single argument.
     return EstimateAllShears(*args)
 
-def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catalog", output_type="fits",
+def EstimateAllShears(subfield, sim_dir, output_dir, shear_est, output_prefix="output_catalog", output_type="fits",
                       clobber=True, sn_weight=False, calib_factor=0.98, coadd=False,
-                      variable_psf_dir="", shear_est = "regauss"):
+                      variable_psf_dir=""):
     """Main driver for all routines in this file, and the implementation of most of the command-line
     interface.
 
@@ -894,7 +894,8 @@ def main(argv):
         subfield_range = numpy.arange(200)
         iterator = itertools.izip(subfield_range,
                                   itertools.repeat(sim_dir),
-                                  itertools.repeat(output_dir))                              
+                                  itertools.repeat(output_dir),
+                                  itertools.repeat(opts.algorithm))
         R = pool.map(EstimateAllShearsStar,iterator)
 
  
