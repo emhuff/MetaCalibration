@@ -5,7 +5,8 @@ import numpy as np
 import esutil
 import matplotlib as mpl
 mpl.use('Agg')
-import MetaCalGreat3Wrapper as mcg3
+#import MetaCalGreat3Wrapper as mcg3
+import metacal as mcg3
 import galsim
 
 

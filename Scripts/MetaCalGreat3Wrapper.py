@@ -305,7 +305,7 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
     psfGrownNoPixel = psfNoPixel.dilate(1 + 2*math.sqrt(g1**2 + g2**2))
 
     # Convolve the grown psf with the pixel
-    psfGrown = galsim.Convolve(psfGrownNoPixel,pixel)
+    psfGrown = galsim.Convolve([psfGrownNoPixel,pixel])
 
     # I think it's actually the shear of the effective, PSF-convolved PSF that we're sensitive
     # to. So I'm going to shear at this stage if gal_shear is False.
@@ -314,8 +314,8 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
 
     # Draw to an ImageD object, and then return.
     psfGrownImage = galsim.ImageD(psfImage.bounds)
-    psfGrownImage=psfGrown.drawImage(image=psfGrownImage, scale=pixelscale, method='no_pixel')
-    #return psfGrownImage
+    psfGrownImage= psfGrown.drawImage(image=psfGrownImage, scale=pixelscale, method='no_pixel')
+
     return psfGrown
 
 
@@ -331,11 +331,10 @@ def metaCalibrateReconvolve(galaxyImage, psfImage, psfTarget, g1=0.0, g2=0.0, va
 
     galaxy = galsim.InterpolatedImage(galaxyImage,x_interpolant=l5)
     psf = galsim.InterpolatedImage(psfImage,x_interpolant=l5)
-    #psfTarget = galsim.InterpolatedImage(psfImageTarget,x_interpolant=l5)
     
     # Remove the psf from the galaxy
     psfInv = galsim.Deconvolve(psf)
-    galaxy_noPSF = galsim.Convolve(galaxy,psfInv)
+    galaxy_noPSF = galsim.Convolve([galaxy,psfInv])
 
     # Apply a shear
     galaxy_noPSF = galaxy_noPSF.shear(g1 = g1, g2 = g2)
