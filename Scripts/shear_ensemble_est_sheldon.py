@@ -14,21 +14,20 @@ import esutil
 def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3reredux/', subsample = True, nrows = 100000 ):
 
 
-    fields = ["mcal-v05s03/collated/mcal-v05s03.fits",\
-              "mcal-v06s02/collated/mcal-v06s02.fits",\
-              "mcal-v07s02/collated/mcal-v07s02.fits",\
+    fields = ["mcal-v05s03/collated/mcal-v05s03.fits",
+              "mcal-v06s02/collated/mcal-v06s02.fits",
+              "mcal-v07s02/collated/mcal-v07s02.fits",
               "mcal-v08s02/collated/mcal-v08s02.fits"]
     catalogs = []
     cat_dtype =  np.dtype([('id','>i8'),('g1','>f8'),('R1','>f8'),('a1','>f8'),('c1','>f8'), ('psf_e1','>f8'),('g2','>f8'),('R2','>f8'),('a2','>f8'),('c2','>f8'), ('psf_e2','>f8'),('weight','>f8')])
     for thisfield,field_id in zip(fields, np.arange(len(fields))):
         filename = path + thisfield
         if subsample is True:
-            data = esutil.io.read(filename, rows=[np.arange(nrows)], \
-                               columns=['exp_mcal_g','exp_mcal_R', 'exp_mcal_Rpsf','exp_mcal_gpsf','exp_mcal_c','exp_flags'], ext=1)
+            data = esutil.io.read(filename, rows=[np.arange(nrows)], columns=['exp_mcal_g','exp_mcal_R', 'exp_mcal_Rpsf','exp_mcal_gpsf','exp_mcal_c','exp_flags'], ext=1)
             keep = data['exp_flags'] == 0
             
         else:
-            data = esutil.io.read(filename, \
+            data = esutil.io.read(filename,
                                columns=['exp_mcal_g','exp_mcal_R', 'exp_mcal_Rpsf','exp_mcal_gpsf','exp_mcal_c','exp_flags'], ext=1)
             keep = data['exp_flags'] == 0
         this_catalog = np.empty(np.sum(keep), dtype = cat_dtype)
@@ -70,7 +69,7 @@ def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False,\
     r1 = np.hstack(r1)
     r2 = np.hstack(r2)
     if sym:
-        e1prior = np.hstack( (e1_corr, -e1_corr ) )
+        e1prior = np.hstack( (e2_corr, -e2_corr ) )
         e2prior = np.hstack( (e2_corr, -e2_corr ) )
     else:
         e1prior = e1_corr
