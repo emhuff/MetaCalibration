@@ -17,15 +17,15 @@ outfile1 = 'great3_before_after'
 outfile2 = 'great3_before'
 outfile3 = 'great3_after'
 outsuff = '.png'
-a_lim = (-0.3,0.3)
-m_lim = (-0.3,0.3)
+a_lim = (-0.1,0.1)
+m_lim = (-1.,1.)
 # components: average them or ...?
 components = ['1','2','both']
 # make dicts with translation of codes to branches and methods
 info_dict = {
-    'cgc-regauss':{'branch':'CGC','method':'Regauss','marker':'s','color':(0.1,0.1,0.1),'ls':'-'},
-    'cgc-ksb':{'branch':'CGC','method':'KSB','marker':'s','color':(0.9,0.1,0.1),'ls':'-'},
-    'cgc-moments':{'branch':'CGC','method':'Moments','marker':'s','color':(0.9,0.1,0.9),'ls':'-'},
+    'regauss':{'branch':'CGC','method':'Regauss','marker':'s','color':(0.1,0.1,0.1),'ls':'-'},
+    'ksb':{'branch':'CGC','method':'KSB','marker':'s','color':(0.9,0.1,0.1),'ls':'-'},
+    'moments':{'branch':'CGC','method':'Moments','marker':'s','color':(0.9,0.1,0.9),'ls':'-'},
     'noaber-regauss':{'branch':'CGC-noaber','method':'Regauss','marker':'o','color':(0.1,0.1,0.1),'ls':'-'},
     'rgc-regauss':{'branch':'RGC','method':'Regauss','marker':'v','color':(0.1,0.1,0.1),'ls':'-'},
     'rgc-noaber-regauss':{'branch':'RGC-noaber','method':'Regauss','marker':'^','color':(0.1,0.1,0.1),'ls':'-'},
@@ -35,7 +35,7 @@ info_dict = {
 m_targ = 0.002
 
 # read in data
-dat = np.genfromtxt(infile, dtype=None, skip_header=2)
+dat = np.genfromtxt(infile, dtype=None)
 # now we have an unstructured array
 # yank out the methods
 n = len(dat)
@@ -79,6 +79,8 @@ for component in components:
             plt.errorbar([a_vals[ind]], [m_vals[ind]], xerr=[a_err_vals[ind]], yerr=[m_err_vals[ind]],
                          marker=info_dict[mstr]['marker'], color=info_dict[mstr]['color'],
                          label=info_dict[mstr]['method']+' ('+info_dict[mstr]['branch']+')')
+            #if 'ksb' in info_dict[mstr]['method'].lower():
+            #    print info_dict[mstr]['method'], m_vals[ind], a_vals[ind]
     #a_lim = (min_a, max_a)
     #m_lim = (min_m, max_m)
     zero_arr = np.zeros(2)
