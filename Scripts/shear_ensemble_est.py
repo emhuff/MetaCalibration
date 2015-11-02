@@ -8,31 +8,8 @@ import glob
 from astropy.io import fits
 import re
 import galsim
-
-def get_object_size(entry):
-
-    
-    psf_size = 0.2
-    psfObj = galsim.Gaussian(fwhm=psf_size)
-    image = galsim.Image(51,51,scale=0.25)
-
-    if entry['bulge_flux'] > 0.:
-        bulge = galsim.Sersic(entry['bulge_n'], flux = entry['bulge_flux'], half_light_radius = entry['bulge_hlr'])
-        bulge.applyShear(q = entry['bulge_q'], beta =entry['bulge_beta_radians']*galsim.radians)
-        bulgeConv = galsim.Convolve([bulge,psfObj])
-        bulgeConv.drawImage(image=image,add_to_image=True)
-
-    if entry['disk_flux'] > 0.:
-        disk = galsim.Exponential(flux = entry['disk_flux'],half_light_radius = entry['disk_hlr'])
-        disk.applyShear(q=entry['disk_q'],beta=entry['disk_beta_radians']*galsim.radians)
-        diskConv = galsim.Convolve([disk,psfObj])
-        diskConv.drawImage(image=image, add_to_image = True)
-    
-    xx,yy = np.meshgrid(np.arange(51)-25, np.arange(51)-25)
-    sigma = np.sqrt( np.sum( image.array * (xx**2 + yy **2) ) / np.sum(image.array)  )
-    if not np.isfinite(sigma):
-        stop
-    return sigma
+import matplotlib as mpl
+mpl.use('Agg')
 
     
 def getAllCatalogs( path = '../Great3/', mc_type = None, sn_cut = None ):
@@ -100,13 +77,14 @@ def getAllCatalogs( path = '../Great3/', mc_type = None, sn_cut = None ):
         this_catalog = fits.getdata(thisFile)
         keep  =   (this_catalog['g1'] != -10) & (this_catalog['g2'] != -10) & (this_catalog['weight'] > 0)
         this_catalog = this_catalog[keep]
-        if mc_type=='moments':
+        if (mc_type=='moments') or (mc_type=='ksb'):
             this_catalog['a1'] = this_catalog['a1']/2.
             this_catalog['a2'] = this_catalog['a2']/2.
             
         else:
             this_catalog = fits.getdata(thisFile)
-            keep  =   (this_catalog['g1'] != -10) & (this_catalog['g2'] != -10) & (this_catalog['weight'] > 0)
+            keep  =   (this_catalog['g1'] != -10) & (this_catalog['g2'] != -10) & (this_catalog['weight'] > 0) 
+            #keep  =   (this_catalog['g1'] != -10) & (this_catalog['g2'] != -10) & (this_catalog['weight'] > 0)
             this_catalog = this_catalog[keep]
         if sn_cut is not None:
             # Parse thisFile to figure out where the truth catalog
@@ -556,7 +534,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
     if catalogs is not None:
         bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg = buildPrior(catalogs, nbins=20, doplot = True, mc_type = figName)
 
-
+    return coeff1, coeff2
 
 
 def no_correction_plots(catalogs= None,truthtable = None, mc= None):
@@ -657,6 +635,7 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
     ax6.set_ylim([-0.03,0.03])
         
     fig.savefig(mc+'-no_corrections')
+    return coeff1, coeff2
         
 def calculate_likelihood_cut(fieldstr = None, mc=None):
 
@@ -709,6 +688,7 @@ def calculate_likelihood_cut(fieldstr = None, mc=None):
     fig.savefig(mc+'-likelihood_cut_stats')
 
 
+
 def makeFieldStructure(field_id=None, g1raw = None, g2raw = None, g1opt = None, g2opt = None, g1var = None, g2var = None,
                        psf_e1 = None, psf_e2 = None, e1_logL = None, e2_logL = None):
     field_str = np.empty(field_id.size, dtype=[('id',int),('g1raw',float), ('g2raw',float), ('g1opt',float), ('g2opt',float), ('g1var',float),('g2var',float), ('psf_e1',float), ('psf_e2',float), ('e1_logL',float), ('e2_logL',float)])
@@ -739,7 +719,7 @@ def main(argv):
                         help="path to MetaCalibration output catalogs")
     parser.add_argument("-mc","--mc_type", dest="mc_type", type=str, default="regauss",
                         choices = mc_choices, help="metcalibration catalog type to use")
-    parser.add_argument("-n", "--nbins", dest = "nbins", type = int, default= 20,
+    parser.add_argument("-n", "--nbins", dest = "nbins", type = int, default= 10,
                         help = "number of bins to use in histogram estimator.")
     parser.add_argument("-o", "--outfile", dest = "outfile", type = str, default = "tmp_outfile.txt",
                         help = "destination for output per-field shear catalogs.")
@@ -787,6 +767,7 @@ def main(argv):
         final_mc_choices = ['regauss', 'ksb', 'moments','noaber-regauss','rgc-regauss',\
                          'rgc-noaber-regauss','rgc-fixedaber-regauss', 'rgc-ksb']
         final_cuts = [10, 10, 10, 0, 10, 0, 10, 10]
+        all_coeff = []
         for mc_type, percentile_cut in zip(final_mc_choices, final_cuts):
             nbins = args.nbins
             outfile = args.outfile
@@ -804,13 +785,22 @@ def main(argv):
             np.savetxt(outfile, out_data, fmt='%d %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e %10.4e')
             logLcut = np.min( (np.percentile(e1_logL,percentile_cut), np.percentile(e2_logL,percentile_cut)) )
             print "Making plots..."
-            no_correction_plots(catalogs= catalogs,truthtable = truthfile, mc= mc_type)
-            makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),\
-                    psf_e1 = psf_e1, psf_e2 = psf_e2, g1var=  g1var, g2var = g2var,\
-                    e1_logL = e1_logL, e2_logL = e2_logL, catalogs = catalogs,\
-                    truthFile = truthfile,figName=mc_type+'-opt-shear_plots', logLcut = logLcut)
-            print "wrote plots to "+mc_type+'-opt-shear_plots.png'
+            coeff1_nc, coeff2_nc = no_correction_plots(catalogs= catalogs,truthtable = truthfile, mc= mc_type)
+            coeff1, coeff2 = makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),\
+                        psf_e1 = psf_e1, psf_e2 = psf_e2, g1var=  g1var, g2var = g2var,\
+                        e1_logL = e1_logL, e2_logL = e2_logL, catalogs = catalogs,\
+                        truthFile = truthfile,figName=mc_type+'-opt-shear_plots', logLcut = logLcut)
 
+            all_coeff.append(np.hstack((mc_type, coeff1_nc, coeff2_nc, coeff1, coeff2) ))
+            print "wrote plots to "+mc_type+'-opt-shear_plots.png'
+        outfile_coeff = "final_field_fit_coefficients.txt"
+        with open(outfile_coeff,'w') as f:
+            print "# method  m1_no_corr  sigma_m1_no_corr  c1_no_corr  sigma_c1_no_corr  a1_no_corr  sigma_a1_no_corr  m2_no_corr  sigma_m2_no_corr  c2_no_corr  sigma_c2_no_corr  a2_no_corr  sigma_a2_no_corr  m1_mc  sigma_m1_mc  c1_mc  sigma_c1_mc  a1_mc  sigma_a1_mc  m2_mc  sigma_m2_mc  c2_mc  sigma_c2_mc  a2_mc  sigma_a2_mc \n"
+            for row in all_coeff:
+                for el in row:
+                    f.write(str(el)+' ')
+                f.write('\n')
+                
         
 if __name__ == "__main__":
     import pdb, traceback

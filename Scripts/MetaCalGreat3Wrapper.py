@@ -295,8 +295,7 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
 
     # Create a GSObj from the psf image.
     l5 = galsim.Lanczos(5, True, 1.0E-4)
-    l52d = galsim.InterpolantXY(l5)
-    psf = galsim.InterpolatedImage(psfImage)
+    psf = galsim.InterpolatedImage(psfImage,x_interpolant=l5)
 
     # Deconvolve the pixel from the PSF.
     pixInv = galsim.Deconvolve(pixel)
@@ -306,7 +305,7 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
     psfGrownNoPixel = psfNoPixel.dilate(1 + 2*math.sqrt(g1**2 + g2**2))
 
     # Convolve the grown psf with the pixel
-    psfGrown = galsim.Convolve(psfGrownNoPixel,pixel)
+    psfGrown = galsim.Convolve([psfGrownNoPixel,pixel])
 
     # I think it's actually the shear of the effective, PSF-convolved PSF that we're sensitive
     # to. So I'm going to shear at this stage if gal_shear is False.
@@ -315,29 +314,27 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
 
     # Draw to an ImageD object, and then return.
     psfGrownImage = galsim.ImageD(psfImage.bounds)
-    psfGrownImage=psfGrown.drawImage(image=psfGrownImage, scale=pixelscale, method='no_pixel')
-    return psfGrownImage
+    psfGrownImage= psfGrown.drawImage(image=psfGrownImage, scale=pixelscale, method='no_pixel')
+
+    return psfGrown
 
 
-def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1=0.0, g2=0.0, variance=1.,
+def metaCalibrateReconvolve(galaxyImage, psfImage, psfTarget, g1=0.0, g2=0.0, variance=1.,
                             g1psf=0., g2psf=0.):
     
-    pixel = psfImage.scale
+    pixel = galaxyImage.scale
     l5 = galsim.Lanczos(5, True, 1.0E-6)
-    l52d = galsim.InterpolantXY(l5)
-
     
     # Turn the provided image arrays into GSObjects
     # pad factor may be important here (increase to 6?)
     # also, look at k-space interpolant
 
-    galaxy = galsim.InterpolatedImage(galaxyImage)
-    psf = galsim.InterpolatedImage(psfImage)
-    psfTarget = galsim.InterpolatedImage(psfImageTarget)
+    galaxy = galsim.InterpolatedImage(galaxyImage,x_interpolant=l5)
+    psf = galsim.InterpolatedImage(psfImage,x_interpolant=l5)
     
     # Remove the psf from the galaxy
     psfInv = galsim.Deconvolve(psf)
-    galaxy_noPSF = galsim.Convolve(galaxy,psfInv)
+    galaxy_noPSF = galsim.Convolve([galaxy,psfInv])
 
     # Apply a shear
     galaxy_noPSF = galaxy_noPSF.shear(g1 = g1, g2 = g2)
@@ -388,20 +385,25 @@ def metaCalibrate(galaxyImage, psfImage, g1 = 0.01, g2 = 0.00, gal_shear = True,
     
     # First, work out the target psf, which changes depending on whether we're shearing the galaxy
     # or PSF.  So, propagate that kwarg through.
-    targetPSFImage = getTargetPSF(psfImage, pixelscale, g1 = g1, g2 = g2, gal_shear=gal_shear)
-    
+    targetPSFObj = getTargetPSF(psfImage, pixelscale, g1 = g1, g2 = g2, gal_shear=gal_shear)
+    targetPSFImage = galsim.ImageD(psfImage.bounds)
+    targetPSFImage =  targetPSFObj.drawImage(image= targetPSFImage,
+                                             method= 'no_pixel',
+                                             scale= psfImage.scale)
     if gal_shear:
         # Then, produce the reconvolved images, with and without shear.
         reconvSheared = metaCalibrateReconvolve(
-            galaxyImage, psfImage, targetPSFImage, g1=g1, g2=g2, variance=variance, g1psf=0., g2psf=0.)
+            galaxyImage, psfImage, targetPSFObj, g1=g1, g2=g2, variance=variance, g1psf=0., g2psf=0.)
         reconvUnsheared = metaCalibrateReconvolve(
-            galaxyImage, psfImage, targetPSFImage, g1=0.0, g2=0.0, variance=variance, g1psf=0., g2psf=0.)
+            galaxyImage, psfImage, targetPSFObj, g1=0.0, g2=0.0, variance=variance, g1psf=0., g2psf=0.)
+        
         return reconvSheared, reconvUnsheared, targetPSFImage
     else:
         # We really only have to produce one image since the galaxy isn't sheared.
         reconvUnsheared = \
-            metaCalibrateReconvolve(galaxyImage, psfImage, targetPSFImage, g1=0.0,
+            metaCalibrateReconvolve(galaxyImage, psfImage, targetPSFObj, g1=0.0,
                                     g2=0.0, variance=variance, g1psf=g1, g2psf=g2)
+            
         return reconvUnsheared, reconvUnsheared, targetPSFImage
 
 
@@ -472,9 +474,9 @@ def EstimateAllShearsStar(args):
     # Python's pool.map seems only to want to deal with functions of a single argument.
     return EstimateAllShears(*args)
 
-def EstimateAllShears(subfield, sim_dir, output_dir, output_prefix="output_catalog", output_type="fits",
+def EstimateAllShears(subfield, sim_dir, output_dir, shear_est, output_prefix="output_catalog", output_type="fits",
                       clobber=True, sn_weight=False, calib_factor=0.98, coadd=False,
-                      variable_psf_dir="", shear_est = "regauss"):
+                      variable_psf_dir=""):
     """Main driver for all routines in this file, and the implementation of most of the command-line
     interface.
 
@@ -894,7 +896,8 @@ def main(argv):
         subfield_range = numpy.arange(200)
         iterator = itertools.izip(subfield_range,
                                   itertools.repeat(sim_dir),
-                                  itertools.repeat(output_dir))                              
+                                  itertools.repeat(output_dir),
+                                  itertools.repeat(opts.algorithm))
         R = pool.map(EstimateAllShearsStar,iterator)
 
  
