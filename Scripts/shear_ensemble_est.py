@@ -9,7 +9,7 @@ from astropy.io import fits
 import re
 import galsim
 import matplotlib as mpl
-mpl.use('Agg')
+#mpl.use('Agg')
 
     
 def getAllCatalogs( path = '../Great3/', mc_type = None, sn_cut = None ):
@@ -99,12 +99,61 @@ def getAllCatalogs( path = '../Great3/', mc_type = None, sn_cut = None ):
             truthCat = truthCat[use]
 
         catalogs.append(this_catalog)
-    #cat = np.hstack(catalogs)
-    #truth = np.hstack(alltruth)
-    #stop
     return catalogs, truthFile
 
 
+def reconstructMetacalMeas(g=None, R=None, a = None, c=None, psf_e=None, delta_g = 0.01 ):
+    esum = 2*(c + g)
+    ediff = 2*delta_g * R
+    ep = (esum + ediff)/2. - a * psf_e
+    em = (esum - ediff)/2. - a * psf_e
+    return ep,em
+
+    
+
+def getHistogramDerivative(catalogs=None, bin_edges=None, delta_g = 0.01):
+    e1_p_list = []
+    e1_m_list = []
+    e1_0_list = []
+    
+    e2_p_list = []
+    e2_m_list = []
+    e2_0_list = []
+        
+    for catalog in catalogs:
+        e1p, e1m = reconstructMetacalMeas(g=catalog['g1'], R=catalog['R1'],
+                                          a = catalog['a1'], c=catalog['c1'],
+                                          psf_e=catalog['psf_e1'], delta_g = delta_g )
+        e2p, e2m = reconstructMetacalMeas(g=catalog['g2'], R=catalog['R2'],
+                                          a = catalog['a2'], c=catalog['c2'],
+                                          psf_e=catalog['psf_e2'], delta_g = delta_g )
+        e10 = catalog['g1'] - catalog['c1'] - catalog['a1']*catalog['psf_e1']
+        e20 = catalog['g2'] - catalog['c2'] - catalog['a2']*catalog['psf_e2']
+        e1_p_list.append(np.hstack((e1p, -e1m)))
+        e1_m_list.append(np.hstack((e1m, -e1p)))
+        e1_0_list.append(np.hstack((e10, -e10)))
+
+        e2_p_list.append(np.hstack((e2p, -e2m)))
+        e2_m_list.append(np.hstack((e2m, -e2p)))
+        e2_0_list.append(np.hstack((e20, -e20)))
+                
+    e1_p = np.hstack(e1_p_list)
+    e1_m = np.hstack(e1_m_list)
+    e1_0 = np.hstack(e1_0_list)
+    e2_p = np.hstack(e2_p_list)
+    e2_m = np.hstack(e2_m_list)
+    e2_0 = np.hstack(e2_0_list)
+    
+    h1_p, _ = np.histogram(e1_p, bins= bin_edges) 
+    h1_m, _ = np.histogram(e1_m, bins= bin_edges) 
+    h2_p, _ = np.histogram(e2_p, bins= bin_edges)
+    h2_m, _ = np.histogram(e2_m, bins= bin_edges)
+
+    dh1_dg1 = (h1_p - h1_m)/(2*delta_g)*1./len(e1_p)
+    dh2_dg2 = (h2_p - h2_m)/(2*delta_g)*1./len(e2_p)
+
+    return dh1_dg1, dh2_dg2
+    
 
 def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False, mc_type = None):
     # Get a big master list of all the ellipticities in all fields.
@@ -144,25 +193,23 @@ def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False, mc_type = 
     e1_prior_hist, _ = np.histogram(e1prior, bins = bin_edges)
     e2_prior_hist, _ = np.histogram(e2prior, bins = bin_edges)
 
-    e1_prior_hist = e1_prior_hist * 1./e1prior.size
-    e2_prior_hist = e2_prior_hist * 1./e2prior.size
+    e1_prior_hist = e1_prior_hist*1./len(e1prior)
+    e2_prior_hist = e2_prior_hist*1./len(e2prior)
     
+    
+    dg = 0.01
+
     # Compute derivatives.
     # Note from Rachel: changed code inside of the np.hstack() below.  I think it should be e1+r1*dg
     # and -e1+r1*dg, because regardless of whether e1 is >0 or <0, it should still be shifted to a
     # positive direction if dg>0.  Previous code had -(e1+r1*dg) which does the opposite, i.e.,
     # shifts e1 negative if dg is positive.
-    dg = 0.01
-    e1_prior_hist_mod_p, _  = np.histogram(
-        np.hstack( (e1_corr+r1*dg, -e1_corr+(r1*dg) ) ),  bins=bin_edges)
+    e1_prior_hist_mod_p, _  = np.histogram( np.hstack( (e1_corr+r1*dg, -e1_corr+(r1*dg) ) ),  bins=bin_edges)
     e1_prior_hist_mod_p = e1_prior_hist_mod_p * 1./e1prior.size
 
-    e1_prior_hist_mod_m, _  = np.histogram(
-        np.hstack( (e1_corr-r1*dg, -e1_corr-(r1*dg) ) ),  bins=bin_edges)
+    e1_prior_hist_mod_m, _  = np.histogram( np.hstack( (e1_corr-r1*dg, -e1_corr-(r1*dg) ) ),  bins=bin_edges)
     e1_prior_hist_mod_m = e1_prior_hist_mod_m * 1./e1prior.size
-    #e1_prior_hist_mod = ( e1_prior_hist_mod_p - e1_prior_hist_mod_m ) /2.
-    
-    
+
     e2_prior_hist_mod_p, _  = np.histogram(
         np.hstack( (e2_corr+r2*dg, -e2_corr+(r2*dg) ) ),  bins=bin_edges)
     e2_prior_hist_mod_p = e2_prior_hist_mod_p * 1./e2prior.size
@@ -170,21 +217,20 @@ def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False, mc_type = 
     e2_prior_hist_mod_m, _  = np.histogram(
         np.hstack( (e2_corr - r2*dg, -e2_corr - (r2*dg) ) ),  bins=bin_edges)
     e2_prior_hist_mod_m = e2_prior_hist_mod_m * 1./e2prior.size
-    #e2_prior_hist_mod = (e2_prior_hist_mod_p - e2_prior_hist_mod_m)/2.
-    
-    #de1_dg = ( e1_prior_hist_mod_p - e1_prior_hist) / (dg)
-    #de2_dg = ( e2_prior_hist_mod_p - e2_prior_hist) / (dg)
     de1_dg = ( e1_prior_hist_mod_p - e1_prior_hist_mod_m) / (2*dg)
     de2_dg = ( e2_prior_hist_mod_p - e2_prior_hist_mod_m) / (2*dg)
+
+    #de1_dg_nl, de2_dg_nl =  getHistogramDerivative(catalogs= catalogs, bin_edges=bin_edges, delta_g = dg)
+
     de1_dg[-1] = 0.
     de1_dg[0] = 0.
     de2_dg[-1] = 0.
     de2_dg[0] = 0.
-
+    
     if doplot is True:
         import matplotlib.pyplot as plt
         fig,(ax1,ax2) =plt.subplots(nrows = 2, ncols = 1,figsize = (7,14))
-        ax1.hist(  e1_corr[np.abs(e1_corr) <= 4], bins=100, normed=True, log = True )
+        ax1.hist(  e1_corr, bins=np.linspace(-10,10,100), normed=True, log = True )
         for x in bin_edges: ax1.axvline(x,color='red')
         ax1.set_xlim([-10,10])
         ax1.set_xlabel('e')
@@ -217,12 +263,12 @@ def linear_estimator(data = None, null = None, deriv = None, cinv = None):
         var = 1./ (np.dot( np.dot( deriv.T, cinv) , deriv) )
         return est, var
 
-    
 def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
 
     print '  About to build prior...'
     bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg = \
         buildPrior(catalogs, nbins=nbins)
+
     print '  Done building prior, now doing rest of inference.'
     gamma1_raw = np.zeros(len(catalogs))
     gamma2_raw = np.zeros(len(catalogs))
@@ -285,12 +331,20 @@ def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
                 fig.savefig(plotFile)
         
         elif mean is True:
-            this_g1_opt =  np.average(catalog['g1'] - catalog['c1'] - catalog['a1'] * catalog['psf_e1'], weights = catalog['weight']) \
-               / np.average(catalog['R1'], weights = catalog['weight'])
-            this_g2_opt =  np.average(catalog['g2'] - catalog['c2'] - catalog['a2'] * catalog['psf_e2'], weights = catalog['weight']) \
-              / np.average(catalog['R2'], weights = catalog['weight'])
-            this_g1_var =  np.average(  ( ( catalog['g1'] - catalog['c1'] - catalog['a1'] * catalog['psf_e1']) - this_g1_opt )**2, weights = catalog['weight']) *1./ len(catalog)
-            this_g2_var =  np.average(  ( ( catalog['g2'] - catalog['c2'] - catalog['a2'] * catalog['psf_e2']) - this_g2_opt )**2, weights = catalog['weight']) *1./ len(catalog)
+            e1p, e1m =  reconstructMetacalMeas(g=catalog['g1'], R= catalog['R1'],
+                                               a = catalog['a1'], c=catalog['c1'],
+                                               psf_e=catalog['psf_e1'], delta_g = 0.01 )
+            e2p, e2m =  reconstructMetacalMeas(g=catalog['g2'], R= catalog['R2'],
+                                               a = catalog['a2'], c=catalog['c2'],
+                                               psf_e=catalog['psf_e2'], delta_g = 0.01 )
+            
+            coeff1 = np.polyfit([-0.01, 0.0, 0.01], [np.mean(e1m),np.mean(catalog['g1']),np.mean(e1p)], 1)
+            coeff2 = np.polyfit([-0.01, 0.0, 0.01], [np.mean(e1m),np.mean(catalog['g1']),np.mean(e1p)], 1)
+            this_g1_opt = (np.mean(catalog['g1']) - coeff1[1])/coeff1[0]
+            this_g2_opt = (np.mean(catalog['g2']) - coeff2[1])/coeff2[0]
+            this_g1_var = np.var(catalog['g1'])*1./catalog.size
+            this_g2_var = np.var(catalog['g1'])*1./catalog.size
+
 
                             
         gamma1_opt[i] = this_g1_opt
@@ -555,9 +609,9 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
         if 'regauss' in mc:
             calib1 = 2*(1 - np.var(catalog['g1'][np.abs(catalog['g1']) <= 3]))
             calib2 = 2*(1 - np.var(catalog['g2'][np.abs(catalog['g2']) <= 3]))
-        elif 'moments' in mc or 'ksb' in mc:
-            calib1 = 2.
-            calib2 = 2.
+        elif 'moments' in mc:
+            calib1 = 1.
+            calib2 = 1.
         else:
             calib1 = 1.
             calib2 = 1.
@@ -728,7 +782,7 @@ def main(argv):
     parser.add_argument("-dp", "--doplot", dest = "doplot", action="store_true")
     parser.add_argument("-a", "--do_all", dest = "do_all", action="store_true", default = False)
     parser.add_argument("-sn", "--snos_cut", dest="sn_cut",
-                        help="percentile",type= float, default = 0)
+                        help="signal-to-noise cut",type= float, default = 0)
 
     args = parser.parse_args(argv[1:])
     if args.sn_cut > 0:
@@ -766,7 +820,7 @@ def main(argv):
     else:
         final_mc_choices = ['regauss', 'ksb', 'moments','noaber-regauss','rgc-regauss',\
                          'rgc-noaber-regauss','rgc-fixedaber-regauss', 'rgc-ksb']
-        final_cuts = [10, 10, 10, 0, 10, 0, 10, 10]
+        final_cuts = [10, 10, 0, 0, 10, 0, 10, 10]
         all_coeff = []
         for mc_type, percentile_cut in zip(final_mc_choices, final_cuts):
             nbins = args.nbins

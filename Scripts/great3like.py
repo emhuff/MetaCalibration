@@ -17,8 +17,8 @@ outfile1 = 'great3_before_after'
 outfile2 = 'great3_before'
 outfile3 = 'great3_after'
 outsuff = '.png'
-a_lim = (-0.1,0.1)
-m_lim = (-1.,1.)
+a_lim = (-10.,10.)
+m_lim = (-10.,10.)
 # components: average them or ...?
 components = ['1','2','both']
 # make dicts with translation of codes to branches and methods
@@ -75,10 +75,11 @@ for component in components:
     max_m = max(m_vals+m_err_vals)
     for ind in range(n):
         mstr = method_list[ind]
-        if 'moments' not in mstr:
-            plt.errorbar([a_vals[ind]], [m_vals[ind]], xerr=[a_err_vals[ind]], yerr=[m_err_vals[ind]],
-                         marker=info_dict[mstr]['marker'], color=info_dict[mstr]['color'],
-                         label=info_dict[mstr]['method']+' ('+info_dict[mstr]['branch']+')')
+        print mstr
+        #if 'moments' not in mstr:
+        plt.errorbar([a_vals[ind]], [m_vals[ind]], xerr=[a_err_vals[ind]], yerr=[m_err_vals[ind]],
+                     marker=info_dict[mstr]['marker'], color=info_dict[mstr]['color'],
+                     label=info_dict[mstr]['method']+' ('+info_dict[mstr]['branch']+')')
             #if 'ksb' in info_dict[mstr]['method'].lower():
             #    print info_dict[mstr]['method'], m_vals[ind], a_vals[ind]
     #a_lim = (min_a, max_a)
