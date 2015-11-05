@@ -94,6 +94,7 @@ def getAllCatalogs( path = '../Great3/', mc_type = None, sn_cut = None ):
             truthCat = truthCat[use]
 
         catalogs.append(this_catalog)
+
     return catalogs, truthFile
 
 def reconstructMetacalMeas(g=None, R=None, a = None, c=None, psf_e=None, delta_g = 0.01 ):
@@ -103,35 +104,18 @@ def reconstructMetacalMeas(g=None, R=None, a = None, c=None, psf_e=None, delta_g
     em = (esum - ediff)/2. - a * psf_e
     return ep,em
 
-def bootstrap_err_est(catalog=None, g1Tag='g1',g2Tag='g2', method=None, n_iter = 100):
-    
-    e1 = []
-    e2 = []
-    for i in xrange(n_iter):
-        this_catalog = np.random.choice(catalog,size=catalog.size,replace=True)
-        this_e1 = method(this_catalog[g1Tag])
-        this_e2 = method(this_catalog[g2Tag])
-        e1.append(this_e1)
-        e2.append(this_e2)
-    e1 = np.array(e1)
-    e2 = np.array(e2)
-    #e1_err = np.abs(np.percentile(e1,36) - np.percentile(e1,64))
-    #e2_err = np.abs(np.percentile(e2,36) - np.percentile(e2,64))
-    e1_err = np.std(e1)
-    e2_err = np.std(e2)
-    return e1_err, e2_err
-
 def shear_avg(e, weights = True, n= 4, exp=False, scale = .25, pars = None):
     if weights is None:
         return np.mean(e)
     else:
         if n is not None:
             #weight = 1./(scale**n + np.abs(e)**n)
-            weight = 1./(1 + (e/scale)**2/n)**((n+1)/2.)
+            weight = 1./(1 + (e/ scale)**2/n)**((n+1)/2.)
         elif exp is True:
             weight = np.exp(- 0.5*np.abs(e/scale)**2)
         elif pars is not None:
             weight = emt.t(e, 0., pars[1], pars[2])
+
         for i in xrange(10):
             eavg = np.average(e,weights=weight)
             if n is not None:
@@ -140,6 +124,7 @@ def shear_avg(e, weights = True, n= 4, exp=False, scale = .25, pars = None):
                 weight = np.exp(- 0.5*(np.abs(e-eavg)/scale)**2)
             elif pars is not None:
                 weight = emt.t(e - eavg, 0., pars[1], pars[2])
+
         logL = np.average(np.log(weight[weight > 0]) - np.log(np.sum(weight)))
         return np.average(e,weights=weight), logL
 
@@ -177,7 +162,7 @@ def shear_est(catalogs, truthFile, delta_g = 0.01, weights = True,mc_type=None):
     yy_data,b = np.histogram(e1_master,bins=bins)
     yy_gauss = np.exp(-(xx-mu1)**2/2./sigma1**2)
     yy_gauss = yy_gauss/np.sum(yy_gauss)
-    yy_power = 1./(1 + (xx/sigma1/2.)**2/(nu1+eps))**(((nu1+eps)+1)/2.)
+    yy_power = 1./(1 + (xx/(sigma1/2.))**2/(nu1+eps))**(((nu1+eps)+1)/2.)
     yy_power = yy_power/np.sum(yy_power)
     ax1.plot(xx,yy_est,label='model')
     ax1.plot(xx,yy_data*1./np.sum(yy_data),label='data')
@@ -192,7 +177,7 @@ def shear_est(catalogs, truthFile, delta_g = 0.01, weights = True,mc_type=None):
     yy_data = yy_data*1./np.sum(yy_data)
     yy_gauss = np.exp(-(xx-mu2)**2/2./sigma2**2)
     yy_gauss = yy_gauss/np.sum(yy_gauss)
-    yy_power = 1./(1 + (xx/sigma2/2.)**2/(nu2+eps))**(((nu2+eps)+1)/2.)
+    yy_power = 1./(1 + (xx/(sigma2/2.))**2/(nu2+eps))**(((nu2+eps)+1)/2.)
     yy_power = yy_power/np.sum(yy_power)
     ax2.plot(xx,yy_est,label='model')
     ax2.plot(xx,yy_data,label='data')
@@ -300,7 +285,6 @@ def getCalibCoeff(results):
     A2 = np.column_stack([results['g2_true'], results['psf_e2'], np.ones_like(results['psf_e2'])]).transpose()
     B2 = results['g2_est'] - results['g2_true']
     ret2_val, covar2 = curve_fit(shear_model, A2, B2, sigma=results['g1_err'])
-
     
     coeff1 = {'m':ret1_val[0],
              'm_err':np.sqrt(covar1[0][0]),
@@ -315,19 +299,18 @@ def getCalibCoeff(results):
              'a_err':np.sqrt(covar2[1][1]),
              'c':ret2_val[2],
              'c_err':np.sqrt(covar2[2][2])}
-
                  
     return coeff1,coeff2
 
 
 
-def analyze(results_all,mc_type = None, logLcut1 = 3.6, logLcut2 = 3.6):
+def analyze(results_all,mc_type = None, logLcut1 = 3.6, logLcut2 = 3.6, clip=False):
 
     # use only the results with matching truth table entries.
     results = results_all[results_all['good'] & (results_all['logL_e1'] > logLcut1) & (results_all['logL_e2'] > logLcut2) ]
     res_exc = results_all[(results_all['logL_e1'] < logLcut1) & (results_all['logL_e2'] < logLcut2) ]
     # Apply a 10% outlier clipping:
-    clipfrac = 5
+    clipfrac = 2
     clip_interval1 = np.abs(np.percentile(results['g1_est'] - results['g1_true'],clipfrac/2.) -
                            np.percentile(results['g1_est'] - results['g1_true'],100-clipfrac/2.))
     keep1 = (np.abs(results['g1_est'] - results['g1_true'] ) < clip_interval1)
@@ -336,14 +319,9 @@ def analyze(results_all,mc_type = None, logLcut1 = 3.6, logLcut2 = 3.6):
     keep2 = (np.abs(results['g2_est'] - results['g2_true'] ) < clip_interval2) 
     keep = keep1 & keep2
     resclip = results[keep]
-    #coeff_clipped1 = np.polyfit(resclip['g1_true'],resclip['g1_est']-resclip['g1_true'],1)
-    #coeff_clipped2 = np.polyfit(resclip['g2_true'],resclip['g2_est']-resclip['g2_true'],1)
-
     
     figName = mc_type+'-simple'
-    #coeff1 = np.polyfit(results['g1_true'],results['g1_est']-results['g1_true'],1)
-    #coeff2 = np.polyfit(results['g2_true'],results['g2_est']-results['g2_true'],1)
-    resraw = results.copy()
+    resraw = results_all.copy()
     resraw['g1_est'] = resraw['g1_raw']
     resraw['g2_est'] = resraw['g2_raw']
     
@@ -362,7 +340,7 @@ def analyze(results_all,mc_type = None, logLcut1 = 3.6, logLcut2 = 3.6):
 
 
     
-    fig,((ax1,ax2),(ax3,ax4),(ax5,ax6)) = plt.subplots(nrows=3,ncols=2,figsize=(14,21))
+    fig,((ax1,ax2),(ax3,ax4),(ax5,ax6),(ax7,ax8)) = plt.subplots(nrows=4,ncols=2,figsize=(14,21))
     xlim = [-0.06, 0.06]
     y_interval_raw = np.abs(np.percentile(np.hstack((results['g1_raw']-results['g1_true'],results['g2_raw']-results['g2_true'])),10) -
                             np.percentile(np.hstack((results['g1_raw']-results['g1_true'],results['g2_raw']-results['g2_true'])),90))
@@ -379,31 +357,45 @@ def analyze(results_all,mc_type = None, logLcut1 = 3.6, logLcut2 = 3.6):
     ax1.axhline(0,linestyle='--',color='red')
     ax1.set_xlim(xlim)
     ax1.set_ylim(ylim_raw)
+    ax1.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%
+                 (coeff1_raw['m'],coeff1_raw['m_err'],coeff1_raw['a'],coeff1_raw['a_err'],
+                  coeff1_raw['c'],coeff1_raw['c_err']),xy=(0.05, 0.85), xycoords='axes fraction')
+
     
     ax2.plot(results['g2_true'],results['g2_raw'] - results['g2_true'],'.',color='blue')
     ax2.plot([-1,1],[coeff2_raw['c'] -coeff2_raw['m'], coeff2_raw['c'] + coeff2_raw['m']],color='cyan')
     ax2.axhline(0,linestyle='--',color='red')
     ax2.set_xlim(xlim)
     ax2.set_ylim(ylim_raw)
+    ax2.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%
+                 (coeff2_raw['m'],coeff2_raw['m_err'],coeff2_raw['a'],coeff2_raw['a_err'],
+                  coeff2_raw['c'],coeff2_raw['c_err']),xy=(0.05, 0.85), xycoords='axes fraction')
     
     #--------------------------------------------------    
     # Next, the MC'd results.
     #--------------------------------------------------
     ax3.plot(results['g1_true'],results['g1_est'] - results['g1_true'],'.',color='blue')
-    ax3.plot(res_exc['g1_true'],res_exc['g1_est'] - res_exc['g1_true'],'.',color='red')
+    ax3.plot(res_exc['g1_true'],res_exc['g1_est'] - res_exc['g1_true'],'s',color='red')
     ax3.plot([-1,1],[coeff1['c'] -coeff1['m'], coeff1['c'] + coeff1['m']],color='orange')
     ax3.plot([-1,1],[coeff_clipped1['c'] -coeff_clipped1['m'], coeff_clipped1['c'] + coeff_clipped1['m']],color='cyan')
     ax3.axhline(0,linestyle='--',color='red')
     ax3.set_xlim(xlim)
     ax3.set_ylim(ylim_est)
-    
+    ax3.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%
+                 (coeff1['m'],coeff1['m_err'],coeff1['a'],coeff1['a_err'],
+                  coeff1['c'],coeff1['c_err']),xy=(0.05, 0.85), xycoords='axes fraction')
+
+        
     ax4.plot(results['g2_true'],results['g2_est'] - results['g2_true'],'.',color='blue')
-    ax4.plot(res_exc['g2_true'],res_exc['g2_est'] - res_exc['g2_true'],'.',color='red')
+    ax4.plot(res_exc['g2_true'],res_exc['g2_est'] - res_exc['g2_true'],'s',color='red')
     ax4.plot([-1,1],[coeff2['c'] -coeff2['m'], coeff2['c'] + coeff2['m']],color='orange')
     ax4.plot([-1,1],[coeff_clipped2['c'] -coeff_clipped2['m'], coeff_clipped2['c'] + coeff_clipped2['m']],color='cyan')
     ax4.axhline(0,linestyle='--',color='red')
     ax4.set_xlim(xlim)
     ax4.set_ylim(ylim_est)
+    ax4.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%
+                 (coeff2['m'],coeff2['m_err'],coeff2['a'],coeff2['a_err'],
+                  coeff2['c'],coeff2['c_err']),xy=(0.05, 0.85), xycoords='axes fraction')
 
     ax5.plot(results_all['logL_e1'],results_all['g1_est']-results_all['g1_true'],'.')
     ax5.set_xlabel('logL')
@@ -413,9 +405,31 @@ def analyze(results_all,mc_type = None, logLcut1 = 3.6, logLcut2 = 3.6):
     ax6.set_xlabel('logL')
     ax6.axvline(logLcut2,color='red')
     ax6.axhline(0,color='red',linestyle='--')
+
+    ax7.plot(results['psf_e1'],results['g1_est']-results['g1_true'],'.',color='blue')
+    ax7.plot(res_exc['psf_e1'],res_exc['g1_est']-res_exc['g1_true'],'s',color='red')
+    ax7.plot(results['psf_e1'],results['g1_est']-results['g1_true'],'.',color='blue')
+    ax7.plot(res_exc['psf_e1'],res_exc['g1_est']-res_exc['g1_true'],'s',color='red')
+    ax7.plot([-1,1],[coeff1['c'] - coeff1['a'], coeff1['c'] + coeff1['a']],color='orange')
+    ax7.plot([-1,1],[coeff_clipped1['c'] - coeff_clipped1['a'], coeff_clipped1['c'] + coeff_clipped1['a']],color='orange')
+    ax7.axhline(0,linestyle='--',color='red')
+    ax7.set_xlim(-0.2,0.2)
+    ax7.set_xlabel('psf_e1')
+        
+    ax8.plot(results['psf_e2'],results['g2_est']-results['g2_true'],'.',color='blue')
+    ax8.plot(res_exc['psf_e2'],res_exc['g2_est']-res_exc['g2_true'],'s',color='red')
+    ax8.plot([-1,1],[coeff2['c'] - coeff2['a'], coeff2['c'] + coeff2['a']],color='orange')
+    ax8.plot([-1,1],[coeff_clipped2['c'] - coeff_clipped2['a'], coeff_clipped2['c'] + coeff_clipped2['a']],color='orange')
+    ax8.axhline(0,linestyle='--',color='red')
+    ax8.set_xlim(-0.2,0.2)
+    ax8.set_xlabel('psf_e2')
     
+        
     fig.savefig(figName)
-    return coeff1, coeff2, coeff1_raw, coeff2_raw
+    if clip is False:
+        return coeff1, coeff2, coeff1_raw, coeff2_raw
+    else:
+        return coeff_clipped1, coeff_clipped2, coeff1_raw, coeff2_raw
 
 def determineLoglCuts(catalog, percentile = None):
     if percentile is not None:
@@ -442,6 +456,7 @@ def main(argv):
     parser.add_argument("-p", "--percentile_cut", dest="percentile_cut",
                         help="percentile",type= float, default = 10)
     parser.add_argument("-a", "--do_all", dest = "do_all", action="store_true", default = False)
+    parser.add_argument("-c", "--clip", dest = "clip", action='store_true', help="clip large residuals", default = False)
     parser.add_argument("-sn", "--snos_cut", dest="sn_cut",
                         help="signal-to-noise cut",type= float, default = 0)
 
@@ -461,6 +476,7 @@ def main(argv):
         logLcut1, logLcut2 = determineLoglCuts(results, percentile = args.percentile_cut)
         coeff1, coeff2,_,_ = analyze(results,mc_type= args.mc_type, logLcut1 = logLcut1, logLcut2 = logLcut2)
 
+    
 
     else:
         final_mc_choices = ['regauss', 'ksb', 'moments','noaber-regauss','rgc-regauss',
@@ -474,21 +490,22 @@ def main(argv):
             catalogs, truthfile = getAllCatalogs(path=path, mc_type= mc_type)
             results = shear_est(catalogs,truthfile, mc_type = mc_type)
             logLcut1, logLcut2 = determineLoglCuts(results, percentile = percentile_cut)
-            coeff1_d, coeff2_d, coeff1_nc_d, coeff2_nc_d = analyze(results,mc_type= mc_type, logLcut1 = logLcut1, logLcut2 = logLcut2)
+            coeff1_d, coeff2_d, coeff1_nc_d, coeff2_nc_d = analyze(results,mc_type= mc_type,
+                                                                   logLcut1 = logLcut1, logLcut2 = logLcut2,
+                                                                   clip=args.clip)
             outfile_coeff = "final_field_fit_coefficients-simple.txt"
-            keys = ['m','m_err','c','c_err','a','a_err']
+            keys = ['m','a','c','m_err','a_err','c_err']
             coeff1 = [coeff1_d[key] for key in keys]
             coeff2 = [coeff2_d[key] for key in keys]
             coeff1_nc = [coeff1_nc_d[key] for key in keys]
             coeff2_nc = [coeff2_nc_d[key] for key in keys]
             all_coeff.append(np.hstack((mc_type, coeff1_nc, coeff2_nc, coeff1, coeff2) ))
-    
         with open(outfile_coeff,'w') as f:
             print "# method  m1_no_corr  sigma_m1_no_corr  c1_no_corr  sigma_c1_no_corr  a1_no_corr  sigma_a1_no_corr  m2_no_corr  sigma_m2_no_corr  c2_no_corr  sigma_c2_no_corr  a2_no_corr  sigma_a2_no_corr  m1_mc  sigma_m1_mc  c1_mc  sigma_c1_mc  a1_mc  sigma_a1_mc  m2_mc  sigma_m2_mc  c2_mc  sigma_c2_mc  a2_mc  sigma_a2_mc \n"
             for row in all_coeff:
                 for el in row:
                     f.write(str(el)+' ')
-                    f.write('\n')
+                f.write('\n')
 
             
 if __name__ == "__main__":

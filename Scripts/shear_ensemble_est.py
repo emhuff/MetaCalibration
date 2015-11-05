@@ -849,7 +849,6 @@ def main(argv):
             print "wrote plots to "+mc_type+'-opt-shear_plots.png'
         outfile_coeff = "final_field_fit_coefficients.txt"
         with open(outfile_coeff,'w') as f:
-            print "# method  m1_no_corr  sigma_m1_no_corr  c1_no_corr  sigma_c1_no_corr  a1_no_corr  sigma_a1_no_corr  m2_no_corr  sigma_m2_no_corr  c2_no_corr  sigma_c2_no_corr  a2_no_corr  sigma_a2_no_corr  m1_mc  sigma_m1_mc  c1_mc  sigma_c1_mc  a1_mc  sigma_a1_mc  m2_mc  sigma_m2_mc  c2_mc  sigma_c2_mc  a2_mc  sigma_a2_mc \n"
             for row in all_coeff:
                 for el in row:
                     f.write(str(el)+' ')
