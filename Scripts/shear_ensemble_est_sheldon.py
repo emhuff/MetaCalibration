@@ -16,7 +16,9 @@ def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3rere
     
     fields = np.unique(data['shear_index'])
     catalogs = []
-
+    cat_dtype =  np.dtype([('id','>i8'),('g1','>f8'),('R1','>f8'),('a1','>f8'),('c1','>f8'),
+                           ('psf_e1','>f8'),('g2','>f8'),('R2','>f8'),('a2','>f8'),('c2','>f8'),
+                           ('psf_e2','>f8'),('weight','>f8')])
     for field_id in fields:
         keep = (data['flags'] == 0) & (data['shear_index'] == field_id)
         this_catalog = np.empty(np.sum(keep), dtype = cat_dtype)
