@@ -250,132 +250,351 @@ def getCalibCoeff(results):
 
 
 
-def analyze(results_all,mc_type = None, logLcut1 = 3.6, logLcut2 = 3.6, clip=False):
 
-    # use only the results with matching truth table entries.
-    results = results_all[results_all['good'] & (results_all['logL_e1'] > logLcut1) & (results_all['logL_e2'] > logLcut2) ]
-    res_exc = results_all[(results_all['logL_e1'] < logLcut1) & (results_all['logL_e2'] < logLcut2) ]
-    # Apply a 10% outlier clipping:
-    clipfrac = 2
-    clip_interval1 = np.abs(np.percentile(results['g1_est'] - results['g1_true'],clipfrac/2.) -
-                           np.percentile(results['g1_est'] - results['g1_true'],100-clipfrac/2.))
-    keep1 = (np.abs(results['g1_est'] - results['g1_true'] ) < clip_interval1)
-    clip_interval2 = np.abs(np.percentile(results['g2_est'] - results['g2_true'],clipfrac/2.) -
-                           np.percentile(results['g2_est'] - results['g2_true'],100-clipfrac/2.))
-    keep2 = (np.abs(results['g2_est'] - results['g2_true'] ) < clip_interval2) 
-    keep = keep1 & keep2
-    resclip = results[keep]
-    
-    figName = mc_type+'-simple'
-    resraw = results_all.copy()
-    resraw['g1_est'] = resraw['g1_raw']
-    resraw['g2_est'] = resraw['g2_raw']
-    
-    coeff1_raw, coeff2_raw = getCalibCoeff(resraw)
-    coeff1,coeff2 = getCalibCoeff(results)
-    coeff_clipped1, coeff_clipped2 = getCalibCoeff(resclip)
-    
-    print ('Found coeff:\n m1 = %.4f +/- %.4f \n c1 = %.4f +/- %.4f \n a1 = %.4f +/- %.4f'
-           %(coeff1['m'],coeff1['m_err'],coeff1['c'],coeff1['c_err'],coeff1['a'],coeff1['a_err']) )
-    print ('Found coeff:\n m2 = %.4f +/- %.4f \n c2 = %.4f +/- %.4f \n a2 = %.4f +/- %.4f'
-           %(coeff2['m'],coeff2['m_err'],coeff2['c'],coeff2['c_err'],coeff2['a'],coeff2['a_err']) )
+def get_truthtable():
+      shears= [ [-0.0369292, 0.0268976],
+            [0.0147048, -0.023761],
+            [0.010719, -0.0375317],
+            [-0.0170452, 0.00550765],
+            [-0.00558631, 0.0341976],
+            [0.0100402, -0.0108189],
+            [-0.0157668, 0.000980071],
+            [-0.0053554, -0.0113379],
+            [-0.00810751, 0.0124189],
+            [0.0116076, 0.0380271],
+            [-0.0221376, 0.00769596],
+            [-0.031078, -0.00836606],
+            [0.0128836, -0.0196881],
+            [-0.0168117, 0.0199068],
+            [-0.0092067, -0.0141776],
+            [-0.022415, 0.00704573],
+            [0.0362899, 0.00359092],
+            [-0.00893076, -0.0480818],
+            [-0.00770036, -0.0387106],
+            [-0.0311143, 0.0270737],
+            [0.0248045, -0.0192548],
+            [-0.00803955, -0.00757901],
+            [0.00551772, -0.0386444],
+            [0.00700046, 0.0460475],
+            [-0.0130024, 0.0151701],
+            [-0.0424334, 0.0174551],
+            [0.0330243, -0.00143821],
+            [0.00406467, -0.0125254],
+            [-0.00769266, -0.0286388],
+            [-0.0159467, 0.00910803],
+            [-0.0296337, -0.0106395],
+            [-0.030306, -0.0148776],
+            [-0.00192538, 0.0207825],
+            [0.0157234, 0.0193959],
+            [0.0101214, 0.0178025],
+            [-0.000497735, -0.0127332],
+            [-0.0264148, -0.016134],
+            [-0.0276899, 0.00399226],
+            [-0.0194067, 0.0217555],
+            [-0.022896, 0.00584367],
+            [-0.0295027, 0.0208863],
+            [-0.0340295, -0.0202034],
+            [-0.025543, -0.0393635],
+            [0.013143, -0.0295915],
+            [-0.00512104, -0.0114767],
+            [0.0101185, 0.00367991],
+            [-0.035196, -0.00340679],
+            [0.0123071, -0.0247776],
+            [0.0291862, 0.0130342],
+            [-0.00992943, 0.0188574],
+            [-0.0125323, 0.0414613],
+            [0.0205224, 0.00919479],
+            [-0.00197161, -0.0250597],
+            [0.0308497, -0.00124479],
+            [-0.0231097, 0.00355327],
+            [-0.000815949, -0.0293916],
+            [0.0365855, -0.0281216],
+            [0.0298517, -0.0322181],
+            [-0.00747514, 0.00995778],
+            [0.0112657, -0.0155473],
+            [0.0154795, -0.00174974],
+            [0.00213608, -0.0451398],
+            [-0.00887431, 0.0132027],
+            [0.0200191, 0.0271031],
+            [0.00613284, 0.0348119],
+            [0.00918544, -0.0047391],
+            [-0.026846, 0.0350538],
+            [-0.0431593, 0.00481223],
+            [-0.000893738, 0.0281559],
+            [-0.0412704, 0.0246462],
+            [0.00131108, -0.0164841],
+            [-0.0122544, 0.00690147],
+            [-0.0360282, -0.0169149],
+            [0.0180157, 0.0305959],
+            [-0.0314175, 0.0315025],
+            [-0.0124494, 0.0308413],
+            [0.0148659, -0.0476424],
+            [0.00152103, -0.0232373],
+            [0.0183979, 0.000250391],
+            [0.0111579, -0.04835],
+            [-0.0166408, 0.00402619],
+            [-0.0165372, 0.0162025],
+            [-0.033596, -0.0330116],
+            [-0.027052, 0.0416133],
+            [0.00920549, 0.0310317],
+            [-0.00788643, 0.0214157],
+            [0.0387487, -0.0169408],
+            [0.0208807, 0.00832097],
+            [0.0452373, 0.0113349],
+            [0.00666435, 0.0124508],
+            [-0.0423275, 0.00917404],
+            [-0.0102854, -0.0317716],
+            [-0.0364232, 0.0157652],
+            [0.0238979, 0.0266593],
+            [-0.0278488, -0.0214095],
+            [0.0304696, -0.0125246],
+            [-0.00272757, 0.0322831],
+            [0.00018818, 0.0112566],
+            [-0.010533, 0.00449835],
+            [0.00243073, -0.0360685],
+            [0.00388027, 0.023628],
+            [-0.0163723, 0.0170477],
+            [0.012608, 0.0230104],
+            [0.0356393, -0.0086591],
+            [-0.0112829, 0.00724424],
+            [0.00816468, 0.0236215],
+            [-0.00755304, -0.00835738],
+            [0.00627764, 0.0111558],
+            [0.0207231, 0.0245838],
+            [0.0258988, 0.0398534],
+            [-0.0178686, 0.00904728],
+            [0.0350164, 0.00628305],
+            [0.0248316, -0.0245096],
+            [0.00684141, 0.0461624],
+            [-0.00506305, -0.0154174],
+            [0.0305498, 0.00160506],
+            [-0.00489871, -0.0129169],
+            [0.0265094, -0.0377505],
+            [-0.0050039, 0.00921952],
+            [-0.0354254, -0.000949451],
+            [-0.00208154, 0.0477144],
+            [0.00890316, 0.00884904],
+            [0.0191448, -0.0227324],
+            [0.0220497, 0.0441004],
+            [-0.024574, 0.0347115],
+            [0.00396406, -0.0136282],
+            [-0.00760674, 0.0308806],
+            [-0.0277704, 0.0386555],
+            [-0.017493, -0.0175473],
+            [0.0436661, -0.0027356],
+            [0.0229195, -0.00907587],
+            [0.0139287, -0.0389438],
+            [0.00944163, -0.00476974],
+            [-0.0270401, -0.024005],
+            [0.0302651, 0.0297524],
+            [0.00694205, 0.0360192],
+            [-0.0106724, -0.0398671],
+            [-0.0271398, 0.00056506],
+            [0.00876183, -0.0123149],
+            [-0.00598292, 0.0438725],
+            [0.0288276, -0.0157463],
+            [0.0380238, 0.0120442],
+            [-0.0319324, -0.0296935],
+            [-0.0030697, -0.0187077],
+            [-0.0121803, -0.0173717],
+            [0.0150902, 0.0446161],
+            [0.0376233, -0.0220866],
+            [-0.0147005, -0.0155701],
+            [-0.017127, 0.0257343],
+            [-0.0226136, -0.0263898],
+            [-0.0217295, 0.0251977],
+            [0.0215659, 0.0374364],
+            [-0.0337836, -0.000711151],
+            [0.00670888, 0.0362286],
+            [0.0486262, -0.00743311],
+            [-0.00202011, 0.0429544],
+            [-0.0167753, -0.036627],
+            [-0.0190894, -0.0306745],
+            [-0.0136289, 0.00717367],
+            [0.00448618, -0.048362],
+            [0.0190139, -0.0322896],
+            [0.0215585, 0.0439837],
+            [0.0166828, 0.0288881],
+            [0.00575044, -0.0158073],
+            [0.0023268, 0.0124378],
+            [-0.000502961, 0.0335579],
+            [-0.020886, -0.00720564],
+            [0.0192441, -0.0240871],
+            [-0.00327226, -0.0181291],
+            [-0.00051754, 0.0103705],
+            [0.00248451, -0.016697],
+            [0.0320086, -0.00997157],
+            [0.0131062, -0.0111844],
+            [0.000448852, -0.0115048],
+            [0.0371046, 0.0272286],
+            [-0.0373658, -0.0173048],
+            [0.0333225, 0.00391339],
+            [-0.0304504, -0.0151523],
+            [0.0413634, 0.0136676],
+            [-0.00857429, 0.0444579],
+            [0.0255906, 0.0236618],
+            [-0.0143247, 0.000978651],
+            [-0.00394946, -0.0472592],
+            [-0.0169541, 0.0106576],
+            [0.00810509, 0.00746147],
+            [-0.0333278, -0.00838693],
+            [-0.0148629, 6.76447e-05],
+            [0.00865976, -0.00870719],
+            [-0.0119565, -0.00246735],
+            [-0.027168, -0.011222],
+            [0.0119151, -0.0267953],
+            [0.00351119, -0.0106203],
+            [0.014038, 0.00598558],
+            [0.0248723, 0.023178],
+            [-0.00424203, -0.0291179],
+            [-0.0401158, 0.0040168],
+            [-0.0101212, -0.0359837],
+            [-0.0133273, -0.00303826],
+            [0.00321895, 0.0226149],
+            [0.0138849, -0.00272608],
+            [0.00669208, -0.0181479],
+            [0.00611157, -0.013983],
+            [-0.0219695, 0.0356523],
+            [0.0048154, -0.0125004],
+            [-0.0287305, -0.0195992],
+            [-0.0326577, 0.0347267],
+            [0.00486702, -0.0259141],
+            [0.032094, 0.016201],
+            [0.0252234, -0.00177507],
+            [0.0117135, 0.0256355],
+            [0.0445831, -0.0194465],
+            [0.00796167, -0.0426826],
+            [-0.00342807, -0.0259635],
+            [-0.0419965, -0.0236857],
+            [0.0195201, -0.0328418],
+            [-0.0150371, 0.0174543],
+            [0.0227469, -0.03136],
+            [0.0127359, -0.0124801],
+            [0.0232993, 0.039482],
+            [0.0213908, 0.0159259],
+            [0.0110075, -0.0113531],
+            [0.0376659, -0.0149542],
+            [0.00100117, 0.0316909],
+            [0.00586759, -0.0131346],
+            [-0.00593623, -0.0185786],
+            [-0.0230126, -0.0250201],
+            [-0.014751, 0.00442692],
+            [6.04729e-05, 0.0465425],
+            [0.0222067, -0.0356898],
+            [0.0179308, -0.00876186],
+            [-0.0154091, -0.0214502],
+            [-0.0142079, -0.0438975],
+            [0.0141838, -0.00531064],
+            [-0.0098439, -0.00633928],
+            [0.00744103, 0.00947951],
+            [0.0404729, -0.0168176],
+            [-0.0112003, 0.0313309],
+            [-0.0099825, 0.0296441],
+            [0.0260437, 0.00230313],
+            [-0.0464844, -0.00866735],
+            [0.00839305, -0.0162292],
+            [-0.000874439, 0.0179881],
+            [-0.0132249, -0.000621603],
+            [-0.00604973, -0.0395291],
+            [0.0262383, -0.042439],
+            [-0.00469083, 0.0104292],
+            [0.0240346, 0.0388455],
+            [0.011452, 0.0145279],
+            [-0.0259977, 0.00467224],
+            [0.00975905, 0.0240896],
+            [-0.0423451, -0.0212828],
+            [-0.0166085, -0.00220769],
+            [0.0160108, -0.00732746],
+            [0.0179268, 0.00231773],
+            [-0.00729877, -0.0435186],
+            [0.0244741, 0.0349244],
+            [-0.0458469, -0.00973027],
+            [-0.0279072, -0.0217365],
+            [-0.0232985, -0.00797767],
+            [-0.00161875, 0.0384378],
+            [0.00215076, 0.0145467],
+            [-0.0259101, 0.0153983],
+            [-0.011385, 0.0137243],
+            [-0.0136671, 0.00851378],
+            [-0.023498, -0.00986002],
+            [0.0373662, -0.00686131],
+            [0.00394832, -0.0152173],
+            [0.00205421, 0.040455],
+            [-0.027321, -0.0150547],
+            [-0.0253608, 0.0384098],
+            [-0.00300706, 0.0229686],
+            [0.0177499, 0.0116955],
+            [0.0422454, -0.00869398],
+            [0.0333173, 0.0351273],
+            [0.00346382, 0.0151297],
+            [0.0136908, 0.0191799],
+            [0.0158374, 0.0111152],
+            [-0.00488361, 0.02683],
+            [0.0165917, 0.00371596],
+            [-0.0183698, 0.0367385],
+            [-0.0339046, 0.0218397],
+            [-0.0479047, -0.0110466],
+            [0.0135293, -0.0155816],
+            [-0.0103649, 0.0103708],
+            [-0.010204, 0.0183974],
+            [0.0215688, -0.0234347],
+            [0.0108064, 0.00136693],
+            [-0.0487918, -0.00644605],
+            [-0.039717, 0.0142356],
+            [0.0372589, -0.0229965],
+            [-0.0033006, 0.00987298],
+            [-0.00751431, 0.0380412],
+            [-0.00884511, 0.00791263],
+            [-0.0398473, -0.0218551],
+            [-0.0124897, 0.0082718],
+            [0.0398795, -0.0125791],
+            [-0.00779956, 0.0415062],
+            [-0.0131707, 0.0245816],
+            [0.00879533, -0.00504075],
+            [-0.00544512, -0.00880617] ]
+      shears_obj = np.empty(len(shears),dtype=[('g1',np.float),
+                                               ('g2',np.float),
+                                               ('field',np.int)])
+      shears_arr = np.array(shears)
+      shears_obj['g1'] = shears_arr[:,0]
+      shears_obj['g2'] = shears_arr[:,1]
+      shears_obj['field'] = np.arange(len(shears),dtype=np.int)
+      return shears_obj
 
-    print "After "+str(clipfrac)+"% residual clipping, we get:"
-    print ('Found coeff (clipped ):\n m1 = %.4f  c1 = %.4f \n m2 = %.4f  c2 = %.4f '
-           %(coeff_clipped1['m'],coeff_clipped1['c'],coeff_clipped2['m'],coeff_clipped2['c']) )
+def doPlots(data,outfile = None):
+    truthTable = get_truthtable()
 
-
-    
-    fig,((ax1,ax2),(ax3,ax4),(ax5,ax6),(ax7,ax8)) = plt.subplots(nrows=4,ncols=2,figsize=(14,21))
-    xlim = [-0.06, 0.06]
-    y_interval_raw = np.abs(np.percentile(np.hstack((results['g1_raw']-results['g1_true'],results['g2_raw']-results['g2_true'])),10) -
-                            np.percentile(np.hstack((results['g1_raw']-results['g1_true'],results['g2_raw']-results['g2_true'])),90))
-    y_interval_est = np.abs(np.percentile(np.hstack((results['g1_est']-results['g1_true'],results['g2_est']-results['g2_true'])),10) -
-                            np.percentile(np.hstack((results['g1_est']-results['g1_true'],results['g2_est']-results['g2_true'])),90))
-
-    ylim_raw = [-3*y_interval_raw, 3*y_interval_raw]
-    ylim_est = [-3*y_interval_est, 3*y_interval_est]
-    #--------------------------------------------------
-    # First, the raw results.
-    #--------------------------------------------------
-    ax1.plot(results['g1_true'],results['g1_raw'] - results['g1_true'],'.',color='blue')
-    ax1.plot([-1,1],[coeff1_raw['c'] -coeff1_raw['m'], coeff1_raw['c'] + coeff1_raw['m']],color='cyan')
+    coeff1, covar1 = np.polyfit(truthTable['g1'],data['g1opt'] - truthTable['g1'],1,cov=True)
+    coeff2, covar2 = np.polyfit(truthTable['g2'],data['g2opt'] - truthTable['g2'],1,cov=True)
+    print 'm1 = '+str(coeff1[0])+'+/- '+str(np.sqrt(covar1[0,0]))+', c1 = '+str(coeff1[1])+'  '+str(np.sqrt(covar1[1,1]))
+    print 'm2 = '+str(coeff2[0])+'+/- '+str(np.sqrt(covar2[0,0]))+', c2 = '+str(coeff2[1])+'  '+str(np.sqrt(covar2[1,1]))
+    fig,((ax1,ax2),(ax3,ax4),(ax5,ax6)) = plt.subplots(nrows=3,ncols=2,figsize=(14,7))
+    ax1.plot(truthTable['g1'],data['g1opt'] - truthTable['g1'],'.')
     ax1.axhline(0,linestyle='--',color='red')
-    ax1.set_xlim(xlim)
-    ax1.set_ylim(ylim_raw)
-    ax1.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%
-                 (coeff1_raw['m'],coeff1_raw['m_err'],coeff1_raw['a'],coeff1_raw['a_err'],
-                  coeff1_raw['c'],coeff1_raw['c_err']),xy=(0.05, 0.85), xycoords='axes fraction')
-
-    
-    ax2.plot(results['g2_true'],results['g2_raw'] - results['g2_true'],'.',color='blue')
-    ax2.plot([-1,1],[coeff2_raw['c'] -coeff2_raw['m'], coeff2_raw['c'] + coeff2_raw['m']],color='cyan')
+    ax1.plot(truthTable['g1'],coeff1[0]*truthTable['g1'] + coeff1[1],color='cyan')
+    ax1.set_ylim(-0.02,0.02)
+    ax2.plot(truthTable['g2'],data['g2opt'] - truthTable['g2'],'.')
+    ax2.plot(truthTable['g2'],coeff2[0]*truthTable['g2'] + coeff2[1],color='cyan')
     ax2.axhline(0,linestyle='--',color='red')
-    ax2.set_xlim(xlim)
-    ax2.set_ylim(ylim_raw)
-    ax2.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%
-                 (coeff2_raw['m'],coeff2_raw['m_err'],coeff2_raw['a'],coeff2_raw['a_err'],
-                  coeff2_raw['c'],coeff2_raw['c_err']),xy=(0.05, 0.85), xycoords='axes fraction')
-    
-    #--------------------------------------------------    
-    # Next, the MC'd results.
-    #--------------------------------------------------
-    ax3.plot(results['g1_true'],results['g1_est'] - results['g1_true'],'.',color='blue')
-    ax3.plot(res_exc['g1_true'],res_exc['g1_est'] - res_exc['g1_true'],'s',color='red')
-    ax3.plot([-1,1],[coeff1['c'] -coeff1['m'], coeff1['c'] + coeff1['m']],color='orange')
-    ax3.plot([-1,1],[coeff_clipped1['c'] -coeff_clipped1['m'], coeff_clipped1['c'] + coeff_clipped1['m']],color='cyan')
+    ax2.set_ylim(-0.02,0.02)
+
+    ax3.plot(data['e1_logL'],data['g1opt'] - truthTable['g1'],'.')
+    ax3.set_ylim(-0.02,0.02)
     ax3.axhline(0,linestyle='--',color='red')
-    ax3.set_xlim(xlim)
-    ax3.set_ylim(ylim_est)
-    ax3.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%
-                 (coeff1['m'],coeff1['m_err'],coeff1['a'],coeff1['a_err'],
-                  coeff1['c'],coeff1['c_err']),xy=(0.05, 0.85), xycoords='axes fraction')
-
-        
-    ax4.plot(results['g2_true'],results['g2_est'] - results['g2_true'],'.',color='blue')
-    ax4.plot(res_exc['g2_true'],res_exc['g2_est'] - res_exc['g2_true'],'s',color='red')
-    ax4.plot([-1,1],[coeff2['c'] -coeff2['m'], coeff2['c'] + coeff2['m']],color='orange')
-    ax4.plot([-1,1],[coeff_clipped2['c'] -coeff_clipped2['m'], coeff_clipped2['c'] + coeff_clipped2['m']],color='cyan')
+    ax4.plot(data['e2_logL'],data['g2opt'] - truthTable['g2'],'.')
+    ax4.set_ylim(-0.02,0.02)
     ax4.axhline(0,linestyle='--',color='red')
-    ax4.set_xlim(xlim)
-    ax4.set_ylim(ylim_est)
-    ax4.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%
-                 (coeff2['m'],coeff2['m_err'],coeff2['a'],coeff2['a_err'],
-                  coeff2['c'],coeff2['c_err']),xy=(0.05, 0.85), xycoords='axes fraction')
-
-    ax5.plot(results_all['logL_e1'],results_all['g1_est']-results_all['g1_true'],'.')
-    ax5.set_xlabel('logL')
-    ax5.axhline(0,color='red',linestyle='--')
-    ax5.axvline(logLcut1,color='red')
-    ax6.plot(results_all['logL_e2'],results_all['g2_est']-results_all['g2_true'],'.')
-    ax6.set_xlabel('logL')
-    ax6.axvline(logLcut2,color='red')
-    ax6.axhline(0,color='red',linestyle='--')
-
-    ax7.plot(results['psf_e1'],results['g1_est']-results['g1_true'],'.',color='blue')
-    ax7.plot(res_exc['psf_e1'],res_exc['g1_est']-res_exc['g1_true'],'s',color='red')
-    ax7.plot(results['psf_e1'],results['g1_est']-results['g1_true'],'.',color='blue')
-    ax7.plot(res_exc['psf_e1'],res_exc['g1_est']-res_exc['g1_true'],'s',color='red')
-    ax7.plot([-1,1],[coeff1['c'] - coeff1['a'], coeff1['c'] + coeff1['a']],color='orange')
-    ax7.plot([-1,1],[coeff_clipped1['c'] - coeff_clipped1['a'], coeff_clipped1['c'] + coeff_clipped1['a']],color='orange')
-    ax7.axhline(0,linestyle='--',color='red')
-    ax7.set_xlim(-0.2,0.2)
-    ax7.set_xlabel('psf_e1')
-        
-    ax8.plot(results['psf_e2'],results['g2_est']-results['g2_true'],'.',color='blue')
-    ax8.plot(res_exc['psf_e2'],res_exc['g2_est']-res_exc['g2_true'],'s',color='red')
-    ax8.plot([-1,1],[coeff2['c'] - coeff2['a'], coeff2['c'] + coeff2['a']],color='orange')
-    ax8.plot([-1,1],[coeff_clipped2['c'] - coeff_clipped2['a'], coeff_clipped2['c'] + coeff_clipped2['a']],color='orange')
-    ax8.axhline(0,linestyle='--',color='red')
-    ax8.set_xlim(-0.2,0.2)
-    ax8.set_xlabel('psf_e2')
     
-        
-    fig.savefig(figName)
-    if clip is False:
-        return coeff1, coeff2, coeff1_raw, coeff2_raw
-    else:
-        return coeff_clipped1, coeff_clipped2, coeff1_raw, coeff2_raw
+    ax5.plot(data['psf_e1'],data['g1opt'] - truthTable['g1'],'.')
+    ax5.set_ylim(-0.02,0.02)
+    ax5.axhline(0,linestyle='--',color='red')
+    
+    ax6.plot(data['psf_e2'],data['g2opt'] - truthTable['g2'],'.')
+    ax6.axhline(0,linestyle='--',color='red')
+    ax6.set_ylim(-0.02,0.02)
+
+    fig.savefig(outfile)
+    pass
 
 def determineLoglCuts(catalog, percentile = None):
     if percentile is not None:
@@ -415,10 +634,10 @@ def main(argv):
 
 
     outfile = args.outfile
-    catalogs, truthfile = getAllCatalogs()
+    catalogs = getAllCatalogs()
     results = shear_est(catalogs,truthfile, mc_type = args.mc_type)
     logLcut1, logLcut2 = determineLoglCuts(results, percentile = args.percentile_cut)
-    coeff1, coeff2,_,_ = analyze(results,mc_type= args.mc_type, logLcut1 = logLcut1, logLcut2 = logLcut2)
+    doPlots(results,outfile = 'est_simple')
 
     
 
