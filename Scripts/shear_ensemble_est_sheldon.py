@@ -657,11 +657,14 @@ def get_truthtable():
 def doPlots(data,outfile = None):
     truthTable = get_truthtable()
 
-    fig,(ax1,ax2) = plt.subplots(nrows=1,ncols=2,figsize=(14,7))
+    fig,((ax1,ax2),(ax3,ax4)) = plt.subplots(nrows=1,ncols=2,figsize=(14,7))
     ax1.plot(truthTable['g1'],data['g1opt'] - truthTable['g1'],'.')
     ax1.axhline(0,linestyle='--',color='red')
     ax2.plot(truthTable['g2'],data['g2opt'] - truthTable['g2'],'.')
     ax2.axhline(0,linestyle='--',color='red')
+
+    ax3.plot(data['e1_logL'],data['g1opt'] - truthTable['g1'])
+    ax4.plot(data['e2_logL'],data['21opt'] - truthTable['g2'])    
     fig.savefig(outfile)
     pass
 
@@ -684,7 +687,7 @@ def main(argv):
     parser.add_argument("-o", "--outfile", dest = "outfile", type = str, default = "tmp_outfile.txt",
                         help = "destination for output per-field shear catalogs.")
     parser.add_argument("-p", "--percentile_cut", dest="percentile_cut",
-                        help="percentile",type= float, default = 10)
+                        help="percentile",type= float, default = 0)
     parser.add_argument("-dp", "--doplot", dest = "doplot", action="store_true")
     parser.add_argument("-a", "--do_all", dest = "do_all", action="store_true", default = False)
     parser.add_argument("-sn", "--snos_cut", dest="sn_cut",
