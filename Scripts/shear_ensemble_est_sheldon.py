@@ -181,14 +181,12 @@ def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
         from matplotlib.backends.backend_pdf import PdfPages
         import matplotlib.pyplot as plt
         pp = PdfPages(plotFile+".pdf")
-
-    if plotFile is not None:
         linear_bin_edges = np.linspace(-1.5,1.5,100)
         linear_bin_centers = (linear_bin_edges[0:-1] + linear_bin_edges[1:])/2.
         _, prior_alt_e1_hist, prior_alt_e2_hist, _, _ = buildPrior(catalogs, bins=linear_bin_edges)
             
     for catalog,i in zip(catalogs, xrange(len(catalogs) )):
-
+        print "on catalog "+str(i)+" of  "+str(len(catalogs))
 
         if mean is False:
             this_e1_hist, _ = np.histogram(catalog['g1'] - catalog['c1'] - catalog['a1']*catalog['psf_e1'] , bins = bin_edges )
@@ -267,8 +265,8 @@ def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
         field_id[i] = catalog[0]['id'] / 1000000
         psf_e1[i] = np.median(catalog['psf_e1'])
         psf_e2[i] = np.median(catalog['psf_e2'])
-    
-    pp.close()
+    if plotFile is not None:
+        pp.close()
     return field_id, gamma1_raw, gamma2_raw, gamma1_opt, gamma2_opt, gamma1_var, gamma2_var, psf_e1, psf_e2, field_e1_logL, field_e2_logL
 
 
