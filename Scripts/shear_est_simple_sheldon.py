@@ -80,7 +80,7 @@ def shear_em(e):
 
 
 
-def shear_est(catalogs, truthFile, delta_g = 0.01, weights = True,mc_type=None):
+def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None):
 
     est1 = []
     est2 = []
@@ -207,7 +207,6 @@ def shear_est(catalogs, truthFile, delta_g = 0.01, weights = True,mc_type=None):
     results['logL_e2'] = np.array(logL_e2)
     results['field_id'] = np.array([catalog[0]['id'] / 1000000 for catalog in catalogs])
 
-    truthTable = np.loadtxt(truthFile, dtype = [('field_id',np.int), ('g1',np.double), ('g2',np.double ) ])
     for i,this_result in enumerate(results):
         use = truthTable['field_id'] == this_result['field_id']
         if np.sum(use) == 1:
@@ -554,11 +553,11 @@ def get_truthtable():
             [-0.00544512, -0.00880617] ]
       shears_obj = np.empty(len(shears),dtype=[('g1',np.float),
                                                ('g2',np.float),
-                                               ('field',np.int)])
+                                               ('field_id',np.int)])
       shears_arr = np.array(shears)
       shears_obj['g1'] = shears_arr[:,0]
       shears_obj['g2'] = shears_arr[:,1]
-      shears_obj['field'] = np.arange(len(shears),dtype=np.int)
+      shears_obj['field_id'] = np.arange(len(shears),dtype=np.int)
       return shears_obj
 
 def doPlots(data,outfile = None):
