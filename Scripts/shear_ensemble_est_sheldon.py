@@ -330,7 +330,7 @@ def main(argv):
         catalogs = getAllCatalogs(subsample = True)
         print 'Got %d catalogs, doing inference'%len(catalogs)
         field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL = \
-            doInference(catalogs=catalogs, nbins=nbins, mean=False, plotFile = "es_g3redux_histograms")
+            doInference(catalogs=catalogs, nbins=nbins, mean=False)
         field_str = makeFieldStructure(field_id=field_id, g1raw = g1raw, g2raw = g2raw, g1opt = g1opt, g2opt = g2opt,
                                     g1var = g1var, g2var = g2var, psf_e1 = psf_e1, psf_e2 = psf_e2,
                                     e1_logL = e1_logL, e2_logL = e2_logL)
