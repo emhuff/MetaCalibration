@@ -634,7 +634,8 @@ def main(argv):
 
     outfile = args.outfile
     catalogs = getAllCatalogs()
-    results = shear_est(catalogs,truthfile, mc_type = args.mc_type)
+    truthTable = get_truthtable()
+    results = shear_est(catalogs,truthTable, mc_type = args.mc_type)
     logLcut1, logLcut2 = determineLoglCuts(results, percentile = args.percentile_cut)
     doPlots(results,outfile = 'est_simple')
 
