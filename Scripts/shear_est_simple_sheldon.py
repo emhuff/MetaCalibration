@@ -8,6 +8,7 @@ import glob
 from astropy.io import fits
 import re
 import galsim
+import esutil
 import matplotlib as mpl
 #mpl.use('Agg')
 import matplotlib.pyplot as plt
