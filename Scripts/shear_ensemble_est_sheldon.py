@@ -12,35 +12,25 @@ import esutil
     
 def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3reredux/', subsample = True, nrows = 100000 ):
 
-
-    fields = ["mcal-v05s03/collated/mcal-v05s03.fits",
-              "mcal-v06s02/collated/mcal-v06s02.fits",
-              "mcal-v07s02/collated/mcal-v07s02.fits",
-              "mcal-v08s02/collated/mcal-v08s02.fits"]
+    data = esutil.io.read("/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3reredux/mcal-v10s02/collated/mcal-v10s02.fits")
+    
+    fields = np.unique(data['shear_index'])
     catalogs = []
-    cat_dtype =  np.dtype([('id','>i8'),('g1','>f8'),('R1','>f8'),('a1','>f8'),('c1','>f8'), ('psf_e1','>f8'),('g2','>f8'),('R2','>f8'),('a2','>f8'),('c2','>f8'), ('psf_e2','>f8'),('weight','>f8')])
-    for thisfield,field_id in zip(fields, np.arange(len(fields))):
-        filename = path + thisfield
-        if subsample is True:
-            data = esutil.io.read(filename, rows=[np.arange(nrows)], columns=['exp_mcal_g','exp_mcal_R', 'exp_mcal_Rpsf','exp_mcal_gpsf','exp_mcal_c','exp_flags'], ext=1)
-            keep = data['exp_flags'] == 0
-            
-        else:
-            data = esutil.io.read(filename,
-                               columns=['exp_mcal_g','exp_mcal_R', 'exp_mcal_Rpsf','exp_mcal_gpsf','exp_mcal_c','exp_flags'], ext=1)
-            keep = data['exp_flags'] == 0
+
+    for field_id in fields:
+        keep = (data['exp_flags'] == 0) & (data['shear_index'] == field_id)
         this_catalog = np.empty(np.sum(keep), dtype = cat_dtype)
         this_catalog['id'] = 1000000 * field_id 
-        this_catalog['g1'] = data[keep]['exp_mcal_g'][:,0]
-        this_catalog['g2'] = data[keep]['exp_mcal_g'][:,1]
-        this_catalog['R1'] = data[keep]['exp_mcal_R'][:,0,0]
-        this_catalog['R2'] = data[keep]['exp_mcal_R'][:,1,1]
-        this_catalog['a1'] = data[keep]['exp_mcal_Rpsf'][:,0]
-        this_catalog['a2'] = data[keep]['exp_mcal_Rpsf'][:,1]
-        this_catalog['psf_e1'] = data[keep]['exp_mcal_gpsf'][:,0]
-        this_catalog['psf_e2'] = data[keep]['exp_mcal_gpsf'][:,0]
-        this_catalog['c1'] = data[keep]['exp_mcal_c'][:,0]
-        this_catalog['c2'] = data[keep]['exp_mcal_c'][:,1]
+        this_catalog['g1'] = data[keep]['e'][:,0]
+        this_catalog['g2'] = data[keep]['e'][:,1]
+        this_catalog['R1'] = data[keep]['R'][:,0,0]
+        this_catalog['R2'] = data[keep]['R'][:,1,1]
+        this_catalog['a1'] = data[keep]['Rpsf'][:,0,0]
+        this_catalog['a2'] = data[keep]['Rpsf'][:,1,1]
+        this_catalog['psf_e1'] = data[keep]['epsf'][:,0]
+        this_catalog['psf_e2'] = data[keep]['epsf'][:,1]
+        this_catalog['c1'] = data[keep]['c'][:,0]
+        this_catalog['c2'] = data[keep]['c'][:,1]
         this_catalog['weight'] = np.zeros(np.sum(keep))+1.
         catalogs.append(this_catalog)
     return catalogs
