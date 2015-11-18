@@ -188,7 +188,7 @@ def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False,\
         ax2.axhline(0,color='red',linestyle='--')
         fig.savefig(mc_type+'-prior_derivs')
 
-    return bin_edges, e1_prior_hist, e2_prior_hist, de1_dg_nl, de2_dg_nl
+    return bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg
 
 def multinomial_logL(obs_hist= None, truth_prob = None):
     # Make liberal use of Stirling's approx.
@@ -661,8 +661,8 @@ def doPlots(data,outfile = None):
     ax1.plot(truthTable['g1'],data['g1opt'] - truthTable['g1'],'.')
     ax1.axhline(0,linestyle='--',color='red')
     ax2.plot(truthTable['g2'],data['g2opt'] - truthTable['g2'],'.')
-    ax2.axhline(0,linestyle='--',color='red')    
-    fig.savefig(file=outfile)
+    ax2.axhline(0,linestyle='--',color='red')
+    fig.savefig(outfile)
     pass
 
   
