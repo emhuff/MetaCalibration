@@ -21,7 +21,7 @@ def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3rere
                            ('psf_e1','>f8'),('g2','>f8'),('R2','>f8'),('a2','>f8'),('c2','>f8'),
                            ('psf_e2','>f8'),('weight','>f8')])
     for field_id in fields:
-        keep = (data['flags'] == 0) & (data['shear_index'] == field_id) & (data['pars'][:,5] > 10)
+        keep = (data['flags'] == 0) & (data['shear_index'] == field_id) & (data['pars'][:,5] > 15)
         this_catalog = np.empty(np.sum(keep), dtype = cat_dtype)
         this_catalog['id'] = 1000000 * field_id 
         this_catalog['g1'] = data[keep]['e'][:,0]
