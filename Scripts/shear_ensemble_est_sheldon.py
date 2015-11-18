@@ -657,10 +657,10 @@ def get_truthtable():
 def doPlots(data,outfile = None):
     truthTable = get_truthtable()
 
-    coeff1 = np.polyfit(truthTable['g1'],data['g1opt'] - truthTable['g1'],1)
-    coeff2 = np.polyfit(truthTable['g2'],data['g2opt'] - truthTable['g2'],1)
-    print 'm1, c1 ='+str(coeff1[0])+'  '+str(coeff1[1])
-    print 'm2, c2 ='+str(coeff1[0])+'  '+str(coeff1[1])
+    coeff1, covar1 = np.polyfit(truthTable['g1'],data['g1opt'] - truthTable['g1'],1,cov=True)
+    coeff2, covar2 = np.polyfit(truthTable['g2'],data['g2opt'] - truthTable['g2'],1,cov=True)
+    print 'm1 = '+str(coeff1[0])+'+/- '+str(np.sqrt(covar1[0,0]))+', c1 = '+str(coeff1[1])+'  '+str(np.sqrt(covar1[1,1]))
+    print 'm2 = '+str(coeff2[0])+'+/- '+str(np.sqrt(covar2[0,0]))+', c2 = '+str(coeff2[1])+'  '+str(np.sqrt(covar2[1,1]))
     fig,((ax1,ax2),(ax3,ax4),(ax5,ax6)) = plt.subplots(nrows=3,ncols=2,figsize=(14,7))
     ax1.plot(truthTable['g1'],data['g1opt'] - truthTable['g1'],'.')
     ax1.axhline(0,linestyle='--',color='red')
