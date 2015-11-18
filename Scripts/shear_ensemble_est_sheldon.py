@@ -271,6 +271,7 @@ def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
 
 
 
+
 def makeFieldStructure(field_id=None, g1raw = None, g2raw = None, g1opt = None, g2opt = None, g1var = None, g2var = None,
                        psf_e1 = None, psf_e2 = None, e1_logL = None, e2_logL = None):
     field_str = np.empty(field_id.size, dtype=[('id',int),('g1raw',float), ('g2raw',float), ('g1opt',float), ('g2opt',float), ('g1var',float),('g2var',float), ('psf_e1',float), ('psf_e2',float), ('e1_logL',float), ('e2_logL',float)])
