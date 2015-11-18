@@ -41,6 +41,57 @@ def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3rere
 
 
 
+def reconstructMetacalMeas(g=None, R=None, a = None, c=None, psf_e=None, delta_g = 0.01 ):
+    esum = 2*(c + g)
+    ediff = 2*delta_g * R
+    ep = (esum + ediff)/2. - a * psf_e
+    em = (esum - ediff)/2. - a * psf_e
+    return ep,em
+
+def getHistogramDerivative(catalogs=None, bin_edges=None, delta_g = 0.01):
+    e1_p_list = []
+    e1_m_list = []
+    e1_0_list = []
+    
+    e2_p_list = []
+    e2_m_list = []
+    e2_0_list = []
+        
+    for catalog in catalogs:
+        e1p, e1m = reconstructMetacalMeas(g=catalog['g1'], R=catalog['R1'],
+                                          a = catalog['a1'], c=catalog['c1'],
+                                          psf_e=catalog['psf_e1'], delta_g = delta_g )
+        e2p, e2m = reconstructMetacalMeas(g=catalog['g2'], R=catalog['R2'],
+                                          a = catalog['a2'], c=catalog['c2'],
+                                          psf_e=catalog['psf_e2'], delta_g = delta_g )
+        e10 = catalog['g1'] - catalog['c1'] - catalog['a1']*catalog['psf_e1']
+        e20 = catalog['g2'] - catalog['c2'] - catalog['a2']*catalog['psf_e2']
+        e1_p_list.append(np.hstack((e1p, -e1m)))
+        e1_m_list.append(np.hstack((e1m, -e1p)))
+        e1_0_list.append(np.hstack((e10, -e10)))
+
+        e2_p_list.append(np.hstack((e2p, -e2m)))
+        e2_m_list.append(np.hstack((e2m, -e2p)))
+        e2_0_list.append(np.hstack((e20, -e20)))
+                
+    e1_p = np.hstack(e1_p_list)
+    e1_m = np.hstack(e1_m_list)
+    e1_0 = np.hstack(e1_0_list)
+    e2_p = np.hstack(e2_p_list)
+    e2_m = np.hstack(e2_m_list)
+    e2_0 = np.hstack(e2_0_list)
+    
+    h1_p, _ = np.histogram(e1_p, bins= bin_edges) 
+    h1_m, _ = np.histogram(e1_m, bins= bin_edges) 
+    h2_p, _ = np.histogram(e2_p, bins= bin_edges)
+    h2_m, _ = np.histogram(e2_m, bins= bin_edges)
+
+    dh1_dg1 = (h1_p - h1_m)/(2*delta_g)*1./len(e1_p)
+    dh2_dg2 = (h2_p - h2_m)/(2*delta_g)*1./len(e2_p)
+
+    return dh1_dg1, dh2_dg2
+    
+
 def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False,\
                mc_type = None, sym = True):
     # Get a big master list of all the ellipticities in all fields.
@@ -118,6 +169,9 @@ def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False,\
     de2_dg[-1] = 0.
     de2_dg[0] = 0.
 
+    de1_dg_nl, de2_dg_nl =  getHistogramDerivative(catalogs= catalogs, bin_edges=bin_edges, delta_g = dg)
+
+    
     if doplot is True:
         import matplotlib.pyplot as plt
         fig,(ax1,ax2) =plt.subplots(nrows = 2, ncols = 1,figsize = (7,14))
@@ -133,7 +187,7 @@ def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False,\
         ax2.axhline(0,color='red',linestyle='--')
         fig.savefig(mc_type+'-prior_derivs')
 
-    return bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg
+    return bin_edges, e1_prior_hist, e2_prior_hist, de1_dg_nl, de2_dg_nl
 
 def multinomial_logL(obs_hist= None, truth_prob = None):
     # Make liberal use of Stirling's approx.
