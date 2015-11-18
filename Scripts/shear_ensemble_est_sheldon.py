@@ -657,14 +657,34 @@ def get_truthtable():
 def doPlots(data,outfile = None):
     truthTable = get_truthtable()
 
-    fig,((ax1,ax2),(ax3,ax4)) = plt.subplots(nrows=1,ncols=2,figsize=(14,7))
+    coeff1 = np.polyfit(truthTable['g1'],data['g1opt'] - truthTable['g1'],1)
+    coeff2 = np.polyfit(truthTable['g2'],data['g2opt'] - truthTable['g2'],1)
+    
+    fig,((ax1,ax2),(ax3,ax4),(ax5,ax6)) = plt.subplots(nrows=3,ncols=2,figsize=(14,7))
     ax1.plot(truthTable['g1'],data['g1opt'] - truthTable['g1'],'.')
     ax1.axhline(0,linestyle='--',color='red')
+    ax1.plot(truthTable['g1'],coeff1[0]*truthTable['g1'] + coeff1[1],color='cyan')
+    ax1.set_ylim(-0.02,0.02)
     ax2.plot(truthTable['g2'],data['g2opt'] - truthTable['g2'],'.')
+    ax2.plot(truthTable['g2'],coeff2[0]*truthTable['g2'] + coeff2[1],color='cyan')
     ax2.axhline(0,linestyle='--',color='red')
+    ax2.set_ylim(-0.02,0.02)
 
-    ax3.plot(data['e1_logL'],data['g1opt'] - truthTable['g1'])
-    ax4.plot(data['e2_logL'],data['21opt'] - truthTable['g2'])    
+    ax3.plot(data['e1_logL'],data['g1opt'] - truthTable['g1'],'.')
+    ax3.set_ylim(-0.02,0.02)
+    ax3.axhline(0,linestyle='--',color='red')
+    ax4.plot(data['e2_logL'],data['g2opt'] - truthTable['g2'],'.')
+    ax4.set_ylim(-0.02,0.02)
+    ax4.axhline(0,linestyle='--',color='red')
+    
+    ax5.plot(data['psf_e1'],data['g1opt'] - truthTable['g1'],'.')
+    ax5.set_ylim(-0.02,0.02)
+    ax5.axhline(0,linestyle='--',color='red')
+    
+    ax6.plot(data['psf_e2'],data['g2opt'] - truthTable['g2'],'.')
+    ax6.axhline(0,linestyle='--',color='red')
+    ax6.set_ylim(-0.02,0.02)
+
     fig.savefig(outfile)
     pass
 
