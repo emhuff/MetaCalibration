@@ -414,8 +414,7 @@ def main(argv):
 
 
     outfile = args.outfile
-    print 'Getting catalogs from path %s and mc_type %s'%(path, args.mc_type)
-    catalogs, truthfile = getAllCatalogs(path=path, mc_type=args.mc_type)
+    catalogs, truthfile = getAllCatalogs()
     results = shear_est(catalogs,truthfile, mc_type = args.mc_type)
     logLcut1, logLcut2 = determineLoglCuts(results, percentile = args.percentile_cut)
     coeff1, coeff2,_,_ = analyze(results,mc_type= args.mc_type, logLcut1 = logLcut1, logLcut2 = logLcut2)
