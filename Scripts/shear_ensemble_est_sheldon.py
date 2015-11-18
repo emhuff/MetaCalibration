@@ -67,13 +67,13 @@ def getHistogramDerivative(catalogs=None, bin_edges=None, delta_g = 0.01):
                                           psf_e=catalog['psf_e2'], delta_g = delta_g )
         e10 = catalog['g1'] - catalog['c1'] - catalog['a1']*catalog['psf_e1']
         e20 = catalog['g2'] - catalog['c2'] - catalog['a2']*catalog['psf_e2']
-        e1_p_list.append(np.hstack((e1p, -e1m)))
-        e1_m_list.append(np.hstack((e1m, -e1p)))
-        e1_0_list.append(np.hstack((e10, -e10)))
+        e1_p_list.append(np.hstack((e1p)))
+        e1_m_list.append(np.hstack((e1m)))
+        e1_0_list.append(np.hstack((e10)))
 
-        e2_p_list.append(np.hstack((e2p, -e2m)))
-        e2_m_list.append(np.hstack((e2m, -e2p)))
-        e2_0_list.append(np.hstack((e20, -e20)))
+        e2_p_list.append(np.hstack((e2p)))
+        e2_m_list.append(np.hstack((e2m)))
+        e2_0_list.append(np.hstack((e20)))
                 
     e1_p = np.hstack(e1_p_list)
     e1_m = np.hstack(e1_m_list)
@@ -93,8 +93,8 @@ def getHistogramDerivative(catalogs=None, bin_edges=None, delta_g = 0.01):
     return dh1_dg1, dh2_dg2
     
 
-def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False,\
-               mc_type = None, sym = True):
+def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False,
+               mc_type = None, sym = False):
     # Get a big master list of all the ellipticities in all fields.
     # Sadly you cannot retain column identity when using hstack, so we have to do the manipulations
     # for each catalog to get a list of e1 arrays to stack.
@@ -188,7 +188,7 @@ def buildPrior(catalogs=None, nbins=100, bins = None, doplot = False,\
         ax2.axhline(0,color='red',linestyle='--')
         fig.savefig(mc_type+'-prior_derivs')
 
-    return bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg
+    return bin_edges, e1_prior_hist, e2_prior_hist, de1_dg_nl, de2_dg_nl
 
 def multinomial_logL(obs_hist= None, truth_prob = None):
     # Make liberal use of Stirling's approx.
