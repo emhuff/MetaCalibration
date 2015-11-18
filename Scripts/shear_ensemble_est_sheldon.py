@@ -21,7 +21,7 @@ def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3rere
                            ('psf_e1','>f8'),('g2','>f8'),('R2','>f8'),('a2','>f8'),('c2','>f8'),
                            ('psf_e2','>f8'),('weight','>f8')])
     for field_id in fields:
-        keep = (data['flags'] == 0) & (data['shear_index'] == field_id)
+        keep = (data['flags'] == 0) & (data['shear_index'] == field_id) & (data['pars'][:,5] > 20)
         this_catalog = np.empty(np.sum(keep), dtype = cat_dtype)
         this_catalog['id'] = 1000000 * field_id 
         this_catalog['g1'] = data[keep]['e'][:,0]
@@ -659,7 +659,8 @@ def doPlots(data,outfile = None):
 
     coeff1 = np.polyfit(truthTable['g1'],data['g1opt'] - truthTable['g1'],1)
     coeff2 = np.polyfit(truthTable['g2'],data['g2opt'] - truthTable['g2'],1)
-    
+    print 'm1, c1 ='+str(coeff1[0])+'  '+str(coeff1[1])
+    print 'm2, c2 ='+str(coeff1[0])+'  '+str(coeff1[1])
     fig,((ax1,ax2),(ax3,ax4),(ax5,ax6)) = plt.subplots(nrows=3,ncols=2,figsize=(14,7))
     ax1.plot(truthTable['g1'],data['g1opt'] - truthTable['g1'],'.')
     ax1.axhline(0,linestyle='--',color='red')
