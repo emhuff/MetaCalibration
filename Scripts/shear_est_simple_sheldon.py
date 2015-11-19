@@ -156,13 +156,13 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
         _, logL1 = shear_avg(e10,n=nu1_global, scale = sigma1_global)
         _, logL2 = shear_avg(e20,n=nu2_global, scale = sigma2_global)
         
-        g1p, _ = shear_avg(e1p,n=nu1+eps, scale = sigma1/2.)
-        g10, _ = shear_avg(e10,n=nu1+eps, scale = sigma1/2.)
-        g1m, _ = shear_avg(e1m,n=nu1+eps, scale = sigma1/2.)
+        g1p, _ = shear_avg(e1p,n=nu1_global, scale = sigma1_global)
+        g10, _ = shear_avg(e10,n=nu1_global, scale = sigma1_global)
+        g1m, _ = shear_avg(e1m,n=nu1_global, scale = sigma1_global)
 
-        g2p, _ = shear_avg(e2p,n=nu2+eps, scale = sigma2/2.)
-        g20, _ = shear_avg(e20,n=nu2+eps, scale = sigma2/2.)
-        g2m, _ = shear_avg(e2m,n=nu2+eps, scale = sigma2/2.)
+        g2p, _ = shear_avg(e2p,n=nu2_global, scale = sigma2_global)
+        g20, _ = shear_avg(e20,n=nu2_global, scale = sigma2_global)
+        g2m, _ = shear_avg(e2m,n=nu2_global, scale = sigma2_global)
 
         m1 = (g1p - g1m)/(2*delta_g)
         c1 = (g1p + g1m)/2. - g10 
