@@ -163,19 +163,19 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
         _, logL1 = shear_avg(e10,n=nu1_global, scale = sigma1_global)
         _, logL2 = shear_avg(e20,n=nu2_global, scale = sigma2_global)
         
-        g1p, _ = shear_avg(e1p,n=nu1_global, scale = sigma1_global)
-        g10, _ = shear_avg(e10,n=nu1_global, scale = sigma1_global)
-        g1m, _ = shear_avg(e1m,n=nu1_global, scale = sigma1_global)
+        g1p, _ = mu1p#shear_avg(e1p,n=nu1_global, scale = sigma1_global)
+        g10, _ = mu1#shear_avg(e10,n=nu1_global, scale = sigma1_global)
+        g1m, _ = mu1m#shear_avg(e1m,n=nu1_global, scale = sigma1_global)
 
-        g2p, _ = shear_avg(e2p,n=nu2_global, scale = sigma2_global)
-        g20, _ = shear_avg(e20,n=nu2_global, scale = sigma2_global)
-        g2m, _ = shear_avg(e2m,n=nu2_global, scale = sigma2_global)
+        g2p, _ = mu2p#shear_avg(e2p,n=nu2_global, scale = sigma2_global)
+        g20, _ = mu2#shear_avg(e20,n=nu2_global, scale = sigma2_global)
+        g2m, _ = mu2m#shear_avg(e2m,n=nu2_global, scale = sigma2_global)
         
         m1 = (g1p - g1m)/(2*delta_g)
         c1 = (g1p + g1m)/2. - g10 
         m2 = (g2p - g2m)/(2*delta_g)
         c2 = (g2p + g2m)/2. - g20
-        stop
+
         est1.append((g10 - c1)/m1)
         est2.append((g20 - c2)/m2)
 
