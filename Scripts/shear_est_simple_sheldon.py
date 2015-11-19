@@ -20,6 +20,8 @@ def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3rere
     data = esutil.io.read("/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3reredux/mcal-v10s02/collated/mcal-v10s02.fits")
     
     fields = np.unique(data['shear_index'])
+    total_number = 0
+    excluded_number = 0
     catalogs = []
     cat_dtype =  np.dtype([('id','>i8'),('g1','>f8'),('R1','>f8'),('a1','>f8'),('c1','>f8'),
                            ('psf_e1','>f8'),('g2','>f8'),('R2','>f8'),('a2','>f8'),('c2','>f8'),
@@ -163,12 +165,12 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
         g2p, _ = shear_avg(e2p,n=nu2_global, scale = sigma2_global/2.)
         g20, _ = shear_avg(e20,n=nu2_global, scale = sigma2_global/2.)
         g2m, _ = shear_avg(e2m,n=nu2_global, scale = sigma2_global/2.)
-
+        
         m1 = (g1p - g1m)/(2*delta_g)
         c1 = (g1p + g1m)/2. - g10 
         m2 = (g2p - g2m)/(2*delta_g)
         c2 = (g2p + g2m)/2. - g20
-        
+        stop
         est1.append((g10 - c1)/m1)
         est2.append((g20 - c2)/m2)
 
