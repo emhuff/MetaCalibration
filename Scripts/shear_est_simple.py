@@ -204,24 +204,24 @@ def shear_est(catalogs, truthFile, delta_g = 0.01, weights = True,mc_type=None):
         e10 = catalog['g1'] - catalog['c1'] - catalog['a1']*catalog['psf_e1']
         e20 = catalog['g2'] - catalog['c2'] - catalog['a2']*catalog['psf_e2']
 
-        mu1, sigma1, nu1 = shear_em(e10)
-        mu1p,sigma1p,nu1p= shear_em(e1p)
-        mu1m,sigma1m,nu1m= shear_em(e1m)
+        #mu1, sigma1, nu1 = shear_em(e10)
+        #mu1p,sigma1p,nu1p= shear_em(e1p)
+        #mu1m,sigma1m,nu1m= shear_em(e1m)
         
-        mu2, sigma2, nu2 = shear_em(e20)
-        mu2p,sigma2p,nu2p= shear_em(e2p)
-        mu2m,sigma2m,nu2m= shear_em(e2m)
+        #mu2, sigma2, nu2 = shear_em(e20)
+        #mu2p,sigma2p,nu2p= shear_em(e2p)
+        #mu2m,sigma2m,nu2m= shear_em(e2m)
         
         _, logL1 = shear_avg(e10,n=nu1_global, scale = sigma1_global)
         _, logL2 = shear_avg(e20,n=nu2_global, scale = sigma2_global)
         
-        g1p, _ = mu1p,0#shear_avg(e1p,n=nu1_global, scale = sigma1_global)
-        g10, _ = mu1,0#shear_avg(e10,n=nu1_global, scale = sigma1_global)
-        g1m, _ = mu1m,0#shear_avg(e1m,n=nu1_global, scale = sigma1_global)
+        g1p, _ = shear_avg(e1p,n=nu1_global, scale = sigma1_global)
+        g10, _ = shear_avg(e10,n=nu1_global, scale = sigma1_global)
+        g1m, _ = shear_avg(e1m,n=nu1_global, scale = sigma1_global)
 
-        g2p, _ = mu2p,0#shear_avg(e2p,n=nu2_global, scale = sigma2_global)
-        g20, _ = mu2,0#shear_avg(e20,n=nu2_global, scale = sigma2_global)
-        g2m, _ = mu2m,0#shear_avg(e2m,n=nu2_global, scale = sigma2_global)
+        g2p, _ = shear_avg(e2p,n=nu2_global, scale = sigma2_global)
+        g20, _ = shear_avg(e20,n=nu2_global, scale = sigma2_global)
+        g2m, _ = shear_avg(e2m,n=nu2_global, scale = sigma2_global)
 
         m1 = (g1p - g1m)/(2*delta_g)
         c1 = (g1p + g1m)/2. - g10 
