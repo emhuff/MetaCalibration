@@ -577,10 +577,10 @@ def doPlots(data,outfile = None):
     ax2.axhline(0,linestyle='--',color='red')
     ax2.set_ylim(-0.02,0.02)
 
-    ax3.plot(data['e1_logL'],data['g1_est'] - truthTable['g1'],'.')
+    ax3.plot(data['logL_e1'],data['g1_est'] - truthTable['g1'],'.')
     ax3.set_ylim(-0.02,0.02)
     ax3.axhline(0,linestyle='--',color='red')
-    ax4.plot(data['e2_logL'],data['g2_est'] - truthTable['g2'],'.')
+    ax4.plot(data['logL_e2'],data['g2_est'] - truthTable['g2'],'.')
     ax4.set_ylim(-0.02,0.02)
     ax4.axhline(0,linestyle='--',color='red')
     
