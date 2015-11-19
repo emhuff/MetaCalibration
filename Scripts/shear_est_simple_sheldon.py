@@ -170,7 +170,7 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
         g2p, _ = mu2p,0#shear_avg(e2p,n=nu2_global, scale = sigma2_global)
         g20, _ = mu2,0#shear_avg(e20,n=nu2_global, scale = sigma2_global)
         g2m, _ = mu2m,0#shear_avg(e2m,n=nu2_global, scale = sigma2_global)
-        
+        stop
         m1 = (g1p - g1m)/(2*delta_g)
         c1 = (g1p + g1m)/2. - g10 
         m2 = (g2p - g2m)/(2*delta_g)
