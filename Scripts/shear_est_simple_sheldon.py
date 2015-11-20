@@ -108,22 +108,20 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
     mu1, sigma1, nu1 = shear_em(e1_master)
     mu1p,sigma1p,nu1p = shear_em(e1p_master)
     mu1m,sigma1m,nu1m = shear_em(e1m_master)
-
     m1,c1 =np.polyfit([-delta_g,0.,delta_g],[mu1m,mu1,mu1p],1)
-    s1_2,s1_1,s1_0 = np.polyfit([mu1m,mu1,mu1p],[sigma1m,sigma1,sigma1p])
-
+    s1_2,s1_1,s1_0 = np.polyfit([mu1m,mu1,mu1p],[sigma1m,sigma1,sigma1p],2)
     
     mu2, sigma2, nu2 = shear_em(e2_master)
     mu2p,sigma2p,nu2p = shear_em(e2p_master)
     mu2m,sigma2m,nu2m = shear_em(e2m_master)
     m2,c2 =np.polyfit([-delta_g,0.,delta_g],[mu2m,mu2,mu2p],1)
-    s2_2,s2_1,s2_0 = np.polyfit([mu2m,mu2,mu2p],[sigma2m,sigma2,sigma2p])
+    s2_2,s2_1,s2_0 = np.polyfit([mu2m,mu2,mu2p],[sigma2m,sigma2,sigma2p],2)
     
     plt.plot([-delta_g,0.,delta_g],[sigma1m, sigma1,sigma1p],label='e1')
     plt.plot([-delta_g,0.,delta_g],[sigma2m, sigma2,sigma2p],label='e2')
     plt.legend(loc='best')
     plt.show()
-    stop
+
     sigma1_global = sigma1
     sigma2_global = sigma2
     nu1_global = nu1
@@ -190,14 +188,14 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
         
         _, logL1 = shear_avg(e10,n=nu1_global, scale = sigma1_global)
         _, logL2 = shear_avg(e20,n=nu2_global, scale = sigma2_global)
-        
-        g1p, _ = mu1p,0#shear_avg(e1p,n=nu1_global, scale = sigma1_global)
-        g10, _ = mu1,0#shear_avg(e10,n=nu1_global, scale = sigma1_global)
-        g1m, _ = mu1m,0#shear_avg(e1m,n=nu1_global, scale = sigma1_global)
 
-        g2p, _ = mu2p,0#shear_avg(e2p,n=nu2_global, scale = sigma2_global)
-        g20, _ = mu2,0#shear_avg(e20,n=nu2_global, scale = sigma2_global)
-        g2m, _ = mu2m,0#shear_avg(e2m,n=nu2_global, scale = sigma2_global)
+        g1p, _ = shear_avg(e1p,n=nu1_global, scale = sigma1_global)
+        g10, _ = shear_avg(e10,n=nu1_global, scale = sigma1_global)
+        g1m, _ = shear_avg(e1m,n=nu1_global, scale = sigma1_global)
+
+        g2p, _ = shear_avg(e2p,n=nu2_global, scale = sigma2_global)
+        g20, _ = shear_avg(e20,n=nu2_global, scale = sigma2_global)
+        g2m, _ = shear_avg(e2m,n=nu2_global, scale = sigma2_global)
 
         
         #m1 = (g1p - g1m)/(2*delta_g)
