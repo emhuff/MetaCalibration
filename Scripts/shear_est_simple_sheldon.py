@@ -649,14 +649,14 @@ def doPlots(data,outfile = None):
     ax1.set_ylim(-0.03,0.03)
     ax1.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f' %
                  (m1,sig_m1,a1,sig_a1,c1,sig_c1),
-                 (0.01,-0.03))    
+                 (0.01,-0.025))    
     ax2.plot(truthTable['g2'],data['g2_est'] - truthTable['g2'],'.')
     ax2.plot(truthTable['g2'],m2*truthTable['g2'] + c2,color='cyan')
     ax2.axhline(0,linestyle='--',color='red')
     ax2.set_ylim(-0.03,0.03)
     ax2.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f' %
                  (m2,sig_m2,a2,sig_a2,c2,sig_c2),
-                 (0.01,-0.03))    
+                 (0.01,-0.025))    
     ax3.plot(data['logL_e1'],data['g1_est'] - truthTable['g1'],'.')
     ax3.set_ylim(-0.03,0.03)
     ax3.axhline(0,linestyle='--',color='red')
