@@ -124,23 +124,26 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
     mu1, sigma1, nu1 = shear_em(e1_master)
     mu1p,sigma1p,nu1p = shear_em(e1p_master)
     mu1m,sigma1m,nu1m = shear_em(e1m_master)
+
+    g1mean =  -0.000877699757
+    g2mean =   0.00103678184233
     
-    mu1_coeff = np.polyfit([-delta_g,0.,delta_g],[mu1m,mu1,mu1p],1)
-    sigma1_coeff = np.polyfit([-delta_g,0.,delta_g],[sigma1m,sigma1,sigma1p],2)
-    nu1_coeff = np.polyfit([-delta_g,0.,delta_g],[nu1m,nu1,nu1p],2)
+    mu1_coeff = np.polyfit([-delta_g+g1mean,0. + g1mean,delta_g+g1mean],[mu1m,mu1,mu1p],1)
+    sigma1_coeff = np.polyfit([-delta_g+g1mean,0. + g1mean,delta_g + g1mean],[sigma1m,sigma1,sigma1p],2)
+    nu1_coeff = np.polyfit([-delta_g + g1mean,0. + g1mean,delta_g + g1mean],[nu1m,nu1,nu1p],2)
     
     mu2, sigma2, nu2 = shear_em(e2_master)
     mu2p,sigma2p,nu2p = shear_em(e2p_master)
     mu2m,sigma2m,nu2m = shear_em(e2m_master)
     
-    mu2_coeff = np.polyfit([-delta_g,0.,delta_g],[mu1m,mu1,mu1p],1)
-    sigma2_coeff = np.polyfit([-delta_g,0.,delta_g],[sigma2m,sigma2,sigma2p],2)
-    nu2_coeff = np.polyfit([-delta_g,0.,delta_g],[nu2m,nu2,nu2p],2)
+    mu2_coeff = np.polyfit([-delta_g + g2mean,0.  +g2mean,delta_g + g2mean],[mu1m,mu1,mu1p],1)
+    sigma2_coeff = np.polyfit([-delta_g + g2mean,0.  +g2mean,delta_g + g2mean],[sigma2m,sigma2,sigma2p],2)
+    nu2_coeff = np.polyfit([-delta_g + g2mean,0.  +g2mean,delta_g + g2mean],[nu2m,nu2,nu2p],2)
 
-    sigma1_coeff[0:1] = 0.
-    sigma2_coeff[0:1] = 0.
-    nu1_coeff[0:1] = 0.
-    nu2_coeff[0:1] = 0.
+    #sigma1_coeff[0:1] = 0.
+    #sigma2_coeff[0:1] = 0.
+    #nu1_coeff[0:1] = 0.
+    #nu2_coeff[0:1] = 0.
         
     sigma1_global = sigma1
     sigma2_global = sigma2
