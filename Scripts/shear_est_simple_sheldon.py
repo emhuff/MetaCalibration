@@ -110,13 +110,15 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
     mu1m,sigma1m,nu1m = shear_em(e1m_master)
     m1,c1 =np.polyfit([-delta_g,0.,delta_g],[mu1m,mu1,mu1p],1)
     s1_2,s1_1,s1_0 = np.polyfit([mu1m,mu1,mu1p],[sigma1m,sigma1,sigma1p],2)
+    n1_2,n1_1,n1_0 = np.polyfit([mu1m,mu1,mu1p],[nu1m,nu1,nu1p],2)
     
     mu2, sigma2, nu2 = shear_em(e2_master)
     mu2p,sigma2p,nu2p = shear_em(e2p_master)
     mu2m,sigma2m,nu2m = shear_em(e2m_master)
     m2,c2 =np.polyfit([-delta_g,0.,delta_g],[mu2m,mu2,mu2p],1)
     s2_2,s2_1,s2_0 = np.polyfit([mu2m,mu2,mu2p],[sigma2m,sigma2,sigma2p],2)
-    
+    n2_2,n2_1,n2_0 = np.polyfit([nu1m,nu1,nu1p],[nu1m,nu1,nu1p],2)
+        
     plt.plot([-delta_g,0.,delta_g],[nu1m, nu1,nu1p],label='e1')
     plt.plot([-delta_g,0.,delta_g],[nu2m, nu2,nu2p],label='e2')
     plt.legend(loc='best')
@@ -190,15 +192,17 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
         _, logL2 = shear_avg(e20,n=nu2_global, scale = sigma2_global)
 
         this_sigma1 = s1_2*mu1**2 + s1_1*mu1 + s1_0
+        this_nu1 = n1_2*mu1**2 + n1_1 * mu1 + n1_0
         this_sigma2 = s2_2*mu2**2 + s2_1*mu2 + s2_0
-        
-        g1p, _ = shear_avg(e1p,n=nu1_global, scale = this_sigma1)
-        g10, _ = shear_avg(e10,n=nu1_global, scale = this_sigma1)
-        g1m, _ = shear_avg(e1m,n=nu1_global, scale = this_sigma1)
+        this_nu2 = n2_2*mu1**2 + n2_1 * mu2 + n2_0
+                
+        g1p, _ = shear_avg(e1p,n=this_nu1, scale = this_sigma1)
+        g10, _ = shear_avg(e10,n=this_nu1, scale = this_sigma1)
+        g1m, _ = shear_avg(e1m,n=this_nu1, scale = this_sigma1)
 
-        g2p, _ = shear_avg(e2p,n=nu2_global, scale = this_sigma2)
-        g20, _ = shear_avg(e20,n=nu2_global, scale = this_sigma2)
-        g2m, _ = shear_avg(e2m,n=nu2_global, scale = this_sigma2)
+        g2p, _ = shear_avg(e2p,n=this_nu2, scale = this_sigma2)
+        g20, _ = shear_avg(e20,n=this_nu2, scale = this_sigma2)
+        g2m, _ = shear_avg(e2m,n=this_nu2, scale = this_sigma2)
 
         
         #m1 = (g1p - g1m)/(2*delta_g)
