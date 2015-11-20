@@ -642,7 +642,7 @@ def doPlots(data,outfile = None):
     coeff2, covar2 = np.polyfit(truthTable['g2'],data['g2_est'] - truthTable['g2'],1,cov=True)
     print 'm1 = '+str(coeff1[0])+'+/- '+str(np.sqrt(covar1[0,0]))+', c1 = '+str(coeff1[1])+'  '+str(np.sqrt(covar1[1,1]))
     print 'm2 = '+str(coeff2[0])+'+/- '+str(np.sqrt(covar2[0,0]))+', c2 = '+str(coeff2[1])+'  '+str(np.sqrt(covar2[1,1]))
-    fig,((ax1,ax2),(ax3,ax4),(ax5,ax6)) = plt.subplots(nrows=3,ncols=2,figsize=(14,7))
+    fig,((ax1,ax2),(ax3,ax4),(ax5,ax6)) = plt.subplots(nrows=3,ncols=2,figsize=(14,14))
     ax1.plot(truthTable['g1'],data['g1_est'] - truthTable['g1'],'.')
     ax1.axhline(0,linestyle='--',color='red')
     ax1.plot(truthTable['g1'],m1*truthTable['g1'] + c1,color='cyan')
@@ -665,12 +665,12 @@ def doPlots(data,outfile = None):
     ax4.axhline(0,linestyle='--',color='red')
     
     ax5.plot(data['psf_e1'],data['g1_est'] - truthTable['g1'],'.')
-    ax5.plot(data['psf_e1'],a1*truthTable['psf_e1'] + c1,color='cyan')
+    ax5.plot(data['psf_e1'],a1*data['psf_e1'] + c1,color='cyan')
     ax5.set_ylim(-0.03,0.03)
     ax5.axhline(0,linestyle='--',color='red')
     
     ax6.plot(data['psf_e2'],data['g2_est'] - truthTable['g2'],'.')
-    ax6.plot(data['psf_e2'],a2*truthTable['psf_e2'] + c2,color='cyan')    
+    ax6.plot(data['psf_e2'],a2*data['psf_e2'] + c2,color='cyan')    
     ax6.axhline(0,linestyle='--',color='red')
     ax6.set_ylim(-0.03,0.03)
 
