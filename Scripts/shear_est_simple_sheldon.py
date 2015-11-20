@@ -120,7 +120,7 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
     mu2m,sigma2m,nu2m = shear_em(e2m_master)
     m2,c2 =np.polyfit([-delta_g,0.,delta_g],[mu2m,mu2,mu2p],1)
     s2_2,s2_1,s2_0 = np.polyfit([mu2m,mu2,mu2p],[sigma2m,sigma2,sigma2p],2)
-    n2_2,n2_1,n2_0 = np.polyfit([nu1m,nu1,nu1p],[nu1m,nu1,nu1p],2)
+    n2_2,n2_1,n2_0 = np.polyfit([mu1m,mu1,mu1p],[nu2m,nu2,nu2p],2)
         
     plt.plot([-delta_g,0.,delta_g],[nu1m, nu1,nu1p],label='e1')
     plt.plot([-delta_g,0.,delta_g],[nu2m, nu2,nu2p],label='e2')
@@ -195,9 +195,9 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
         _, logL2 = shear_avg(e20,n=nu2_global, scale = sigma2_global)
 
         this_sigma1 = s1_2*mu1**2 + s1_1*mu1 + s1_0
-        this_nu1 = n1_2*mu1**2 + n1_1 * mu1 + n1_0
+        this_nu1 = np.abs(n1_2*mu1**2 + n1_1 * mu1 + n1_0)
         this_sigma2 = s2_2*mu2**2 + s2_1*mu2 + s2_0
-        this_nu2 = n2_2*mu1**2 + n2_1 * mu2 + n2_0
+        this_nu2 = np.abs(n2_2*mu2**2 + n2_1 * mu2 + n2_0)
                 
         g1p, _ = shear_avg(e1p,n=this_nu1, scale = this_sigma1)
         g10, _ = shear_avg(e10,n=this_nu1, scale = this_sigma1)
