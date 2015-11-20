@@ -90,9 +90,9 @@ def shear_em(e):
 def ml_g_est( e=None, g_start = 0.,mu_coeff=None,sigma_coeff = None, nu_coeff = None):
     
     def logL_t(g):
-        this_mu = mu_coeff[1]*g + mu_coeff[0]
-        this_sigma = sigma_coeff[2]*g**2 + sigma_coeff[1]*g + sigma_coeff[0]
-        this_nu = nu_coeff[2]*g**2 + nu_coeff[1]*g + nu_coeff[0]
+        this_mu = mu_coeff[0]*g + mu_coeff[1]
+        this_sigma = sigma_coeff[0]*g**2 + sigma_coeff[1]*g + sigma_coeff[2]
+        this_nu = nu_coeff[0]*g**2 + nu_coeff[1]*g + nu_coeff[2]
         prob = emt.t(e,mu=this_mu,nu=this_nu,sigma=this_sigma)
         logL = np.mean(prob)
         return -logL
