@@ -198,7 +198,11 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
         this_nu1 = n1_2*mu1**2 + n1_1 * mu1 + n1_0
         this_sigma2 = s2_2*mu2**2 + s2_1*mu2 + s2_0
         this_nu2 = n2_2*mu2**2 + n2_1 * mu2 + n2_0
-                
+        if this_nu2 < 0:
+            this_nu2 = nu2
+        if this_nu1 < 0:
+            this_nu2 = nu1
+        
         g1p, _ = shear_avg(e1p,n=this_nu1, scale = this_sigma1)
         g10, _ = shear_avg(e10,n=this_nu1, scale = this_sigma1)
         g1m, _ = shear_avg(e1m,n=this_nu1, scale = this_sigma1)
