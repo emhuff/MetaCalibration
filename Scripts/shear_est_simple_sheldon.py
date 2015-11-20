@@ -126,7 +126,7 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
     plt.plot([-delta_g,0.,delta_g],[nu2m, nu2,nu2p],label='e2')
     plt.legend(loc='best')
     plt.show()
-    stop
+
     sigma1_global = sigma1
     sigma2_global = sigma2
     nu1_global = nu1
@@ -602,9 +602,43 @@ def get_truthtable():
       shears_obj['field_id'] = np.arange(len(shears),dtype=np.int)
       return shears_obj
 
+
+def shear_model(x, m, a, c):
+    # x should be 3 x N, where 0=gtrue, 1=epsf, 2=const
+    return m*x[0,:] + a*x[1,:] + c*x[2,:]
+
+def getCalibCoeff(g_true = None, g_meas=None, g_var=None, psf_e=None):
+    from scipy.optimize import curve_fit
+    A = np.column_stack([g_true, psf_e, np.ones_like(psf_e)]).transpose()
+    B = g_meas - g_true
+    if errType is 'bootstrap':
+        m,a,c, sig_m, sig_a, sig_c = bootstrapCoeffErr(shear_model,A,B, np.sqrt(g_var), n_resample = 400)
+    if errType is 'jackknife':
+        m,a,c, sig_m, sig_a, sig_c = jackknifeCoeffErr(shear_model,A,B, np.sqrt(g_var))
+    else:
+        ret_val, covar = curve_fit(shear_model, A, B, sigma=np.sqrt(g_var))
+        m=ret_val[0]
+        a=ret_val[1]
+        c=ret_val[2]
+        sig_m=np.sqrt(covar[0][0])
+        sig_a=np.sqrt(covar[1][1])
+        sig_c=np.sqrt(covar[2][2])
+    return m,a,c,sig_m,sig_a,sig_c
+
+  
 def doPlots(data,outfile = None):
     truthTable = get_truthtable()
 
+
+    m1,a1,c1,sig_m1,sig_a1,sig_c1 = getCalibCoeff(g_true=truthTable['g1'],
+                                                  g_meas = data['g1_est'],
+                                                  g_var = data['g1_err']**2
+                                                  psf_e = data['psf_e1'])
+    m2,a2,c2,sig_m2,sig_a2,sig_c2 = getCalibCoeff(g_true=truthTable['g2'],
+                                                  g_meas = data['g2_est'],
+                                                  g_var = data['g2_err']**2
+                                                  psf_e = data['psf_e2'])
+    
     coeff1, covar1 = np.polyfit(truthTable['g1'],data['g1_est'] - truthTable['g1'],1,cov=True)
     coeff2, covar2 = np.polyfit(truthTable['g2'],data['g2_est'] - truthTable['g2'],1,cov=True)
     print 'm1 = '+str(coeff1[0])+'+/- '+str(np.sqrt(covar1[0,0]))+', c1 = '+str(coeff1[1])+'  '+str(np.sqrt(covar1[1,1]))
@@ -612,27 +646,34 @@ def doPlots(data,outfile = None):
     fig,((ax1,ax2),(ax3,ax4),(ax5,ax6)) = plt.subplots(nrows=3,ncols=2,figsize=(14,7))
     ax1.plot(truthTable['g1'],data['g1_est'] - truthTable['g1'],'.')
     ax1.axhline(0,linestyle='--',color='red')
-    ax1.plot(truthTable['g1'],coeff1[0]*truthTable['g1'] + coeff1[1],color='cyan')
-    ax1.set_ylim(-0.02,0.02)
+    ax1.plot(truthTable['g1'],m1*truthTable['g1'] + c1,color='cyan')
+    ax1.set_ylim(-0.03,0.03)
+    ax1.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f' %
+                 (m1,sig_m1,a1,sig_a1,c1,sig_c1),
+                 (0.01,-0.03))    
     ax2.plot(truthTable['g2'],data['g2_est'] - truthTable['g2'],'.')
-    ax2.plot(truthTable['g2'],coeff2[0]*truthTable['g2'] + coeff2[1],color='cyan')
+    ax2.plot(truthTable['g2'],m2*truthTable['g2'] + c2,color='cyan')
     ax2.axhline(0,linestyle='--',color='red')
-    ax2.set_ylim(-0.02,0.02)
-
+    ax2.set_ylim(-0.03,0.03)
+    ax2.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f' %
+                 (m2,sig_m2,a2,sig_a2,c2,sig_c2),
+                 (0.01,-0.03))    
     ax3.plot(data['logL_e1'],data['g1_est'] - truthTable['g1'],'.')
-    ax3.set_ylim(-0.02,0.02)
+    ax3.set_ylim(-0.03,0.03)
     ax3.axhline(0,linestyle='--',color='red')
     ax4.plot(data['logL_e2'],data['g2_est'] - truthTable['g2'],'.')
-    ax4.set_ylim(-0.02,0.02)
+    ax4.set_ylim(-0.03,0.03)
     ax4.axhline(0,linestyle='--',color='red')
     
     ax5.plot(data['psf_e1'],data['g1_est'] - truthTable['g1'],'.')
-    ax5.set_ylim(-0.02,0.02)
+    ax5.plot(data['psf_e1'],a1*truthTable['psf_e1'] + c1,color='cyan')
+    ax5.set_ylim(-0.03,0.03)
     ax5.axhline(0,linestyle='--',color='red')
     
     ax6.plot(data['psf_e2'],data['g2_est'] - truthTable['g2'],'.')
+    ax6.plot(data['psf_e2'],a2*truthTable['psf_e2'] + c2,color='cyan')    
     ax6.axhline(0,linestyle='--',color='red')
-    ax6.set_ylim(-0.02,0.02)
+    ax6.set_ylim(-0.03,0.03)
 
     fig.savefig(outfile)
     pass
