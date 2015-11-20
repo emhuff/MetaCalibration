@@ -94,11 +94,11 @@ def ml_g_est( e=None, g_start = 0.,mu_coeff=None,sigma_coeff = None, nu_coeff = 
         this_sigma = sigma_coeff[0]*g**2 + sigma_coeff[1]*g + sigma_coeff[2]
         this_nu = nu_coeff[0]*g**2 + nu_coeff[1]*g + nu_coeff[2]
         prob = emt.t(e,mu=this_mu,nu=this_nu,sigma=this_sigma)
-        logL = np.mean(prob)
-        return -logL
+        use = prob > 0
+        return -np.mean(np.log(prob[use])) 
     # find the value of g, given the coefficients, that maximizes <-logL>
-    result = minimize_scalar(logL_t,method='Bounded',bounds=[-0.15,0.15])
-    stop
+    result = minimize_scalar(logL_t,method='Bounded',bounds=[-0.1,0.1])
+
     return np.asscalar(result.x)
 
 def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None):
