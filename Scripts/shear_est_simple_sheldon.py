@@ -98,7 +98,7 @@ def ml_g_est( e=None, g_start = 0.,mu_coeff=None,sigma_coeff = None, nu_coeff = 
         return -logL
     # find the value of g, given the coefficients, that maximizes <-logL>
     result = minimize_scalar(logL_t,method='Bounded',bounds=[-0.15,0.15])
-
+    stop
     return np.asscalar(result.x)
 
 def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None):
