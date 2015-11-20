@@ -201,7 +201,7 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
         if this_nu2 < 0:
             this_nu2 = nu2_global
         if this_nu1 < 0:
-            this_nu2 = nu1_global
+            this_nu1 = nu1_global
         
         g1p, _ = shear_avg(e1p,n=this_nu1, scale = this_sigma1)
         g10, _ = shear_avg(e10,n=this_nu1, scale = this_sigma1)
