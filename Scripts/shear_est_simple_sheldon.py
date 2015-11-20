@@ -201,8 +201,8 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
         this_err1 = nu1*1./(nu1-2.)/np.sqrt(catalog.size)
         this_err2 = nu2*1./(nu2-2.)/np.sqrt(catalog.size)
 
-        est1_err.append(this_err1/m1)
-        est2_err.append(this_err2/m2)
+        est1_err.append(this_err1)
+        est2_err.append(this_err2)
 
     
     results = np.empty(len(catalogs), dtype = [('g1_est',np.float),('g2_est',np.float),
