@@ -13,7 +13,7 @@ import matplotlib as mpl
 #mpl.use('Agg')
 import matplotlib.pyplot as plt
 import em_student_t as emt
-
+from scipy.optimize import minimize_scalar
 
 def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3reredux/', subsample = True, nrows = 100000 ):
 
@@ -87,6 +87,19 @@ def shear_em(e):
 
 
 
+def ml_g_est( e=None, g_start = 0.,mu_coeff=None,sigma_coeff = None, nu_coeff = None):
+    
+    def logL_t(g):
+        this_mu = mu_coeff[1]*g + mu_coeff[0]
+        this_sigma = sigma_coeff[2]*g**2 + sigma_coeff[1]*g + sigma_coeff[0]
+        this_nu = nu_coeff[2]*g**2 + nu_coeff[1]*g + nu_coeff[0]
+        prob = emt.t(e,mu=this_mu,nu=this_nu,sigma=this_sigma)
+        logL = np.mean(prob)
+        return -logL
+    # find the value of g, given the coefficients, that maximizes <-logL>
+    result = minimize_scalar(logL_t,method='Bounded',bounds=[-0.15,0.15])
+    return np.asscalar(result.x)
+
 def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None):
 
     est1 = []
@@ -111,64 +124,24 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
     mu1, sigma1, nu1 = shear_em(e1_master)
     mu1p,sigma1p,nu1p = shear_em(e1p_master)
     mu1m,sigma1m,nu1m = shear_em(e1m_master)
-    m1,c1 =np.polyfit([-delta_g,0.,delta_g],[mu1m,mu1,mu1p],1)
-    s1_2,s1_1,s1_0 = np.polyfit([mu1m,mu1,mu1p],[sigma1m,sigma1,sigma1p],2)
-    n1_2,n1_1,n1_0 = np.polyfit([mu1m,mu1,mu1p],[nu1m,nu1,nu1p],2)
+    
+    mu1_coeff = np.polyfit([-delta_g,0.,delta_g],[mu1m,mu1,mu1p],1)
+    sigma1_coeff = np.polyfit([-delta_g,0.,delta_g],[sigma1m,sigma1,sigma1p],2)
+    nu1_coeff = np.polyfit([-delta_g,0.,delta_g],[nu1m,nu1,nu1p],2)
     
     mu2, sigma2, nu2 = shear_em(e2_master)
     mu2p,sigma2p,nu2p = shear_em(e2p_master)
     mu2m,sigma2m,nu2m = shear_em(e2m_master)
-    m2,c2 =np.polyfit([-delta_g,0.,delta_g],[mu2m,mu2,mu2p],1)
-    s2_2,s2_1,s2_0 = np.polyfit([mu2m,mu2,mu2p],[sigma2m,sigma2,sigma2p],2)
-    n2_2,n2_1,n2_0 = np.polyfit([mu1m,mu1,mu1p],[nu2m,nu2,nu2p],2)
-        
-    plt.plot([-delta_g,0.,delta_g],[nu1m, nu1,nu1p],label='e1')
-    plt.plot([-delta_g,0.,delta_g],[nu2m, nu2,nu2p],label='e2')
-    plt.legend(loc='best')
-    plt.show()
+    
+    mu2_coeff = np.polyfit([-delta_g,0.,delta_g],[mu1m,mu1,mu1p],1)
+    sigma2_coeff = np.polyfit([-delta_g,0.,delta_g],[sigma2m,sigma2,sigma2p],2)
+    nu2_coeff = np.polyfit([-delta_g,0.,delta_g],[nu2m,nu2,nu2p],2)
 
     sigma1_global = sigma1
     sigma2_global = sigma2
     nu1_global = nu1
     nu2_global = nu2
-    eps = .0
-    
-    bins = np.linspace(-10,10,250)
-    xx = (bins[0:-1] + bins[1:])/2.
-    yy_est =  emt.t(xx, mu1, sigma1, nu1)
-    yy_est = yy_est/np.sum(yy_est)
-    fig,(ax1,ax2) = plt.subplots(ncols=2,nrows=1,figsize=(14,7))
-    yy_data,b = np.histogram(e1_master,bins=bins)
-    yy_gauss = np.exp(-(xx-mu1)**2/2./sigma1**2)
-    yy_gauss = yy_gauss/np.sum(yy_gauss)
-    yy_power = 1./(1 + (xx/(sigma1/2.))**2/(nu1+eps))**(((nu1+eps)+1)/2.)
-    yy_power = yy_power/np.sum(yy_power)
-    ax1.plot(xx,yy_est,label='model')
-    ax1.plot(xx,yy_data*1./np.sum(yy_data),label='data')
-    ax1.plot(xx,yy_gauss*1./np.sum(yy_gauss),label='gauss')
-    ax1.plot(xx,yy_power*1./np.sum(yy_power),label='weight')
-    ax1.legend(loc='best')
-    ax1.set_yscale('log')
-    ax1.set_ylim(1e-6,1)
-    ax1.annotate('mu = %.4f \n sigma = %.4f \n nu = %.4f'%(mu1, sigma1, nu1),xy=(0.05, 0.85), xycoords='axes fraction')
 
-    yy_data,b = np.histogram(e2_master,bins=bins)
-    yy_data = yy_data*1./np.sum(yy_data)
-    yy_gauss = np.exp(-(xx-mu2)**2/2./sigma2**2)
-    yy_gauss = yy_gauss/np.sum(yy_gauss)
-    yy_power = 1./(1 + (xx/(sigma2/2.))**2/(nu2+eps))**(((nu2+eps)+1)/2.)
-    yy_power = yy_power/np.sum(yy_power)
-    ax2.plot(xx,yy_est,label='model')
-    ax2.plot(xx,yy_data,label='data')
-    ax2.plot(xx,yy_gauss,label='gauss')
-    ax2.plot(xx,yy_power,label='weight')
-    ax2.legend(loc='best')
-    ax2.set_yscale('log')
-    ax2.set_ylim(1e-6,1)
-    ax2.annotate('mu = %.4f \n sigma = %.4f \n nu = %.4f'%(mu2, sigma2, nu2),xy=(0.05, 0.85), xycoords='axes fraction')
-
-        
-    fig.savefig(mc_type+'-prior_model_comparison')
 
     
     for i,catalog in enumerate(catalogs):
@@ -183,33 +156,33 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
         e10 = catalog['g1'] - catalog['c1'] - catalog['a1']*catalog['psf_e1']
         e20 = catalog['g2'] - catalog['c2'] - catalog['a2']*catalog['psf_e2']
 
-        mu1, sigma1, nu1 = shear_em(e10)
-        mu1p,sigma1p,nu1p= shear_em(e1p)
-        mu1m,sigma1m,nu1m= shear_em(e1m)
+        #mu1, sigma1, nu1 = shear_em(e10)
+        #mu1p,sigma1p,nu1p= shear_em(e1p)
+        #mu1m,sigma1m,nu1m= shear_em(e1m)
         
-        mu2, sigma2, nu2 = shear_em(e20)
-        mu2p,sigma2p,nu2p= shear_em(e2p)
-        mu2m,sigma2m,nu2m= shear_em(e2m)
+        #mu2, sigma2, nu2 = shear_em(e20)
+        #mu2p,sigma2p,nu2p= shear_em(e2p)
+        #mu2m,sigma2m,nu2m= shear_em(e2m)
         
         _, logL1 = shear_avg(e10,n=nu1_global, scale = sigma1_global)
         _, logL2 = shear_avg(e20,n=nu2_global, scale = sigma2_global)
 
-        this_sigma1 = s1_2*mu1**2 + s1_1*mu1 + s1_0
-        this_nu1 = n1_2*mu1**2 + n1_1 * mu1 + n1_0
-        this_sigma2 = s2_2*mu2**2 + s2_1*mu2 + s2_0
-        this_nu2 = n2_2*mu2**2 + n2_1 * mu2 + n2_0
-        if this_nu2 < 0:
-            this_nu2 = nu2_global
-        if this_nu1 < 0:
-            this_nu1 = nu1_global
-        
-        g1p, _ = shear_avg(e1p,n=this_nu1, scale = this_sigma1)
-        g10, _ = shear_avg(e10,n=this_nu1, scale = this_sigma1)
-        g1m, _ = shear_avg(e1m,n=this_nu1, scale = this_sigma1)
+        g1_est = ml_g_est( e=e10, mu_coeff=mu1_coeff,
+                           sigma_coeff = sigma1_coeff,
+                           nu_coeff = nu1_coeff)
+        g2_est = ml_g_est( e=e20, mu_coeff=mu2_coeff,
+                           sigma_coeff = sigma2_coeff,
+                           nu_coeff = nu2_coeff)
+        est1.append(g1_est)
+        est2.append(g2_est)
+                
+        #g1p, _ = shear_avg(e1p,n=this_nu1, scale = this_sigma1)
+        #g10, _ = shear_avg(e10,n=this_nu1, scale = this_sigma1)
+        #g1m, _ = shear_avg(e1m,n=this_nu1, scale = this_sigma1)
 
-        g2p, _ = shear_avg(e2p,n=this_nu2, scale = this_sigma2)
-        g20, _ = shear_avg(e20,n=this_nu2, scale = this_sigma2)
-        g2m, _ = shear_avg(e2m,n=this_nu2, scale = this_sigma2)
+        #g2p, _ = shear_avg(e2p,n=this_nu2, scale = this_sigma2)
+        #g20, _ = shear_avg(e20,n=this_nu2, scale = this_sigma2)
+        #g2m, _ = shear_avg(e2m,n=this_nu2, scale = this_sigma2)
 
         
         #m1 = (g1p - g1m)/(2*delta_g)
@@ -217,14 +190,12 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
         #m2 = (g2p - g2m)/(2*delta_g)
         #c2 = (g2p + g2m)/2. - g20
 
-        est1.append((g10 - c1)/m1)
-        est2.append((g20 - c2)/m2)
+        #est1.append((g10 - c1)/m1)
+        #est2.append((g20 - c2)/m2)
 
         logL_e1.append(logL1)
         logL_e2.append(logL2)
 
-
-            
         #this_err1 = np.std(catalog['g1'])/np.sqrt(catalog.size)
         #this_err2 = np.std(catalog['g2'])/np.sqrt(catalog.size)
         this_err1 = nu1*1./(nu1-2.)/np.sqrt(catalog.size)
@@ -261,7 +232,6 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
             results[i]['good'] = True
         else:
             results['good'] = False
-    
     return results
 
 def shear_model(x, m, a, c):
@@ -292,8 +262,6 @@ def getCalibCoeff(results):
              'c_err':np.sqrt(covar2[2][2])}
                  
     return coeff1,coeff2
-
-
 
 
 def get_truthtable():
