@@ -615,18 +615,13 @@ def getCalibCoeff(g_true = None, g_meas=None, g_var=None, psf_e=None):
     from scipy.optimize import curve_fit
     A = np.column_stack([g_true, psf_e, np.ones_like(psf_e)]).transpose()
     B = g_meas - g_true
-    if errType is 'bootstrap':
-        m,a,c, sig_m, sig_a, sig_c = bootstrapCoeffErr(shear_model,A,B, np.sqrt(g_var), n_resample = 400)
-    if errType is 'jackknife':
-        m,a,c, sig_m, sig_a, sig_c = jackknifeCoeffErr(shear_model,A,B, np.sqrt(g_var))
-    else:
-        ret_val, covar = curve_fit(shear_model, A, B, sigma=np.sqrt(g_var))
-        m=ret_val[0]
-        a=ret_val[1]
-        c=ret_val[2]
-        sig_m=np.sqrt(covar[0][0])
-        sig_a=np.sqrt(covar[1][1])
-        sig_c=np.sqrt(covar[2][2])
+    ret_val, covar = curve_fit(shear_model, A, B, sigma=np.sqrt(g_var))
+    m=ret_val[0]
+    a=ret_val[1]
+    c=ret_val[2]
+    sig_m=np.sqrt(covar[0][0])
+    sig_a=np.sqrt(covar[1][1])
+    sig_c=np.sqrt(covar[2][2])
     return m,a,c,sig_m,sig_a,sig_c
 
   
