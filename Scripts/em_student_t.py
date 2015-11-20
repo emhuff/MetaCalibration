@@ -28,7 +28,7 @@ def nu_root(nu, x, mu_0, sigma_0, nu_0):
 
 def nu_est_nl(x, mu_0, sigma_0, nu_0):
     nu_sol = root(nu_root, 1, args=(x,mu_0, sigma_0, nu_0))
-    return nu_sol.x
+    return np.asscalar(nu_sol.x)
     #return 2.0
 
 
