@@ -117,8 +117,8 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
     m2,c2 =np.polyfit([-delta_g,0.,delta_g],[mu2m,mu2,mu2p],1)
     s2_2,s2_1,s2_0 = np.polyfit([mu2m,mu2,mu2p],[sigma2m,sigma2,sigma2p],2)
     
-    plt.plot([-delta_g,0.,delta_g],[sigma1m, sigma1,sigma1p],label='e1')
-    plt.plot([-delta_g,0.,delta_g],[sigma2m, sigma2,sigma2p],label='e2')
+    plt.plot([-delta_g,0.,delta_g],[nu1m, nu1,nu1p],label='e1')
+    plt.plot([-delta_g,0.,delta_g],[nu2m, nu2,nu2p],label='e2')
     plt.legend(loc='best')
     plt.show()
 
@@ -211,8 +211,6 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
 
         logL_e1.append(logL1)
         logL_e2.append(logL2)
-        #logL_e1.append(-1.)
-        #logL_e2.append(-1.)
 
 
             
