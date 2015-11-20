@@ -108,17 +108,19 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
     mu1, sigma1, nu1 = shear_em(e1_master)
     mu1p,sigma1p,nu1p = shear_em(e1p_master)
     mu1m,sigma1m,nu1m = shear_em(e1m_master)
+
+    m1,c1 =np.polyfit([-delta_g,0.,delta_g],[mu1m,mu1,mu1p],1)
     
     mu2, sigma2, nu2 = shear_em(e2_master)
     mu2p,sigma2p,nu2p = shear_em(e2p_master)
     mu2m,sigma2m,nu2m = shear_em(e2m_master)
-
+    m2,c2 =np.polyfit([-delta_g,0.,delta_g],[mu2m,mu2,mu2p],1)
+    
     plt.plot([-delta_g,0.,delta_g],[mu1m, mu1,mu1p],label='e1')
     plt.plot([-delta_g,0.,delta_g],[mu2m, mu2,mu2p],label='e2')
     plt.legend(loc='best')
     plt.show()
     
-    stop
     sigma1_global = sigma1
     sigma2_global = sigma2
     nu1_global = nu1
@@ -195,10 +197,10 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
         g2m, _ = mu2m,0#shear_avg(e2m,n=nu2_global, scale = sigma2_global)
 
         
-        m1 = (g1p - g1m)/(2*delta_g)
-        c1 = (g1p + g1m)/2. - g10 
-        m2 = (g2p - g2m)/(2*delta_g)
-        c2 = (g2p + g2m)/2. - g20
+        #m1 = (g1p - g1m)/(2*delta_g)
+        #c1 = (g1p + g1m)/2. - g10 
+        #m2 = (g2p - g2m)/(2*delta_g)
+        #c2 = (g2p + g2m)/2. - g20
 
         est1.append((g10 - c1)/m1)
         est2.append((g20 - c2)/m2)
