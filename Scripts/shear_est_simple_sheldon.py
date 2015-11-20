@@ -45,6 +45,8 @@ def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3rere
     return catalogs
 
     return catalogs, truthFile
+
+
 def reconstructMetacalMeas(g=None, R=None, a = None, c=None, psf_e=None, delta_g = 0.01 ):
     esum = 2*(c + g)
     ediff = 2*delta_g * R
@@ -92,10 +94,22 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
     logL_e2 = []
 
     e1_master = np.hstack([catalog['g1'] - catalog['c1'] - catalog['a1']*catalog['psf_e1'] for catalog in catalogs])
+    e1p_master, e1m_master = reconstructMetacalMeas(g=catalog['g1'], R=catalog['R1'],
+                                                    a = catalog['a1'], c=catalog['c1'],
+                                                    psf_e=catalog['psf_e1'], delta_g = 0.01 )
     e2_master = np.hstack([catalog['g2'] - catalog['c2'] - catalog['a2']*catalog['psf_e2'] for catalog in catalogs])
-    mu1, sigma1, nu1 = shear_em(e1_master)
-    mu2, sigma2, nu2 = shear_em(e2_master)
+    e2p_master, e2m_master = reconstructMetacalMeas(g=catalog['g2'], R=catalog['R2'],
+                                                    a = catalog['a2'], c=catalog['c2'],
+                                                    psf_e=catalog['psf_e2'], delta_g = 0.01 )
 
+    mu1, sigma1, nu1 = shear_em(e1_master)
+    mu1p,sigma1p,nu1p = shear_em(e1p_master)
+    mu1m,sigma1m,nu1m = shear_em(e1m_master)
+    
+    mu2, sigma2, nu2 = shear_em(e2_master)
+    mu2p,sigma2p,nu2p = shear_em(e2p_master)
+    mu2m,sigma2m,nu2m = shear_em(e2m_master)
+    stop
     sigma1_global = sigma1
     sigma2_global = sigma2
     nu1_global = nu1
@@ -163,13 +177,13 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
         _, logL1 = shear_avg(e10,n=nu1_global, scale = sigma1_global)
         _, logL2 = shear_avg(e20,n=nu2_global, scale = sigma2_global)
         
-        g1p, _ = shear_avg(e1p,n=nu1_global, scale = sigma1_global)
-        g10, _ = shear_avg(e10,n=nu1_global, scale = sigma1_global)
-        g1m, _ = shear_avg(e1m,n=nu1_global, scale = sigma1_global)
+        g1p, _ = mu1p,0#shear_avg(e1p,n=nu1_global, scale = sigma1_global)
+        g10, _ = mu1,0#shear_avg(e10,n=nu1_global, scale = sigma1_global)
+        g1m, _ = mu1m,0#shear_avg(e1m,n=nu1_global, scale = sigma1_global)
 
-        g2p, _ = shear_avg(e2p,n=nu2_global, scale = sigma2_global)
-        g20, _ = shear_avg(e20,n=nu2_global, scale = sigma2_global)
-        g2m, _ = shear_avg(e2m,n=nu2_global, scale = sigma2_global)
+        g2p, _ = mu2p,0#shear_avg(e2p,n=nu2_global, scale = sigma2_global)
+        g20, _ = mu2,0#shear_avg(e20,n=nu2_global, scale = sigma2_global)
+        g2m, _ = mu2m,0#shear_avg(e2m,n=nu2_global, scale = sigma2_global)
 
         
         m1 = (g1p - g1m)/(2*delta_g)
