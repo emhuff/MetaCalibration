@@ -110,17 +110,20 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
     mu1m,sigma1m,nu1m = shear_em(e1m_master)
 
     m1,c1 =np.polyfit([-delta_g,0.,delta_g],[mu1m,mu1,mu1p],1)
+    s1_2,s1_1,s1_0 = np.polyfit([mu1m,mu1,mu1p],[sigma1m,sigma1,sigma1p])
+
     
     mu2, sigma2, nu2 = shear_em(e2_master)
     mu2p,sigma2p,nu2p = shear_em(e2p_master)
     mu2m,sigma2m,nu2m = shear_em(e2m_master)
     m2,c2 =np.polyfit([-delta_g,0.,delta_g],[mu2m,mu2,mu2p],1)
+    s2_2,s2_1,s2_0 = np.polyfit([mu2m,mu2,mu2p],[sigma2m,sigma2,sigma2p])
     
     plt.plot([-delta_g,0.,delta_g],[sigma1m, sigma1,sigma1p],label='e1')
     plt.plot([-delta_g,0.,delta_g],[sigma2m, sigma2,sigma2p],label='e2')
     plt.legend(loc='best')
     plt.show()
-    
+    stop
     sigma1_global = sigma1
     sigma2_global = sigma2
     nu1_global = nu1
