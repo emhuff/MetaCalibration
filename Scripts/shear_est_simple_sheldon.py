@@ -201,10 +201,10 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
         logL_e1.append(logL1)
         logL_e2.append(logL2)
 
-        #this_err1 = np.std(catalog['g1'])/np.sqrt(catalog.size)
-        #this_err2 = np.std(catalog['g2'])/np.sqrt(catalog.size)
-        this_err1 = nu1*1./(nu1-2.)/np.sqrt(catalog.size)
-        this_err2 = nu2*1./(nu2-2.)/np.sqrt(catalog.size)
+        this_err1 = np.std(catalog['g1'])/np.sqrt(catalog.size)
+        this_err2 = np.std(catalog['g2'])/np.sqrt(catalog.size)
+        #this_err1 = nu1*1./(nu1-2.)/np.sqrt(catalog.size)
+        #this_err2 = nu2*1./(nu2-2.)/np.sqrt(catalog.size)
 
         est1_err.append(this_err1)
         est2_err.append(this_err2)
@@ -648,6 +648,7 @@ def doPlots(data,outfile = None):
     ax6.set_ylim(-0.03,0.03)
 
     fig.savefig(outfile)
+    stop
     pass
 
 def determineLoglCuts(catalog, percentile = None):
