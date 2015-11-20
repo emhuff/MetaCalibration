@@ -76,6 +76,9 @@ def shear_avg(e, weights = True, n= 4, exp=False, scale = .25, pars = None):
                 weight = emt.t(e - eavg, 0., pars[1], pars[2])
 
         logL = np.average(np.log(weight[weight > 0]) - np.log(np.sum(weight)))
+        result = np.average(e,weights=weight)
+        if ~np.isfinite(result):
+            stop
         return np.average(e,weights=weight), logL
 
 def shear_em(e):
