@@ -632,11 +632,11 @@ def doPlots(data,outfile = None):
 
     m1,a1,c1,sig_m1,sig_a1,sig_c1 = getCalibCoeff(g_true=truthTable['g1'],
                                                   g_meas = data['g1_est'],
-                                                  g_var = data['g1_err']**2
+                                                  g_var = data['g1_err']**2,
                                                   psf_e = data['psf_e1'])
     m2,a2,c2,sig_m2,sig_a2,sig_c2 = getCalibCoeff(g_true=truthTable['g2'],
                                                   g_meas = data['g2_est'],
-                                                  g_var = data['g2_err']**2
+                                                  g_var = data['g2_err']**2,
                                                   psf_e = data['psf_e2'])
     
     coeff1, covar1 = np.polyfit(truthTable['g1'],data['g1_est'] - truthTable['g1'],1,cov=True)
