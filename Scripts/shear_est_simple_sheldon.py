@@ -94,13 +94,16 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
     logL_e2 = []
 
     e1_master = np.hstack([catalog['g1'] - catalog['c1'] - catalog['a1']*catalog['psf_e1'] for catalog in catalogs])
-    e1p_master, e1m_master = reconstructMetacalMeas(g=catalog['g1'], R=catalog['R1'],
-                                                    a = catalog['a1'], c=catalog['c1'],
-                                                    psf_e=catalog['psf_e1'], delta_g = delta_g )
+    
+    catalogs_all = np.hstack(catalogs)
+    
+    e1p_master, e1m_master = reconstructMetacalMeas(g=catalogs_all['g1'], R=catalogs_all['R1'],
+                                                    a = catalogs_all['a1'], c=catalogs_all['c1'],
+                                                    psf_e=catalogs_all['psf_e1'], delta_g = delta_g )
     e2_master = np.hstack([catalog['g2'] - catalog['c2'] - catalog['a2']*catalog['psf_e2'] for catalog in catalogs])
-    e2p_master, e2m_master = reconstructMetacalMeas(g=catalog['g2'], R=catalog['R2'],
-                                                    a = catalog['a2'], c=catalog['c2'],
-                                                    psf_e=catalog['psf_e2'], delta_g = delta_g )
+    e2p_master, e2m_master = reconstructMetacalMeas(g=catalogs_all['g2'], R=catalogs_all['R2'],
+                                                    a = catalogs_all['a2'], c=catalogs_all['c2'],
+                                                    psf_e=catalogs_all['psf_e2'], delta_g = delta_g )
 
     mu1, sigma1, nu1 = shear_em(e1_master)
     mu1p,sigma1p,nu1p = shear_em(e1p_master)
