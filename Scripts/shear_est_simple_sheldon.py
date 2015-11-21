@@ -140,10 +140,10 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
     sigma2_coeff = np.polyfit([-delta_g + g2mean,0.  +g2mean,delta_g + g2mean],[sigma2m,sigma2,sigma2p],2)
     nu2_coeff = np.polyfit([-delta_g + g2mean,0.  +g2mean,delta_g + g2mean],[nu2m,nu2,nu2p],2)
 
-    sigma1_coeff[1] = 0.
-    sigma2_coeff[1] = 0.
-    nu1_coeff[1] = 0.
-    nu2_coeff[1] = 0.
+    sigma1_coeff[:1] = 0.
+    sigma2_coeff[:1] = 0.
+    nu1_coeff[:1] = 0.
+    nu2_coeff[:1] = 0.
         
     sigma1_global = sigma1
     sigma2_global = sigma2
