@@ -125,8 +125,8 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
     mu1p,sigma1p,nu1p = shear_em(e1p_master)
     mu1m,sigma1m,nu1m = shear_em(e1m_master)
 
-    g1mean =  -0.000877699757
-    g2mean =   0.00103678184233
+    g1mean = -( -0.000877699757)
+    g2mean =  -( 0.00103678184233)
     
     mu1_coeff = np.polyfit([-delta_g+g1mean,0. + g1mean,delta_g+g1mean],[mu1m,mu1,mu1p],1)
     sigma1_coeff = np.polyfit([-delta_g+g1mean,0. + g1mean,delta_g + g1mean],[sigma1m,sigma1,sigma1p],2)
