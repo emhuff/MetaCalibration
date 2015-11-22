@@ -28,6 +28,7 @@ def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3rere
                            ('psf_e2','>f8'),('weight','>f8')])
     for field_id in fields:
         keep = (data['flags'] == 0) & (data['shear_index'] == field_id) #& (data['pars'][:,5] > 15)
+        print np.sum(keep)*1./np.sum(data['shear_index'] == field_d)
         this_catalog = np.empty(np.sum(keep), dtype = cat_dtype)
         this_catalog['id'] = 1000000 * field_id 
         this_catalog['g1'] = data[keep]['e'][:,0]
@@ -108,7 +109,8 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
     est2_err = []
     logL_e1 = []
     logL_e2 = []
-
+    badfrac = []
+    
     e1_master = np.hstack([catalog['g1'] - catalog['c1'] - catalog['a1']*catalog['psf_e1'] for catalog in catalogs])
     
     catalogs_all = np.hstack(catalogs)
@@ -211,7 +213,7 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
 
         est1_err.append(this_err1)
         est2_err.append(this_err2)
-
+        badfrac.append(catalog.size * 1./6667.) 
     
     results = np.empty(len(catalogs), dtype = [('g1_est',np.float),('g2_est',np.float),
                                                ('g1_err',np.float),('g2_err',np.float),
@@ -232,6 +234,7 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
     results['logL_e1'] = np.array(logL_e1)
     results['logL_e2'] = np.array(logL_e2)
     results['field_id'] = np.array([catalog[0]['id'] / 1000000 for catalog in catalogs])
+
 
     for i,this_result in enumerate(results):
         use = truthTable['field_id'] == this_result['field_id']
