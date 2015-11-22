@@ -635,9 +635,11 @@ def doPlots(data,outfile = None):
                  (m2,sig_m2,a2,sig_a2,c2,sig_c2),
                  (0.01,-0.025))    
     ax3.plot(data['badfrac'],data['g1_est'] - truthTable['g1'],'.')
+    ax3.set_xlabel('bad fraction')
     ax3.set_ylim(-0.03,0.03)
     ax3.axhline(0,linestyle='--',color='red')
     ax4.plot(data['badfrac'],data['g2_est'] - truthTable['g2'],'.')
+    ax4.set_xlabel('bad fraction')
     ax4.set_ylim(-0.03,0.03)
     ax4.axhline(0,linestyle='--',color='red')
     
