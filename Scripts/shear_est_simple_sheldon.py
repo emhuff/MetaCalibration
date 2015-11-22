@@ -219,6 +219,7 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
                                                ('g1_true',np.float),('g2_true',np.float),
                                                ('psf_e1',np.float),('psf_e2',np.float),
                                                ('logL_e1',np.float),('logL_e2',np.float),
+                                               ('badfrac',np.float),
                                                ('field_id',np.int),('good',np.bool)])
     results['g1_est'] = np.array(est1)
     results['g2_est'] = np.array(est2)
@@ -633,10 +634,10 @@ def doPlots(data,outfile = None):
     ax2.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f' %
                  (m2,sig_m2,a2,sig_a2,c2,sig_c2),
                  (0.01,-0.025))    
-    ax3.plot(data['logL_e1'],data['g1_est'] - truthTable['g1'],'.')
+    ax3.plot(data['badfrac'],data['g1_est'] - truthTable['g1'],'.')
     ax3.set_ylim(-0.03,0.03)
     ax3.axhline(0,linestyle='--',color='red')
-    ax4.plot(data['logL_e2'],data['g2_est'] - truthTable['g2'],'.')
+    ax4.plot(data['badfrac'],data['g2_est'] - truthTable['g2'],'.')
     ax4.set_ylim(-0.03,0.03)
     ax4.axhline(0,linestyle='--',color='red')
     
