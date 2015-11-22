@@ -23,13 +23,14 @@ def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3rere
     total_number = 0
     excluded_number = 0
     catalogs = []
+    goodfrac = []
     cat_dtype =  np.dtype([('id','>i8'),('g1','>f8'),('R1','>f8'),('a1','>f8'),('c1','>f8'),
                            ('psf_e1','>f8'),('g2','>f8'),('R2','>f8'),('a2','>f8'),('c2','>f8'),
                            ('psf_e2','>f8'),('weight','>f8')])
     
     for field_id in fields:
         keep = (data['flags'] == 0) & (data['shear_index'] == field_id) #& (data['pars'][:,5] > 15)
-        print np.sum(keep)*1./np.sum(data['shear_index'] == field_d)
+        goodfrac.append( np.sum(keep)*1./np.sum(data['shear_index'] == field_id))
         this_catalog = np.empty(np.sum(keep), dtype = cat_dtype)
         this_catalog['id'] = 1000000 * field_id 
         this_catalog['g1'] = data[keep]['e'][:,0]
@@ -44,9 +45,7 @@ def getAllCatalogs( path = '/nfs/slac/des/fs1/g/sims/esheldon/lensing/great3rere
         this_catalog['c2'] = data[keep]['c'][:,1]
         this_catalog['weight'] = np.zeros(np.sum(keep))+1.
         catalogs.append(this_catalog)
-    return catalogs
-
-    return catalogs, truthFile
+    return catalogs, goodfrac
 
 
 def reconstructMetacalMeas(g=None, R=None, a = None, c=None, psf_e=None, delta_g = 0.01 ):
@@ -102,7 +101,7 @@ def ml_g_est( e=None, g_start = 0.,mu_coeff=None,sigma_coeff = None, nu_coeff = 
     result = minimize_scalar(logL_t,method='Bounded',bounds=[-0.1,0.1])
     return np.asscalar(result.x)
 
-def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None):
+def shear_est(catalogs, goodfrac, truthTable, delta_g = 0.01, weights = True,mc_type=None):
 
     est1 = []
     est2 = []
@@ -214,7 +213,7 @@ def shear_est(catalogs, truthTable, delta_g = 0.01, weights = True,mc_type=None)
 
         est1_err.append(this_err1)
         est2_err.append(this_err2)
-        badfrac.append(catalog.size * 1./6667.) 
+        badfrac.append(1 - goodfrac[i]) 
     
     results = np.empty(len(catalogs), dtype = [('g1_est',np.float),('g2_est',np.float),
                                                ('g1_err',np.float),('g2_err',np.float),
@@ -699,9 +698,9 @@ def main(argv):
 
 
     outfile = args.outfile
-    catalogs = getAllCatalogs()
+    catalogs,goodfrac = getAllCatalogs()
     truthTable = get_truthtable()
-    results = shear_est(catalogs,truthTable, mc_type = args.mc_type)
+    results = shear_est(catalogs, goodfrac,truthTable, mc_type = args.mc_type)
     logLcut1, logLcut2 = determineLoglCuts(results, percentile = args.percentile_cut)
     doPlots(results,outfile = 'est_simple')
 
