@@ -234,7 +234,7 @@ def shear_est(catalogs, goodfrac, truthTable, delta_g = 0.01, weights = True,mc_
     results['logL_e1'] = np.array(logL_e1)
     results['logL_e2'] = np.array(logL_e2)
     results['field_id'] = np.array([catalog[0]['id'] / 1000000 for catalog in catalogs])
-
+    results['badfrac'] = np.array(badfrac)
 
     for i,this_result in enumerate(results):
         use = truthTable['field_id'] == this_result['field_id']
