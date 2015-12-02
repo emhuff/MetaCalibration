@@ -7,7 +7,7 @@ import numpy as np
 import glob
 from astropy.io import fits
 import galsim
-import MetaCalGreat3Wrapper as mcG3
+import metacal
 import matplotlib.pyplot as plt
 
 
@@ -41,7 +41,7 @@ def size_mom(image= None, weight = None):
 def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, shear2_step = 0., psf_size =
                      1.0, sersic_index = 4., pixscale = 0.2,
                      galaxy_size = 2.50, doplot = False, size = False,
-                     do_centroid = False, noise = False):
+                     do_centroid = False, noise = False, noise_symm = False):
 
 
     image_size = np.ceil(125 * (0.3/pixscale))
@@ -71,13 +71,17 @@ def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, 
 
     image_noised = image.copy()
     if noise is not False:
-        snr = float(noise)
-        image_noised.addNoiseSNR(galsim.noise.GaussianNoise(),snr)
-
+        noiseModel = galsim.noise.GaussianNoise(sigma=noise)
+        image_noised.addNoise(noiseModel)
+        
     
     # Copied straight from MetaCalGreat3Wrapper.py
-    sheared1Galaxy, unsheared1Galaxy, reconv1PSF = mcG3.metaCalibrate(image_noised, psf_im, g1 = shear1_step, g2 = shear2_step)
-    shearedm1Galaxy, unshearedm1Galaxy, reconvm1PSF = mcG3.metaCalibrate(image_noised, psf_im, g1 =  -shear1_step, g2 = - shear2_step)
+    sheared1Galaxy, unsheared1Galaxy, reconv1PSF = metacal.metaCalibrate(image_noised, psf_im,
+                                                                         g1 = shear1_step, g2 = shear2_step,
+                                                                         noise_symm = noise_symm, variance = noise**2)
+    shearedm1Galaxy, unshearedm1Galaxy, reconvm1PSF = metacal.metaCalibrate(image_noised, psf_im,
+                                                                            g1 =  -shear1_step, g2 = - shear2_step,
+                                                                            noise_symm = noise_symm, variance = noise**2)
 
     
     # Make an interpolated image of the psf.
@@ -206,7 +210,7 @@ def metacal_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, 
 
 def main(argv):
     npts = 20
-    n_iter = 100
+    n_iter = 50
     e_arr =  np.linspace(-0.5, 0.5, npts)
     R_true_arr = e_arr*0.
     R_est_arr = e_arr*0.
@@ -216,15 +220,15 @@ def main(argv):
     shear2_step = 0.0
     e1_intrinsic = 0.
     e2_intrinsic = 0.
-    noise = False # set to False for no noise.
-
+    noise = 0.0001 # set to False for no noise.
+    noise_symm = False
     
-    thing =  metacal_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic, shear1_step = shear1_step, shear2_step = shear2_step, doplot=True)
+    #thing =  metacal_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic, shear1_step = shear1_step, shear2_step = shear2_step, doplot=True,noise= noise)
 
     
     for i, this_e in zip(xrange(npts), e_arr):
         if noise is False:
-            R_true, R_est, R_rec = metacal_diagnose(e1_intrinsic = this_e, e2_intrinsic = 0.,  shear1_step = shear1_step, shear2_step = shear2_step, size = False, do_centroid = False)
+            R_true, R_est, R_rec = metacal_diagnose(e1_intrinsic = this_e, e2_intrinsic = 0.,  shear1_step = shear1_step, shear2_step = shear2_step, size = False, do_centroid = False,noise=0.01)
         else:
             R_true = 0.
             R_est = 0.
@@ -237,7 +241,8 @@ def main(argv):
                 try:
                     this_R_true, this_R_est, this_R_rec = metacal_diagnose(e1_intrinsic = this_e, e2_intrinsic = 0., \
                                                                             shear1_step = shear1_step, shear2_step = shear2_step, \
-                                                                            size = False, do_centroid = False, noise=noise)
+                                                                            size = False, do_centroid = False, noise=noise,
+                                                                            noise_symm = noise_symm)
                     R_true = R_true + this_R_true * 1./n_iter
                     R_est  = R_est  + this_R_est  * 1./n_iter
                     R_rec  = R_rec  + this_R_rec  * 1./n_iter
@@ -249,8 +254,8 @@ def main(argv):
                     pass
 
         print "true R:", R_true
-        print "avg. estimated R2:", R_est
-        print "True reconv R2", R_rec
+        print "avg. estimated R:", R_est, '+/-', np.sqrt(R_sig)
+        print "True reconv R", R_rec
         print "______________________________"
         
         R_true_arr[i] = R_true
