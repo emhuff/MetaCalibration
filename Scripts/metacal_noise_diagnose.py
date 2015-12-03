@@ -44,7 +44,7 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
                      do_centroid = False, noise = 0.01):
 
 
-    image_size = np.ceil(125 * (0.3/pixscale))
+    image_size = np.ceil(128 * (0.3/pixscale))
     
     # We're worried about FFT accuracy, so there should be hooks here for the gsparams.
     gspars = galsim.GSParams()
@@ -75,19 +75,21 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     image_noised_orig = image_noised.copy()
 
     # get the MetaCal images (without noise)
-    shearedGal, unshearedGal, reconv1PSF = metacal.metaCalibrate(image, psf_im,
+    shearedGal, unshearedGal, reconv1PSF = metacal.metaCalibrate(image, psf_im,#targetPSFImage = psf_dil_im,
                                                                    g1 = shear1_step, g2 = shear2_step,
                                                                    noise_symm = False, variance = noise**2)
     # get the MetaCal images (with noise)
-    shearedGal_noisy, unshearedGal_noisy, _ = metacal.metaCalibrate(image_noised, psf_im,
+    shearedGal_noisy, unshearedGal_noisy, _ = metacal.metaCalibrate(image_noised, psf_im,#targetPSFImage = psf_dil_im,
                                                                             g1 = shear1_step, g2 = shear2_step,
                                                                             noise_symm = False, variance = noise**2)
     # Get the MetaCal noise correlation function image.
     noiseCorrImage, CNobj = metacal.getMetaCalNoiseCorrImage(image_noised, psf_im, psf_dil_im, g1 = shear1_step, g2=shear2_step, variance = noise**2)
-    print np.std(image_noised.array)
-
+    pspec_noisy = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_noisy-image_noised).array)))**2
+    pspec_orig = np.abs(np.fft.fftshift(np.fft.fft2((image_sheared-image).array)))**2
+    pspec_mcal = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal - image).array)))**2
+    
     # First plot: The images (true, metacal, difference):
-    fig, ((ax1,ax2,ax3),(ax4,ax5,ax6)) = plt.subplots(nrows=2,ncols=3,figsize=(21,14))
+    fig, ((ax1,ax2,ax3),(ax4,ax5,ax6),(ax7,ax8,ax9)) = plt.subplots(nrows=3,ncols=3,figsize=(20,20))
     plt1 = ax1.imshow(image_sheared.array)
     ax1.set_title("'true' metacal image")
     plt2 = ax2.imshow(shearedGal.array)
@@ -102,9 +104,23 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     ax5.set_title("noisy metacal image")
     plt6 = ax6.imshow(noiseCorrImage.array)
     ax6.set_title("2d noise \n correlation function")
+
+    plt7 = ax7.imshow(np.log10(pspec_orig))
+    ax7.set_title("log_10 of power spectrum of \n before - after truth images")
+
+    plt8 = ax8.imshow(np.log10(pspec_mcal))
+    ax8.set_title("log_10 of power spectrum of \n before - after noiseless mcal images")    
+    plt9 = ax9.imshow(np.log10(pspec_noisy))
+    ax9.set_title("log_10 of power spectrum of \n before - after noisy mcal images")    
+
+    
+    
     print "initial noise:",np.std(image_noised.array - image.array)
     print "estimated noise after noise symmetrization processing:", np.sqrt(CNobj.getVariance())
     print "actual noise after noise symmetrization processing::",np.std(shearedGal_noisy.array - image_sheared.array)
+
+
+    
 
     fig.colorbar(plt1,ax=ax1)
     fig.colorbar(plt2,ax=ax2)
@@ -112,8 +128,11 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     fig.colorbar(plt4,ax=ax4)
     fig.colorbar(plt5,ax=ax5)
     fig.colorbar(plt6,ax=ax6)
+    fig.colorbar(plt7,ax=ax7)
+    fig.colorbar(plt8,ax=ax8)
+    fig.colorbar(plt9,ax=ax9)
     fig.savefig("metacal_noise_images.png")
-
+    stop
 
 def main(argv):
     npts = 20
@@ -127,8 +146,7 @@ def main(argv):
     shear2_step = 0.0
     e1_intrinsic = 0.
     e2_intrinsic = 0.
-    noise = .01 # set to False for no noise.
-    noise_symm = True
+    noise = .01
     
     metacal_noise_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic, shear1_step = shear1_step, shear2_step = shear2_step, doplot=True,noise= noise)
 
