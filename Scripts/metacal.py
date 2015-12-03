@@ -30,6 +30,26 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
     psfGrownImage=psfGrown.drawImage(image=psfGrownImage, scale=pixelscale, method='no_pixel')
     return psfGrownImage
 
+
+def getMetaCalNoiseCorrImage(galaxyImage, psfImage, psfImageTarget, g1=0.0, g2=0.0, variance = None):
+    pixel = psfImage.scale
+    l5 = galsim.Lanczos(5, True, 1.0E-4)
+
+    psf = galsim.InterpolatedImage(psfImage, x_interpolant=l5)
+    psfTarget = galsim.InterpolatedImage(psfImageTarget, x_interpolant=l5)
+    psfInv = galsim.Deconvolve(psf)
+    GN = galsim.GaussianNoise(sigma=np.double(np.sqrt(variance)))
+    test_im = galsim.Image(512,512,scale=pixel)
+    test_im.addNoise(GN)
+    CN = galsim.CorrelatedNoise(test_im, scale=pixel)
+    print "reported noise before symmetrization is: ",np.sqrt(CN.getVariance())
+    CN = CN.convolvedWith(psfInv)
+    CN = CN.shear(g1 = g1, g2 = g2)
+    CN = CN.convolvedWith(psfTarget)
+    print "reported noise after symmetrization is: ",np.sqrt(CN.getVariance())
+    noiseCorr = CN.drawImage(image=galaxyImage.copy(),add_to_image=False)
+    return noiseCorr, CN
+
 def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1=0.0, g2=0.0, noise_symm = False, variance = None):
     pixel = psfImage.scale
     l5 = galsim.Lanczos(5, True, 1.0E-4)
@@ -63,13 +83,14 @@ def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1=0.0, g2=0.
         test_im = galsim.Image(512,512,scale=pixel)
         test_im.addNoise(GN)
         CN = galsim.CorrelatedNoise(test_im, scale=pixel)
-        #print "noise before symmetrization is: ",np.sqrt(CN.getVariance())
+        print "noise before symmetrization is: ",np.sqrt(CN.getVariance())
         CN = CN.convolvedWith(psfInv)
         CN = CN.shear(g1 = g1, g2 = g2)
         CN = CN.convolvedWith(psfTarget)
         origIm = galaxyImageSheared.copy()
         varCalc = galaxyImageSheared.symmetrizeNoise(CN,order=4)
-        #print "noise after symmetrization is: ",np.sqrt(varCalc)
+        #varCalc = CN.whitenImage(galaxyImageSheared)
+        print "noise after symmetrization is: ",np.sqrt(varCalc)
     return galaxyImageSheared
 
 def metaCalibrate(galaxyImage, psfImage, g1 = 0.01, g2 = 0.00, gal_shear = True, noise_symm = False, variance = None):

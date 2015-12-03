@@ -221,7 +221,7 @@ def main(argv):
     e1_intrinsic = 0.
     e2_intrinsic = 0.
     noise = 0.0001 # set to False for no noise.
-    noise_symm = False
+    noise_symm = True
     
     #thing =  metacal_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic, shear1_step = shear1_step, shear2_step = shear2_step, doplot=True,noise= noise)
 
