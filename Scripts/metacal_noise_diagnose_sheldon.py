@@ -52,8 +52,10 @@ pspec_symm  = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_symm  - shearedGal)
 
 res_nonoise = galsim.hsm.EstimateShear(shearedGal_noisy, reconv1PSF, sky_var= noise**2)
 res_noise   = galsim.hsm.EstimateShear(shearedGal, reconv1PSF, sky_var= noise**2)
+res_symm   = galsim.hsm.EstimateShear(shearedGal_symm, reconv1PSF, sky_var= noise**2)
 
-print res_nonoise.corrected_e1, res_noise.corrected_e1
+
+print res_nonoise.corrected_e1, res_noise.corrected_e1, res_symm.corrected_e1
 
 fig, ((ax1,ax2,ax3),(ax4,ax5,ax6)) = plt.subplots(nrows=2,ncols=3,figsize=(21,7))
 plt1 = ax1.imshow(shearedGal.array,interpolation='nearest')
