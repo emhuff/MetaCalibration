@@ -79,11 +79,11 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
 
     
     # get the MetaCal images (without noise)
-    shearedGal, unshearedGal, reconv1PSF = metacal.metaCalibrate(image, psf_im,targetPSFImage = psf_dil_im,
+    shearedGal, unshearedGal, reconv1PSF = metacal.metaCalibrate(image, psf_im,#targetPSFImage = psf_dil_im,
                                                                    g1 = shear1_step, g2 = shear2_step,
                                                                    noise_symm = False, variance = noise**2)
     # get the MetaCal images (with noise)
-    shearedGal_noisy, unshearedGal_noisy, _ = metacal.metaCalibrate(image_noised, psf_im,targetPSFImage = psf_dil_im,
+    shearedGal_noisy, unshearedGal_noisy, _ = metacal.metaCalibrate(image_noised, psf_im,#targetPSFImage = psf_dil_im,
                                                                             g1 = shear1_step, g2 = shear2_step,
                                                                             noise_symm = False, variance = noise**2)
     # Get the MetaCal noise correlation function image.
