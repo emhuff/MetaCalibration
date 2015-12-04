@@ -47,7 +47,9 @@ noiseCorrImage, CNobj = metacal.getMetaCalNoiseCorrImage(image_noised, psf_im, p
 
 
 pspec_noise = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_noisy - shearedGal).array)))**2
-pspec_symm  = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_symm  - shearedGal).array)))**2
+pspec_symm  = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_symm  - shearedGal_noisy).array)))**2
+
+
 
 fig, ((ax1,ax2,ax3),(ax4,ax5,ax6)) = plt.subplots(nrows=2,ncols=3,figsize=(21,7))
 plt1 = ax1.imshow(shearedGal.array,interpolation='nearest')
