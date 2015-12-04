@@ -51,7 +51,7 @@ pspec_symm  = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_symm  - shearedGal)
 
 
 res_nonoise = galsim.hsm.EstimateShear(shearedGal_noisy, reconv1PSF, sky_var= noise**2)
-res_noise   = galsim.hsm.EstimateShear(shearedGa, reconv1PSF, sky_var= noise**2)
+res_noise   = galsim.hsm.EstimateShear(shearedGal, reconv1PSF, sky_var= noise**2)
 
 print res_nonoise.corrected_e1, res_noise.corrected_e1
 
