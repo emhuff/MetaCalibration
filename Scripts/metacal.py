@@ -104,7 +104,7 @@ def metaCalibrate(galaxyImage, psfImage, g1 = 0.00, g2 = 0.00, gal_shear = True,
     # First, work out the target psf, which changes depending on whether we're shearing the galaxy
     # or PSF.  So, propagate that kwarg through.
     if targetPSFImage is None:
-        targetPSFImage = getTargetPSF(psfImage, pixelscale, g1 = 0., g2 = 0., gal_shear=gal_shear)
+        targetPSFImage = getTargetPSF(psfImage, pixelscale, g1 =g1, g2 = g2, gal_shear=gal_shear)
         
     if gal_shear:
         # Then, produce the reconvolved images, with and without shear.
