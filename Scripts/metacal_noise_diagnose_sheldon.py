@@ -61,7 +61,7 @@ plt4 = ax4.imshow(pspec_noise,interpolation='nearest')
 ax4.set_title("power spectrum of \n mcal_noise - mcal_nonoise")
 plt5 = ax5.imshow(pspec_symm,interpolation='nearest')
 ax5.set_title("power spectrum of \n mcal_symm - mcal_nonoise")
-plt6 = ax6.imshow(noiseCorrImage,interpolation='nearest')
+plt6 = ax6.imshow(noiseCorrImage.array,interpolation='nearest')
 ax6.set_title("noise correlation function")
 
 fig.colorbar(plt1,ax=ax1)
