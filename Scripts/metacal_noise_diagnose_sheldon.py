@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 pixscale = 0.265
 shear1_step = 0.01
 shear2_step = 0.0
-noise = 0.2
+noise = 1.0
 
 psf_im = galsim.fits.read("/u/ki/esheldon/tmp/for-eric/psf-000010-35.fits")
 psf_im.scale = pixscale
