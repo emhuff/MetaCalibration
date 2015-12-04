@@ -44,7 +44,7 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
                      do_centroid = False, noise = 0.01):
 
 
-    image_size = 51#ceil(128 * (0.3/pixscale))
+    image_size = 256#ceil(128 * (0.3/pixscale))
     psf_image_size = 25
     
     # We're worried about FFT accuracy, so there should be hooks here for the gsparams.
