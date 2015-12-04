@@ -39,8 +39,8 @@ def size_mom(image= None, weight = None):
 
 
 def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.00, shear2_step = 0., psf_size =
-                     .80, sersic_index = 4., pixscale = 0.25,
-                     galaxy_size = 1.0, doplot = False, size = False,
+                     1.0, sersic_index = 4., pixscale = 0.2,
+                     galaxy_size = 2.5, doplot = False, size = False,
                      do_centroid = False, noise = 0.01):
 
 
