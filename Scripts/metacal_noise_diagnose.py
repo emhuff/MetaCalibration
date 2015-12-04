@@ -74,7 +74,7 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     image_noised.addNoise(noiseModel)
     image_noised_orig = image_noised.copy()
 
-    psf = metacal.getTargetPSF(psf_im, pixelscale, g1 =0.0, g2 = 0.0, gal_shear=True)
+    psf = metacal.getTargetPSF(psf_im, pixscale, g1 =0.0, g2 = 0.0, gal_shear=True)
 
     plt.imshow( (psf - psf_dil_im).array)
     plt.show()
