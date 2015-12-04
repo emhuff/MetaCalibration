@@ -39,8 +39,8 @@ def size_mom(image= None, weight = None):
 
 
 def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.00, shear2_step = 0., psf_size =
-                     1.0, sersic_index = 4., pixscale = 0.2,
-                     galaxy_size = 2.5, doplot = False, size = False,
+                     0.80, sersic_index = 4., pixscale = 0.2,
+                     galaxy_size = 1.0, doplot = False, size = False,
                      do_centroid = False, noise = 0.01):
 
 
@@ -83,7 +83,7 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     # get the MetaCal images (with noise)
     shearedGal_noisy, unshearedGal_noisy, _ = metacal.metaCalibrate(image_noised, psf_im,#targetPSFImage = psf_dil_im,
                                                                             g1 = shear1_step, g2 = shear2_step,
-                                                                            noise_symm = False, variance = noise**2)
+                                                                            noise_symm = True, variance = noise**2)
     # Get the MetaCal noise correlation function image.
     noiseCorrImage, CNobj = metacal.getMetaCalNoiseCorrImage(image_noised, psf_im, psf_dil_im, g1 = shear1_step, g2=shear2_step, variance = noise**2)
     pspec_noisy = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_noisy-image_noised).array)))**2
