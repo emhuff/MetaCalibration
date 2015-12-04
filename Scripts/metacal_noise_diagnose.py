@@ -38,7 +38,7 @@ def size_mom(image= None, weight = None):
     return x2,y2
 
 
-def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.01, shear2_step = 0., psf_size =
+def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.00, shear2_step = 0., psf_size =
                      1.0, sersic_index = 4., pixscale = 0.2,
                      galaxy_size = 2.50, doplot = False, size = False,
                      do_centroid = False, noise = 0.01):
@@ -106,7 +106,6 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     plt3 = ax3.imshow((shearedGal - image_sheared).array)
     ax3.set_title("numerical error \n in metacal procedure")
 
-    
     plt4 = ax4.imshow(image_noised_orig.array)
     ax4.set_title("noisy initial image")
     plt5 = ax5.imshow((shearedGal_noisy).array)
