@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 pixscale = 0.265
 shear1_step = 0.01
 shear2_step = 0.0
-noise = 0.01
+noise = 0.1
 
 psf_im = galsim.fits.read("/u/ki/esheldon/tmp/for-eric/psf-000010-35.fits")
 psf_im.scale = pixscale
@@ -47,7 +47,7 @@ noiseCorrImage, CNobj = metacal.getMetaCalNoiseCorrImage(image_noised, psf_im, p
 
 
 pspec_noise = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_noisy - shearedGal).array)))**2
-pspec_symm  = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_symm  - shearedGal_noisy).array)))**2
+pspec_symm  = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_symm  - shearedGal).array)))**2
 
 
 
