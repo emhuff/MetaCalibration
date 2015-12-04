@@ -45,7 +45,7 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
 
 
     image_size = np.ceil(128 * (0.3/pixscale))
-    psf_size = 25
+    psf_image_size = 25
     # We're worried about FFT accuracy, so there should be hooks here for the gsparams.
     gspars = galsim.GSParams()
     
@@ -65,8 +65,8 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     image_sheared = objConv_sheared.drawImage(image=galsim.Image(image_size,image_size,scale=pixscale) )
     
     # Make an image of the psf (the dilated one, which we use for the measurement image)
-    psf_im = psf.drawImage(image=galsim.Image(psf_size,psf_size,scale=pixscale) )
-    psf_dil_im = psf_dil.drawImage(image=galsim.Image(psf_size,psf_size,scale=pixscale) )
+    psf_im = psf.drawImage(image=galsim.Image(psf_image_size,psf_image_size,scale=pixscale) )
+    psf_dil_im = psf_dil.drawImage(image=galsim.Image(psf_image_size,psf_image_size,scale=pixscale) )
 
     # Add noise to the image.
     image_noised = image.copy()
