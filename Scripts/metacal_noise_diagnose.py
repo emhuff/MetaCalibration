@@ -75,11 +75,11 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     image_noised_orig = image_noised.copy()
 
     # get the MetaCal images (without noise)
-    shearedGal, unshearedGal, reconv1PSF = metacal.metaCalibrate(image, psf_im,#targetPSFImage = psf_dil_im,
+    shearedGal, unshearedGal, reconv1PSF = metacal.metaCalibrate(image, psf_im,targetPSFImage = psf_dil_im,
                                                                    g1 = shear1_step, g2 = shear2_step,
                                                                    noise_symm = False, variance = noise**2)
     # get the MetaCal images (with noise)
-    shearedGal_noisy, unshearedGal_noisy, _ = metacal.metaCalibrate(image_noised, psf_im,#targetPSFImage = psf_dil_im,
+    shearedGal_noisy, unshearedGal_noisy, _ = metacal.metaCalibrate(image_noised, psf_im,targetPSFImage = psf_dil_im,
                                                                             g1 = shear1_step, g2 = shear2_step,
                                                                             noise_symm = False, variance = noise**2)
     # Get the MetaCal noise correlation function image.
@@ -87,6 +87,15 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     pspec_noisy = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_noisy-image_noised).array)))**2
     pspec_orig = np.abs(np.fft.fftshift(np.fft.fft2((image_sheared-image).array)))**2
     pspec_mcal = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal - image).array)))**2
+
+    # factor of 10 in power is a sort-of-arbitrary threshold... but looking at plots of the power spectra suggests that it's still a fair place to start.
+    bad = np.abs(np.fft.fft2(((shearedGal_noisy-image_noised).array)))**2 > 10
+    image_reconv_fft = np.fft.fft2(shearedGal_noisy.array)
+    image_reconv_fft[bad] = 0.
+    image_reconv_better= np.real(np.fft.ifft2(image_reconv_fft))
+    shearedGal_noisy_better = galsim.Image(np.ascontiguousarray(image_reconv_better), scale=shearedGal_noisy.scale)
+
+
     
     # First plot: The images (true, metacal, difference):
     fig, ((ax1,ax2,ax3),(ax4,ax5,ax6),(ax7,ax8,ax9)) = plt.subplots(nrows=3,ncols=3,figsize=(20,20))
@@ -114,11 +123,11 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     ax9.set_title("log_10 of power spectrum of \n before - after noisy mcal images")    
 
     
-    
+
     print "initial noise:",np.std(image_noised.array - image.array)
     print "estimated noise after noise symmetrization processing:", np.sqrt(CNobj.getVariance())
     print "actual noise after noise symmetrization processing::",np.std(shearedGal_noisy.array - image_sheared.array)
-
+    print "noise in cleaned image is:",np.std(shearedGal_noisy_better.array - image_sheared.array)
 
     
 
@@ -144,7 +153,7 @@ def main(argv):
     R_rec_arr = e_arr*0.
     shear1_step = 0.01
     shear2_step = 0.0
-    e1_intrinsic = 0.
+    e1_intrinsic = 0.0
     e2_intrinsic = 0.
     noise = .01
     
