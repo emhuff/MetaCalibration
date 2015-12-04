@@ -46,6 +46,7 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
 
     image_size = np.ceil(128 * (0.3/pixscale))
     psf_image_size = 51
+    
     # We're worried about FFT accuracy, so there should be hooks here for the gsparams.
     gspars = galsim.GSParams()
     
