@@ -2,13 +2,14 @@ import galsim
 import math
 import numpy as np
 
+pad_factor = 4
+interpolant = galsim.Quintic()
+
 def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
     pixel = galsim.Pixel(pixelscale)
 
     # Create a GSObj from the psf image.
-    l5 = galsim.Lanczos(5, True, 1.0E-4)
-    qt = galsim.Quintic()
-    psf = galsim.InterpolatedImage(psfImage, k_interpolant=qt)
+    psf = galsim.InterpolatedImage(psfImage, x_interpolant=interpolant, pad_factor=pad_factor )
 
     # Deconvolve the pixel from the PSF.
     pixInv = galsim.Deconvolve(pixel)
@@ -37,8 +38,8 @@ def getMetaCalNoiseCorrImage(galaxyImage, psfImage, psfImageTarget, g1=0.0, g2=0
     l5 = galsim.Lanczos(5, True, 1.0E-4)
     qt = galsim.Quintic()
     
-    psf = galsim.InterpolatedImage(psfImage, k_interpolant=qt)
-    psfTarget = galsim.InterpolatedImage(psfImageTarget, k_interpolant=qt)
+    psf = galsim.InterpolatedImage(psfImage, x_interpolant=interpolant, pad_factor=pad_factor)
+    psfTarget = galsim.InterpolatedImage(psfImageTarget, x_interpolant=interpolant, pad_factor=pad_factor)
     psfInv = galsim.Deconvolve(psf)
     GN = galsim.GaussianNoise(sigma=np.double(np.sqrt(variance)))
     test_im = galsim.Image(512,512,scale=pixel)
@@ -60,9 +61,9 @@ def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1=0.0, g2=0.
     # pad factor may be important here (increase to 6?)
     # also, look at k-space interpolant
 
-    galaxy = galsim.InterpolatedImage(galaxyImage, k_interpolant=qt)
-    psf = galsim.InterpolatedImage(psfImage, k_interpolant=qt)
-    psfTarget = galsim.InterpolatedImage(psfImageTarget, k_interpolant=qt)
+    galaxy = galsim.InterpolatedImage(galaxyImage, x_interpolant=interpolant, pad_factor=pad_factor)
+    psf = galsim.InterpolatedImage(psfImage, x_interpolant=interpolant, pad_factor=pad_factor)
+    psfTarget = galsim.InterpolatedImage(psfImageTarget, x_interpolant=interpolant, pad_factor=pad_factor)
     
     # Remove the psf from the galaxy
     psfInv = galsim.Deconvolve(psf)
