@@ -7,7 +7,8 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
 
     # Create a GSObj from the psf image.
     l5 = galsim.Lanczos(5, True, 1.0E-4)
-    psf = galsim.InterpolatedImage(psfImage, x_interpolant=l5)
+    qt = galsim.Quintic()
+    psf = galsim.InterpolatedImage(psfImage, x_interpolant=qt)
 
     # Deconvolve the pixel from the PSF.
     pixInv = galsim.Deconvolve(pixel)
@@ -34,9 +35,10 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
 def getMetaCalNoiseCorrImage(galaxyImage, psfImage, psfImageTarget, g1=0.0, g2=0.0, variance = None):
     pixel = psfImage.scale
     l5 = galsim.Lanczos(5, True, 1.0E-4)
-
-    psf = galsim.InterpolatedImage(psfImage, x_interpolant=l5)
-    psfTarget = galsim.InterpolatedImage(psfImageTarget, x_interpolant=l5)
+    qt = galsim.Quintic()
+    
+    psf = galsim.InterpolatedImage(psfImage, x_interpolant=qt)
+    psfTarget = galsim.InterpolatedImage(psfImageTarget, x_interpolant=qt)
     psfInv = galsim.Deconvolve(psf)
     GN = galsim.GaussianNoise(sigma=np.double(np.sqrt(variance)))
     test_im = galsim.Image(512,512,scale=pixel)
@@ -53,14 +55,14 @@ def getMetaCalNoiseCorrImage(galaxyImage, psfImage, psfImageTarget, g1=0.0, g2=0
 def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1=0.0, g2=0.0, noise_symm = False, variance = None):
     pixel = psfImage.scale
     l5 = galsim.Lanczos(5, True, 1.0E-4)
-    
+    qt = galsim.Quintic()
     # Turn the provided image arrays into GSObjects
     # pad factor may be important here (increase to 6?)
     # also, look at k-space interpolant
 
-    galaxy = galsim.InterpolatedImage(galaxyImage, x_interpolant=l5)
-    psf = galsim.InterpolatedImage(psfImage, x_interpolant=l5)
-    psfTarget = galsim.InterpolatedImage(psfImageTarget, x_interpolant=l5)
+    galaxy = galsim.InterpolatedImage(galaxyImage, x_interpolant=qt)
+    psf = galsim.InterpolatedImage(psfImage, x_interpolant=qt)
+    psfTarget = galsim.InterpolatedImage(psfImageTarget, x_interpolant=qt)
     
     # Remove the psf from the galaxy
     psfInv = galsim.Deconvolve(psf)
