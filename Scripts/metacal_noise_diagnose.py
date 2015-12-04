@@ -65,8 +65,8 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     image_sheared = objConv_sheared.drawImage(image=galsim.Image(image_size,image_size,scale=pixscale) )
     
     # Make an image of the psf (the dilated one, which we use for the measurement image)
-    psf_im = psf.drawImage(image=galsim.Image(51,51,scale=pixscale) )
-    psf_dil_im = psf_dil.drawImage(image=galsim.Image(51,51,scale=pixscale) )
+    psf_im = psf.drawImage(image=galsim.Image(psf_size,psf_size,scale=pixscale) )
+    psf_dil_im = psf_dil.drawImage(image=galsim.Image(psf_size,psf_size,scale=pixscale) )
 
     # Add noise to the image.
     image_noised = image.copy()

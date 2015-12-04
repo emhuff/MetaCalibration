@@ -2,7 +2,7 @@ import galsim
 import math
 import numpy as np
 
-pad_factor = 4
+pad_factor = 6
 interpolant =  galsim.Lanczos(5, True, 1.0E-4)#galsim.Quintic()
 
 def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
