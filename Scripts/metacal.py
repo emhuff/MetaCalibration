@@ -5,7 +5,7 @@ import numpy as np
 pad_factor = 6
 interpolant =  galsim.Lanczos(5, True, 1.0E-4)#galsim.Quintic()
 
-def getTargetPSF(psfImage, pixelscale, g1 =0.01, g2 = 0.0, gal_shear=True):
+def getTargetPSF(psfImage, pixelscale, g1 =0.0, g2 = 0.0, gal_shear=True):
     pixel = galsim.Pixel(pixelscale)
 
     # Create a GSObj from the psf image.
@@ -104,7 +104,7 @@ def metaCalibrate(galaxyImage, psfImage, g1 = 0.01, g2 = 0.00, gal_shear = True,
     # First, work out the target psf, which changes depending on whether we're shearing the galaxy
     # or PSF.  So, propagate that kwarg through.
     if targetPSFImage is None:
-        targetPSFImage = getTargetPSF(psfImage, pixelscale, g1 = g1, g2 = g2, gal_shear=gal_shear)
+        targetPSFImage = getTargetPSF(psfImage, pixelscale, g1 = 0., g2 = 0., gal_shear=gal_shear)
         
     if gal_shear:
         # Then, produce the reconvolved images, with and without shear.
