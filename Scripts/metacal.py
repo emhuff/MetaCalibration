@@ -67,7 +67,7 @@ def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1=0.0, g2=0.
     galaxy_noPSF = galsim.Convolve(galaxy,psfInv)
 
     # Apply a shear
-    galaxy_noPSF = galaxy_noPSF.shear(g1 = g1, g2 = g2)
+    galaxy_noPSF = galaxy_noPSF.lens( g1, g2,1.0)
 
     # Reconvolve to the target psf
     galaxy_sheared_reconv = galsim.Convolve([galaxy_noPSF, psfTarget])
@@ -93,7 +93,7 @@ def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1=0.0, g2=0.
         print "noise after symmetrization is: ",np.sqrt(varCalc)
     return galaxyImageSheared
 
-def metaCalibrate(galaxyImage, psfImage, g1 = 0.01, g2 = 0.00, gal_shear = True, noise_symm = False, variance = None, targetPSFImage = None):
+def metaCalibrate(galaxyImage, psfImage, g1 = 0.00, g2 = 0.00, gal_shear = True, noise_symm = False, variance = None, targetPSFImage = None):
     """The new gal_shear argument tells metaCalibrate whether to interpret the (g1, g2) args as a
     shear to apply to the *galaxy* (True - which is the default behavior and the only behavior this
     function had before) or to the *PSF* (False - in which case the galaxy is unsheared but the PSF
