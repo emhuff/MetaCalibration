@@ -79,6 +79,7 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     plt.imshow( (psf - psf_dil_im).array)
     print np.max(np.abs((psf - psf_dil_im).array))
     plt.show()
+    stop
     
     # get the MetaCal images (without noise)
     shearedGal, unshearedGal, reconv1PSF = metacal.metaCalibrate(image, psf_im,targetPSFImage = psf_dil_im,
