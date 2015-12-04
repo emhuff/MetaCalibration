@@ -57,7 +57,7 @@ ax2.set_title("noisy metacal")
 plt3 = ax3.imshow(shearedGal_symm.array,interpolation='nearest')
 ax3.set_title("noise symm. metacal")
 
-plt4 = ax4.imshow(pspec_noisy,interpolation='nearest')
+plt4 = ax4.imshow(pspec_noise,interpolation='nearest')
 ax4.set_title("power spectrum of \n mcal_noise - mcal_nonoise")
 plt5 = ax5.imshow(pspec_symm,interpolation='nearest')
 ax5.set_title("power spectrum of \n mcal_symm - mcal_nonoise")
