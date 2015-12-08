@@ -26,43 +26,33 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.0, g2 = 0.0, gal_shear=True):
     if not gal_shear:
         psfGrown = psfGrown.shear(g1=g1, g2=g2)
 
-    # Draw to an ImageD object, and then return.
-    psfGrownImage = galsim.ImageD(psfImage.bounds)
-
-    psfGrownImage=psfGrown.drawImage(image=psfGrownImage, scale=pixelscale, method='no_pixel')
-    return psfGrownImage
+    return psfGrown
 
 
-def getMetaCalNoiseCorrImage(galaxyImage, psfImage, psfImageTarget, g1=0.0, g2=0.0, variance = None):
-    pixel = psfImage.scale
+def getMetaCalNoiseCorrImage(galaxyImage, psf, psfTarget, g1=0.0, g2=0.0, variance = None):
     
-    psf = galsim.InterpolatedImage(psfImage, k_interpolant=interpolant, pad_factor=pad_factor)
-    psfTarget = galsim.InterpolatedImage(psfImageTarget, k_interpolant=interpolant, pad_factor=pad_factor)
     psfInv = galsim.Deconvolve(psf)
-    GN = galsim.GaussianNoise(sigma=np.double(np.sqrt(variance)))
-    test_im = galsim.Image(512,512,scale=pixel)
-    test_im.addNoise(GN)
-    CN = galsim.CorrelatedNoise(test_im, scale=pixel)
-    print "reported noise before symmetrization is: ",np.sqrt(CN.getVariance())
+    CN = galsim.UncorrelatedNoise(variance=variance)
+    print "reported noise before metacal is: ",np.sqrt(CN.getVariance())
     CN = CN.convolvedWith(psfInv)
     CN = CN.shear(g1 = g1, g2 = g2)
     CN = CN.convolvedWith(psfTarget)
-    print "reported noise after symmetrization is: ",np.sqrt(CN.getVariance())
+    print "reported noise after metacal is: ",np.sqrt(CN.getVariance())
     noiseCorr = CN.drawImage(image=galaxyImage.copy(),add_to_image=False)
     return noiseCorr, CN
 
-def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1=0.0, g2=0.0, noise_symm = False, variance = None):
-    pixel = psfImage.scale
+def metaCalibrateReconvolve(galaxyImage, psf, psfTarget, g1=0.0, g2=0.0, noise_symm = False, variance = None):
 
-    # Turn the provided image arrays into GSObjects
+    # psf, and psfTarget need to be GSObjects.
+    
+    # Turn the provided galaxy image into a GSObject
     # pad factor may be important here (increase to 6?)
     # also, look at k-space interpolant
-
-    galaxy = galsim.InterpolatedImage(galaxyImage, k_interpolant=interpolant, pad_factor=pad_factor)
-    psf = galsim.InterpolatedImage(psfImage, k_interpolant=interpolant, pad_factor=pad_factor)
-    psfTarget = galsim.InterpolatedImage(psfImageTarget, k_interpolant=interpolant, pad_factor=pad_factor)
     
     # Remove the psf from the galaxy
+    galaxy = galsim.InterpolatedImage(galaxyImage, k_interpolant=interpolant, pad_factor=pad_factor)
+    if variance is not None:
+        galaxy.noise = galsim.UncorrelatedNoise(variance=variance)
     psfInv = galsim.Deconvolve(psf)
     galaxy_noPSF = galsim.Convolve(galaxy,psfInv)
 
@@ -71,29 +61,15 @@ def metaCalibrateReconvolve(galaxyImage, psfImage, psfImageTarget, g1=0.0, g2=0.
 
     # Reconvolve to the target psf
     galaxy_sheared_reconv = galsim.Convolve([galaxy_noPSF, psfTarget])
-
     # Draw reconvolved, sheared image to an ImageD object, and return.
-    galaxyImageSheared = galsim.ImageD(galaxyImage.bounds)
-    galaxyImageSheared = galaxy_sheared_reconv.drawImage(image=galaxyImageSheared,
-                                                         method='no_pixel',
-                                                         scale=psfImage.scale)
-
+    galaxyImageSheared = galaxy_sheared_reconv.drawImage(image=galaxyImage.copy(),method='no_pixel')
     if noise_symm is True:
-        GN = galsim.GaussianNoise(sigma=np.double(np.sqrt(variance)))
-        test_im = galsim.Image(512,512,scale=pixel)
-        test_im.addNoise(GN)
-        CN = galsim.CorrelatedNoise(test_im, scale=pixel)
-        print "noise before symmetrization is: ",np.sqrt(CN.getVariance())
-        CN = CN.convolvedWith(psfInv)
-        CN = CN.shear(g1 = g1, g2 = g2)
-        CN = CN.convolvedWith(psfTarget)
-        origIm = galaxyImageSheared.copy()
-        varCalc = galaxyImageSheared.symmetrizeNoise(CN,order=4)
-        #varCalc = CN.whitenImage(galaxyImageSheared)
-        print "noise after symmetrization is: ",np.sqrt(varCalc)
+        galaxyImageSheared.symmetrizeNoise(galaxy_sheared_reconv.noise, order=4)
+        
     return galaxyImageSheared
-
-def metaCalibrate(galaxyImage, psfImage, g1 = 0.00, g2 = 0.00, gal_shear = True, noise_symm = False, variance = None, targetPSFImage = None):
+        
+def metaCalibrate(galaxyImage, psfImage, g1 = 0.00, g2 = 0.00, gal_shear = True, noise_symm = False, variance = None,
+                  psfObj = None, targetPSFObj = None):
     """The new gal_shear argument tells metaCalibrate whether to interpret the (g1, g2) args as a
     shear to apply to the *galaxy* (True - which is the default behavior and the only behavior this
     function had before) or to the *PSF* (False - in which case the galaxy is unsheared but the PSF
@@ -101,23 +77,30 @@ def metaCalibrate(galaxyImage, psfImage, g1 = 0.00, g2 = 0.00, gal_shear = True,
 
     # Routine to drive the metaCalibration procedure.
     pixelscale = psfImage.scale
+    
     # First, work out the target psf, which changes depending on whether we're shearing the galaxy
-    # or PSF.  So, propagate that kwarg through.
-    if targetPSFImage is None:
-        targetPSFImage = getTargetPSF(psfImage, pixelscale, g1 =g1, g2 = g2, gal_shear=gal_shear)
-        
+    # or PSF.
+    if psfObj is None:
+        psf = galsim.InterpolatedImage(psfImage, k_interpolant=interpolant, pad_factor=pad_factor)
+
+    if targetPSFObj is None:
+        targetPSFObj = getTargetPSF(psfImage, pixelscale, g1 =g1, g2 = g2, gal_shear=gal_shear)
+
+    else:
+        psf = psfObj
+    
     if gal_shear:
         # Then, produce the reconvolved images, with and without shear.
         reconvSheared = metaCalibrateReconvolve(
-            galaxyImage, psfImage, targetPSFImage, g1=g1, g2=g2,
+            galaxyImage, psf, targetPSFObj, galaxyImage.copy(), g1=g1, g2=g2,
             noise_symm = noise_symm, variance = variance)
         reconvUnsheared = metaCalibrateReconvolve(
-            galaxyImage, psfImage, targetPSFImage, g1=0.0, g2=0.0,
+            galaxyImage, psf, targetPSFObj, galaxyImage.copy(), g1=0.0, g2=0.0,
             noise_symm = noise_symm, variance = variance)
         return reconvSheared, reconvUnsheared, targetPSFImage
     else:
         # We really only have to produce one image since the galaxy isn't sheared.
         reconvUnsheared = \
-            metaCalibrateReconvolve(galaxyImage, psfImage, targetPSFImage, g1=0.0,g2=0.0,
+            metaCalibrateReconvolve(galaxyImage, psf, targetPSFObj, g1=0.0, g2=0.0,
             noise_symm = noise_symm, variance = variance)
         return reconvUnsheared, reconvUnsheared, targetPSFImage

@@ -47,7 +47,7 @@ noiseCorrImage, CNobj = metacal.getMetaCalNoiseCorrImage(image_noised, psf_im, p
 
 
 pspec_noise = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_noisy - shearedGal).array*(1./noise))))**2
-pspec_symm  = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_symm  - shearedGal).array)*(1./noise)))**2
+pspec_symm  = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_symm  - shearedGal).array)*(1./noise))**2
 
 
 res_nonoise = galsim.hsm.EstimateShear(shearedGal_noisy, reconv1PSF, sky_var= noise**2)
