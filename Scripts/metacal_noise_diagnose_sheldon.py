@@ -80,4 +80,4 @@ fig.colorbar(plt5,ax=ax5)
 fig.colorbar(plt6,ax=ax6)
 
 fig.savefig("metacal_noise_sheldon.png")
-
+fig.clf()
