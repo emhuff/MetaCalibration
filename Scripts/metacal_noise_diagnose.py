@@ -135,17 +135,17 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
 
 
 
-    fig.colorbar(plt1,ax=ax1)
-    fig.colorbar(plt2,ax=ax2)
-    fig.colorbar(plt3,ax=ax3)
-    fig.colorbar(plt4,ax=ax4)
-    fig.colorbar(plt5,ax=ax5)
-    #fig.colorbar(plt6,ax=ax6)
-    fig.colorbar(plt7,ax=ax7)
-    fig.colorbar(plt8,ax=ax8)
-    fig.colorbar(plt9,ax=ax9)
-    fig.savefig("metacal_noise_images.png")
-    fig.clf()
+        fig.colorbar(plt1,ax=ax1)
+        fig.colorbar(plt2,ax=ax2)
+        fig.colorbar(plt3,ax=ax3)
+        fig.colorbar(plt4,ax=ax4)
+        fig.colorbar(plt5,ax=ax5)
+        #fig.colorbar(plt6,ax=ax6)
+        fig.colorbar(plt7,ax=ax7)
+        fig.colorbar(plt8,ax=ax8)
+        fig.colorbar(plt9,ax=ax9)
+        fig.savefig("metacal_noise_images.png")
+        fig.clf()
     return status, res_noise.corrected_e1, res_symm.corrected_e1, res_nonoise.corrected_e1, res_white.corrected_e1
 
 
