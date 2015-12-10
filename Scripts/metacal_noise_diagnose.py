@@ -101,30 +101,30 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
 
 
 
-    
-    # First plot: The images (true, metacal, difference):
-    fig, ((ax1,ax2,ax3),(ax4,ax5,ax6),(ax7,ax8,ax9)) = plt.subplots(nrows=3,ncols=3,figsize=(20,20))
-    plt1 = ax1.imshow(image_sheared.array,interpolation='nearest')
-    ax1.set_title("'true' metacal image")
-    plt2 = ax2.imshow(shearedGal.array,interpolation='nearest')
-    ax2.set_title("metacal image")
-    plt3 = ax3.imshow((shearedGal - image_sheared).array,interpolation='nearest')
-    ax3.set_title("numerical error \n in metacal procedure")
+    if doplot is True:
+        # First plot: The images (true, metacal, difference):
+        fig, ((ax1,ax2,ax3),(ax4,ax5,ax6),(ax7,ax8,ax9)) = plt.subplots(nrows=3,ncols=3,figsize=(20,20))
+        plt1 = ax1.imshow(image_sheared.array,interpolation='nearest')
+        ax1.set_title("'true' metacal image")
+        plt2 = ax2.imshow(shearedGal.array,interpolation='nearest')
+        ax2.set_title("metacal image")
+        plt3 = ax3.imshow((shearedGal - image_sheared).array,interpolation='nearest')
+        ax3.set_title("numerical error \n in metacal procedure")
 
-    plt4 = ax4.imshow(image_noised.array,interpolation='nearest')
-    ax4.set_title("noisy initial image")
-    plt5 = ax5.imshow((shearedGal_noisy).array,interpolation='nearest')
-    ax5.set_title("noisy metacal image")
-    #plt6 = ax6.imshow(noiseCorrImage.array,interpolation='nearest')
-    #ax6.set_title("2d noise \n correlation function")
+        plt4 = ax4.imshow(image_noised.array,interpolation='nearest')
+        ax4.set_title("noisy initial image")
+        plt5 = ax5.imshow((shearedGal_noisy).array,interpolation='nearest')
+        ax5.set_title("noisy metacal image")
+        #plt6 = ax6.imshow(noiseCorrImage.array,interpolation='nearest')
+        #ax6.set_title("2d noise \n correlation function")
 
-    plt7 = ax7.imshow(np.log10(pspec_orig),interpolation='nearest')
-    ax7.set_title("log_10 of power spectrum of \n before - after truth images")
+        plt7 = ax7.imshow(np.log10(pspec_orig),interpolation='nearest')
+        ax7.set_title("log_10 of power spectrum of \n before - after truth images")
 
-    plt8 = ax8.imshow(np.log10(pspec_mcal),interpolation='nearest')
-    ax8.set_title("log_10 of power spectrum of \n before - after noiseless mcal images")    
-    plt9 = ax9.imshow(np.log10(pspec_noisy),interpolation='nearest')
-    ax9.set_title("log_10 of power spectrum of \n before - after noisy mcal images")    
+        plt8 = ax8.imshow(np.log10(pspec_mcal),interpolation='nearest')
+        ax8.set_title("log_10 of power spectrum of \n before - after noiseless mcal images")    
+        plt9 = ax9.imshow(np.log10(pspec_noisy),interpolation='nearest')
+        ax9.set_title("log_10 of power spectrum of \n before - after noisy mcal images")    
 
     
 
