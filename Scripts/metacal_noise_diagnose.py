@@ -214,7 +214,6 @@ def main(argv):
     print np.mean(Ewhite-Etrue), np.std(Ewhite-Etrue)/np.sqrt(n_iter), np.mean(Enoise-Ewhite), \
       np.std(Enoise - Ewhite)/np.sqrt(n_iter), \
       np.mean(Esymm-Ewhite), np.std(Esymm - Etrue)/np.sqrt(n_iter)
-    stop
 
 if __name__ == "__main__":
     import pdb, traceback
