@@ -128,12 +128,12 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
 
     
 
-    print "initial noise:",np.std(image_noised.array - image.array)
+    #print "initial noise:",np.std(image_noised.array - image.array)
     #print "estimated noise after noise symmetrization processing:", np.sqrt(CNobj.getVariance())
-    print "actual noise after processing::",np.std(shearedGal_noisy.array - image_sheared.array)
+    #print "actual noise after processing::",np.std(shearedGal_noisy.array - image_sheared.array)
 
 
-    
+
 
     fig.colorbar(plt1,ax=ax1)
     fig.colorbar(plt2,ax=ax2)
@@ -172,7 +172,7 @@ def main(argv):
 
 
     for i in xrange(n_iter):
-        print "iter "+str(i)+" of "+str(n_iter)
+        #print "iter "+str(i)+" of "+str(n_iter)
         (status, this_Enoise, this_Esymm, this_Etrue, this_Ewhite) = metacal_noise_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic,
                                                                        shear1_step = shear1_step, shear2_step = shear2_step, doplot=False,noise= noise)
         if status is True:
@@ -184,11 +184,11 @@ def main(argv):
             Esymm_arr = np.array(Esymm)
             Etrue_arr = np.array(Etrue)
             Ewhite_arr = np.array(Ewhite)
-            print "truth, white noise", np.mean(Ewhite_arr-Etrue_arr),"+/-",np.std(Ewhite_arr-Etrue_arr)/np.sqrt(i+1)
-            print "metacal only: ",np.mean(Enoise_arr-Ewhite_arr)," +/- ",np.std(Enoise_arr - Ewhite_arr)/np.sqrt(i+1)
-            print "metacal with symm: ",np.mean(Esymm_arr-Ewhite_arr)," +/- ",np.std(Esymm_arr - Ewhite_arr)/np.sqrt(i+1)
+            #print "truth, white noise", np.mean(Ewhite_arr-Etrue_arr),"+/-",np.std(Ewhite_arr-Etrue_arr)/np.sqrt(i+1)
+            #print "metacal only: ",np.mean(Enoise_arr-Ewhite_arr)," +/- ",np.std(Enoise_arr - Ewhite_arr)/np.sqrt(i+1)
+            #print "metacal with symm: ",np.mean(Esymm_arr-Ewhite_arr)," +/- ",np.std(Esymm_arr - Ewhite_arr)/np.sqrt(i+1)
         else:
-            print "shape measurement failed."
+            #print "shape measurement failed."
 
 
 
@@ -207,10 +207,13 @@ def main(argv):
     image = objConv.drawImage(image=galsim.Image(image_size,image_size,scale=0.265) )
 
     
-    print "at S/N=",np.sqrt(np.sum(image.array**2)/noise**2)
-    print "truth, white noise", np.mean(Ewhite-Etrue),"+/-",np.std(Ewhite-Etrue)/np.sqrt(n_iter)
-    print "metacal only: ",np.mean(Enoise-Ewhite)," +/- ",np.std(Enoise - Ewhite)/np.sqrt(n_iter)
-    print "metacal with symm: ",np.mean(Esymm-Ewhite)," +/- ",np.std(Esymm - Etrue)/np.sqrt(n_iter)
+    #print "at S/N=",np.sqrt(np.sum(image.array**2)/noise**2)
+    #print "truth, white noise", np.mean(Ewhite-Etrue),"+/-",np.std(Ewhite-Etrue)/np.sqrt(n_iter)
+    #print "metacal only: ",np.mean(Enoise-Ewhite)," +/- ",np.std(Enoise - Ewhite)/np.sqrt(n_iter)
+    #print "metacal with symm: ",np.mean(Esymm-Ewhite)," +/- ",np.std(Esymm - Etrue)/np.sqrt(n_iter)
+    print np.mean(Ewhite-Etrue), np.std(Ewhite-Etrue)/np.sqrt(n_iter), np.mean(Enoise-Ewhite), \
+      np.std(Enoise - Ewhite)/np.sqrt(n_iter), \
+      np.mean(Esymm-Ewhite), np.std(Esymm - Etrue)/np.sqrt(n_iter)
     stop
 
 if __name__ == "__main__":
