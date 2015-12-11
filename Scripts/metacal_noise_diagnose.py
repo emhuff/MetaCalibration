@@ -74,7 +74,7 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     shearedGal_nofilt = metacal.metaCalibrateReconvolve(image_noised, psf, psf_dil,regularize=False,
                                                        g1=shear1_step, g2=shear2_step,
                                                        noise_symm = False, variance = noise**2)
-    shearedGal_symm = metacal.metaCalibrateReconvolve(image_noised, psf, psf_dil,regularize=False
+    shearedGal_symm = metacal.metaCalibrateReconvolve(image_noised, psf, psf_dil,regularize=False,
                                                        g1=shear1_step, g2=shear2_step,
                                                        noise_symm = True, variance = noise**2)
 
