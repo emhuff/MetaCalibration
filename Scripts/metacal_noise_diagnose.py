@@ -157,15 +157,19 @@ def main(argv):
     R_est_arr = e_arr*0.
     R_sig_arr = e_arr * 0.
     R_rec_arr = e_arr*0.
-    shear1_step = -0.001
+    shear1_step = 0.001
     shear2_step = 0.0
     e1_intrinsic = 0.0
     e2_intrinsic = 0.
     noise = 0.4
-    Enoise = []
-    Esymm= []
-    Etrue = []
-    Ewhite = []
+    Enoise1 = []
+    Esymm1 = []
+    Etrue1 = []
+    Ewhite1 = []
+    Enoise2 = []
+    Esymm2 = []
+    Etrue2 = []
+    Ewhite2 = []    
     #(status, this_Enoise, this_Esymm, this_Etrue, this_Ewhite) = metacal_noise_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic,
     #                                                                                    shear1_step = shear1_step, shear2_step = shear2_step,
     #                                                                                    doplot=True,noise= noise)
@@ -173,17 +177,20 @@ def main(argv):
 
     for i in xrange(n_iter):
         #print "iter "+str(i)+" of "+str(n_iter)
-        (status, this_Enoise, this_Esymm, this_Etrue, this_Ewhite) = metacal_noise_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic,
+        (status1, this_Enoise1, this_Esymm1, this_Etrue1, this_Ewhite1) = metacal_noise_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic,
                                                                        shear1_step = shear1_step, shear2_step = shear2_step, doplot=False,noise= noise)
+        (status2, this_Enoise2, this_Esymm2, this_Etrue2, this_Ewhite2) = metacal_noise_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic,
+                                                                       shear1_step = -shear1_step, shear2_step = -shear2_step, doplot=False,noise= noise)
         if status is True:
-            Enoise.append(this_Enoise)
-            Esymm.append(this_Esymm)
-            Etrue.append(this_Etrue)
-            Ewhite.append(this_Ewhite)
-            Enoise_arr = np.array(Enoise)
-            Esymm_arr = np.array(Esymm)
-            Etrue_arr = np.array(Etrue)
-            Ewhite_arr = np.array(Ewhite)
+            Enoise1.append(this_Enoise1)
+            Esymm1.append(this_Esymm1)
+            Etrue1.append(this_Etrue1)
+            Ewhite1.append(this_Ewhite1)
+            Enoise2.append(this_Enoise2)
+            Esymm2.append(this_Esymm2)
+            Etrue2.append(this_Etrue2)
+            Ewhite2.append(this_Ewhite2)
+            
             #print "truth, white noise", np.mean(Ewhite_arr-Etrue_arr),"+/-",np.std(Ewhite_arr-Etrue_arr)/np.sqrt(i+1)
             #print "metacal only: ",np.mean(Enoise_arr-Ewhite_arr)," +/- ",np.std(Enoise_arr - Ewhite_arr)/np.sqrt(i+1)
             #print "metacal with symm: ",np.mean(Esymm_arr-Ewhite_arr)," +/- ",np.std(Esymm_arr - Ewhite_arr)/np.sqrt(i+1)
@@ -193,10 +200,14 @@ def main(argv):
 
 
         
-    Enoise = np.array(Enoise)
-    Esymm = np.array(Esymm)
-    Etrue = np.array(Etrue)
-    Ewhite = np.array(Ewhite)
+    Enoise1 = np.array(Enoise1)
+    Esymm1 = np.array(Esymm1)
+    Etrue1 = np.array(Etrue1)
+    Ewhite1 = np.array(Ewhite1)
+    Enoise2 = np.array(Enoise2)
+    Esymm2 = np.array(Esymm2)
+    Etrue2 = np.array(Etrue2)
+    Ewhite2 = np.array(Ewhite2)    
     image_size = 48
     obj = galsim.Sersic(4, half_light_radius =1.0, flux=100.0)
     objEllip = obj.lens(e1_intrinsic, e2_intrinsic, 1.)
@@ -211,9 +222,8 @@ def main(argv):
     #print "truth, white noise", np.mean(Ewhite-Etrue),"+/-",np.std(Ewhite-Etrue)/np.sqrt(n_iter)
     #print "metacal only: ",np.mean(Enoise-Ewhite)," +/- ",np.std(Enoise - Ewhite)/np.sqrt(n_iter)
     #print "metacal with symm: ",np.mean(Esymm-Ewhite)," +/- ",np.std(Esymm - Etrue)/np.sqrt(n_iter)
-    print np.mean(Ewhite-Etrue), np.std(Ewhite-Etrue)/np.sqrt(n_iter), np.mean(Enoise-Ewhite), \
-      np.std(Enoise - Ewhite)/np.sqrt(n_iter), \
-      np.mean(Esymm-Ewhite), np.std(Esymm - Etrue)/np.sqrt(n_iter)
+    print np.mean(Ewhite1-Etrue1), np.mean(Enoise1-Ewhite1), np.mean(Esymm1-Ewhite1), \
+      np.mean(Ewhite2-Etrue2), np.mean(Enoise2-Ewhite2), np.mean(Esymm2-Ewhite2)
 
 if __name__ == "__main__":
     import pdb, traceback
