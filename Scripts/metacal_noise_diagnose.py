@@ -211,7 +211,7 @@ def main(argv):
     #print "truth, white noise", np.mean(Ewhite-Etrue),"+/-",np.std(Ewhite-Etrue)/np.sqrt(n_iter)
     #print "metacal only: ",np.mean(Enoise-Ewhite)," +/- ",np.std(Enoise - Ewhite)/np.sqrt(n_iter)
     #print "metacal with symm: ",np.mean(Esymm-Ewhite)," +/- ",np.std(Esymm - Etrue)/np.sqrt(n_iter)
-    print "#",np.mean(Ewhite-Etrue), np.std(Ewhite-Etrue)/np.sqrt(n_iter), np.mean(Enoise-Ewhite), \
+    print "###",np.mean(Ewhite-Etrue), np.std(Ewhite-Etrue)/np.sqrt(n_iter), np.mean(Enoise-Ewhite), \
       np.std(Enoise - Ewhite)/np.sqrt(n_iter), \
       np.mean(Esymm-Ewhite), np.std(Esymm - Etrue)/np.sqrt(n_iter)
 
