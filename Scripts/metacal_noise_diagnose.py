@@ -181,7 +181,7 @@ def main(argv):
                                                                        shear1_step = shear1_step, shear2_step = shear2_step, doplot=False,noise= noise)
         (status2, this_Enoise2, this_Esymm2, this_Etrue2, this_Ewhite2) = metacal_noise_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic,
                                                                        shear1_step = -shear1_step, shear2_step = -shear2_step, doplot=False,noise= noise)
-        if status is True:
+        if (status1 is True) & (status2 is True):
             Enoise1.append(this_Enoise1)
             Esymm1.append(this_Esymm1)
             Etrue1.append(this_Etrue1)
