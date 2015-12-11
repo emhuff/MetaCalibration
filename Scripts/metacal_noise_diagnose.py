@@ -7,10 +7,10 @@ import numpy as np
 import glob
 from astropy.io import fits
 import galsim
-import matplotlib as mpl
-mpl.use('Agg')
+#import matplotlib as mpl
+#mpl.use('Agg')
 import metacal
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 
 
