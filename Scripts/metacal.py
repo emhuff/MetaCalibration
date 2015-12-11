@@ -101,7 +101,6 @@ def metaCalibrateReconvolve(galaxyImage, psf, psfTarget, g1=0.0, g2=0.0, noise_s
         imFilt = galsim.Image(arrFilt,scale=galaxyImageSheared.scale)
         #imFilt.addNoise(galsim.UncorrelatedNoise(variance=variance))
         #imFilt.noise = galsim.UncorrelatedNoise(variance=variance)
-        print "regularizing."
         return imFilt
         
     
