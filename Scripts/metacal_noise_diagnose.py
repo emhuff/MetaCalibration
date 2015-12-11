@@ -157,7 +157,7 @@ def main(argv):
     R_est_arr = e_arr*0.
     R_sig_arr = e_arr * 0.
     R_rec_arr = e_arr*0.
-    shear1_step = 0.001
+    shear1_step = -0.001
     shear2_step = 0.0
     e1_intrinsic = 0.0
     e2_intrinsic = 0.
