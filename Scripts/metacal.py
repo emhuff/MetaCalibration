@@ -20,7 +20,9 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.0, g2 = 0.0, gal_shear=True):
 
     # Convolve the grown psf with the pixel
     psfGrown = galsim.Convolve(psfGrownNoPixel,pixel)
+    # Convolve one more time with a tiny, tiny gaussian.
 
+    
     # I think it's actually the shear of the effective, PSF-convolved PSF that we're sensitive
     # to. So I'm going to shear at this stage if gal_shear is False.
     if not gal_shear:
@@ -54,13 +56,13 @@ def deCorrelateNoiseObject(galaxyImage, psf, psfTarget, g1=0.0, g2=0.0, variance
     deCorrCNObj = galsim.CorrelatedNoise(noiseImageDiff,rng=galsim.BaseDeviate())
     return deCorrCNObj
 
-def metaCalibrateReconvolve(galaxyImage, psf, psfTarget, g1=0.0, g2=0.0, noise_symm = False, variance = None):
+
+
+def metaCalibrateReconvolve(galaxyImage, psf, psfTarget, g1=0.0, g2=0.0, noise_symm = False, variance = None, regularize= True):
 
     # psf, and psfTarget need to be GSObjects.
-    
+    # psf and psfTarget should both contain the pixel.
     # Turn the provided galaxy image into a GSObject
-    # pad factor may be important here (increase to 6?)
-    # also, look at k-space interpolant
     
     # Remove the psf from the galaxy
     
@@ -78,15 +80,38 @@ def metaCalibrateReconvolve(galaxyImage, psf, psfTarget, g1=0.0, g2=0.0, noise_s
     galaxy_sheared_reconv = galsim.Convolve([galaxy_noPSF, psfTarget])
 
     
-    # Draw reconvolved, sheared image to an ImageD object, and return.
+    # Draw reconvolved, sheared image to an ImageD object.
     galaxyImageSheared = galaxy_sheared_reconv.drawImage(image=galaxyImage.copy(),method='no_pixel')
+    
+    if regularize is True:
+        # apply Bernstein's k-sigma filter.
+        imFFT = np.fft.fft2(galaxyImageSheared.array)
+        ky = np.fft.fftfreq(galaxyImageSheared.array.shape[0])
+        kyy = np.outer(ky,np.ones(galaxyImageSheared.array.shape[1]))
+        kx =  np.fft.fftfreq(galaxyImageSheared.array.shape[1])
+        kxx = np.outer(np.ones(galaxyImageSheared.array.shape[0]),kx)
+        kk = np.sqrt(kxx**2 + kyy**2)
+        scale = (2./galaxyImage.scale)
+        Nfilt = 4
+        outer = kk >= np.sqrt(2*Nfilt)/scale
+        W = (1 - (kk*scale)**2/(2*Nfilt))**Nfilt
+        W[outer] =0.
+        imFFT = imFFT * W
+        arrFilt = np.ascontiguousarray(np.real(np.fft.ifft2(imFFT)))
+        imFilt = galsim.Image(arrFilt,scale=galaxyImageSheared.scale)
+        #imFilt.addNoise(galsim.UncorrelatedNoise(variance=variance))
+        #imFilt.noise = galsim.UncorrelatedNoise(variance=variance)
+        print "regularizing."
+        return imFilt
+        
+    
     if noise_symm is True:
         #deCorrNoiseObj = deCorrelateNoiseObject(galaxyImage, psf, psfTarget, g1=g1, g2=g2,variance = variance)
         #galaxyImageSheared.addNoise(deCorrNoiseObj)
         galaxyImageSheared.symmetrizeNoise(galaxy_sheared_reconv.noise, order=4)
-        return galaxyImageSheared
-    else:
-        return galaxyImageSheared
+
+        
+    return galaxyImageSheared
         
 
         
