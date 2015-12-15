@@ -15,14 +15,14 @@ import metacal
 
 
 
-def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.00, shear2_step = 0.,
-                           psf_size = 0.7, sersic_index = 4., pixscale = 0.265,
+def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.00, shear2_step = 0.00,
+                           psf_size = .70, sersic_index = 4., pixscale = .265,
                            galaxy_size = 1.0, doplot = False, size = False,
                            do_centroid = False, noise = 0.01):
 
 
-    image_size = 128 #ceil(128 * (0.3/pixscale))
-    psf_image_size = 64
+    image_size = 64 #ceil(128 * (0.3/pixscale))
+    psf_image_size = 48
     # We're worried about FFT accuracy, so there should be hooks here for the gsparams.
     gspars = galsim.GSParams()
     gspars.noise_pad_factor = 4*image_size
@@ -91,12 +91,16 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     
     # Get the MetaCal noise correlation function image.
     pspec_orig = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal-image_sheared).array*(1./noise))))**2*(1./image.array.size)
-    pspec_noise = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_noisy-image_sheared_noised).array)))**2 *(1./image.array.size)
-    pspec_symm = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_symm - image_sheared).array*(1./noise))))**2*(1./image.array.size)
+    pspec_noise = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_noisy-image_sheared).array)))**2 *(1./image.array.size)
+    pspec_symm = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_symm - shearedGal_noisy).array*(1./noise))))**2*(1./image.array.size)
 
 
 
     if doplot is True:
+        import matplotlib as mpl
+        mpl.use('Agg')
+        import matplotlib.pyplot as plt
+        cmap = plt.cm.Greys
         # First plot: The images (true, metacal, difference):
         fig, ((ax1,ax2,ax3),(ax4,ax5,ax6),(ax7,ax8,ax9)) = plt.subplots(nrows=3,ncols=3,figsize=(20,20))
         plt1 = ax1.imshow(image_sheared.array,interpolation='nearest')
@@ -132,22 +136,16 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
         fig.colorbar(plt7,ax=ax7)
         fig.colorbar(plt8,ax=ax8)
         fig.colorbar(plt9,ax=ax9)
-        fig.savefig("metacal_noise_images.png")
+        fig.savefig("metacal_noise_diagnostics.png")
         fig.clf()
     return status, res_noise.corrected_e1, res_symm.corrected_e1, res_nonoise.corrected_e1, res_white.corrected_e1
 
 
 def main(argv):
-    npts = 20
     n_iter = 10
-    e_arr =  np.linspace(-0.5, 0.5, npts)
-    R_true_arr = e_arr*0.
-    R_est_arr = e_arr*0.
-    R_sig_arr = e_arr * 0.
-    R_rec_arr = e_arr*0.
     shear1_step = 0.001
     shear2_step = 0.0
-    e1_intrinsic = 0.0
+    e1_intrinsic = 0.1
     e2_intrinsic = 0.
     noise = 0.4
     Enoise1 = []
@@ -158,9 +156,9 @@ def main(argv):
     Esymm2 = []
     Etrue2 = []
     Ewhite2 = []    
-    #(status, this_Enoise, this_Esymm, this_Etrue, this_Ewhite) = metacal_noise_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic,
-    #                                                                                    shear1_step = shear1_step, shear2_step = shear2_step,
-    #                                                                                    doplot=True,noise= noise)
+    (status, this_Enoise, this_Esymm, this_Etrue, this_Ewhite) = metacal_noise_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic,
+                                                                                        shear1_step = shear1_step, shear2_step = shear2_step,
+                                                                                        doplot=True,noise= noise)
 
 
     for i in xrange(n_iter):

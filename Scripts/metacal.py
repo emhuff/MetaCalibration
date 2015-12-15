@@ -3,13 +3,11 @@ import math
 import numpy as np
 
 pad_factor = 8
-interpolant =  galsim.Quintic()
 
 def getTargetPSF(psfImage, pixelscale, g1 =0.0, g2 = 0.0, gal_shear=True):
     pixel = galsim.Pixel(pixelscale)
 
-    # Create a GSObj from the psf image.
-    psf = galsim.InterpolatedImage(psfImage, k_interpolant=interpolant, pad_factor=pad_factor )
+    psf = galsim.InterpolatedImage(psfImage, pad_factor=pad_factor )
 
     # Deconvolve the pixel from the PSF.
     pixInv = galsim.Deconvolve(pixel)
@@ -59,13 +57,14 @@ def deCorrelateNoiseObject(galaxyImage, psf, psfTarget, g1=0.0, g2=0.0, variance
 
 def metaCalibrateReconvolve(galaxyImage, psf, psfTarget, g1=0.0, g2=0.0, noise_symm = False, variance = None, regularize= False):
 
-    # psf, and psfTarget need to be GSObjects.
-    # psf and psfTarget should both contain the pixel.
-    # Turn the provided galaxy image into a GSObject
+    gspars = galsim.GSParams()
+    image_size  = galaxyImage.array.shape[0]
+    gspars.noise_pad_factor = 4*image_size
+    gspars.pad_factor = 1
+    gspars.noise_pad = variance
     
-    # Remove the psf from the galaxy
     
-    galaxy = galsim.InterpolatedImage(galaxyImage, k_interpolant=interpolant, pad_factor=pad_factor)
+    galaxy = galsim.InterpolatedImage(galaxyImage,gsparams=gspars)
     
     if variance is not None:
         galaxy.noise = galsim.UncorrelatedNoise(variance=variance)
@@ -125,7 +124,7 @@ def metaCalibrate(galaxyImage, psfImage, g1 = 0.00, g2 = 0.00, gal_shear = True,
     # First, work out the target psf, which changes depending on whether we're shearing the galaxy
     # or PSF.
     if psfObj is None:
-        psf = galsim.InterpolatedImage(psfImage, k_interpolant=interpolant, pad_factor=pad_factor)
+        psf = galsim.InterpolatedImage(psfImage)
 
     if targetPSFObj is None:
         targetPSFObj = getTargetPSF(psfImage, pixelscale, g1 =g1, g2 = g2, gal_shear=gal_shear)
