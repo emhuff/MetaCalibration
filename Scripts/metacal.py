@@ -19,16 +19,13 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.0, g2 = 0.0, gal_shear=True):
     psfGrownNoPixel = psfNoPixel.dilate(1 + 2*math.sqrt(g1**2 + g2**2))
 
     # Convolve the grown psf with the pixel
-    # Convolve one more time with a tiny, tiny gaussian.
-    delta = galsim.Gaussian(sigma=0.001)
-    psfGrown = galsim.Convolve([psfGrownNoPixel,pixel,delta])
-
+    psfGrown = galsim.Convolve([psfGrownNoPixel,pixel])
     
     # I think it's actually the shear of the effective, PSF-convolved PSF that we're sensitive
     # to. So I'm going to shear at this stage if gal_shear is False.
     if not gal_shear:
         psfGrown = psfGrown.shear(g1=g1, g2=g2)
-
+    
     return psfGrown
 
 
@@ -111,7 +108,6 @@ def metaCalibrateReconvolve(galaxyImage, psf, psfTarget, g1=0.0, g2=0.0, noise_s
         #galaxyImageSheared.addNoise(deCorrNoiseObj)
         galaxyImageSheared.symmetrizeNoise(galaxy_sheared_reconv.noise, order=4)
 
-        
     return galaxyImageSheared
         
 
