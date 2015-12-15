@@ -21,39 +21,41 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
                            do_centroid = False, noise = 0.01):
 
 
-    image_size = 64#ceil(128 * (0.3/pixscale))
+    image_size = 128 #ceil(128 * (0.3/pixscale))
     psf_image_size = 64
     # We're worried about FFT accuracy, so there should be hooks here for the gsparams.
     gspars = galsim.GSParams()
+    gspars.noise_pad_factor = 4*image_size
+    gspars.noise_pad = noise**2
     
     # Create the undistorted galaxy, assign it some intrinsic ellipticity.
-    obj = galsim.Sersic(sersic_index, half_light_radius =galaxy_size, flux=100.0, gsparams = gspars)
-    objEllip = obj.lens(e1_intrinsic, e2_intrinsic, 1.)
+    obj = galsim.Sersic(sersic_index, half_light_radius = galaxy_size, flux=100.0, gsparams = gspars)
+    obj_ellip = obj.lens(e1_intrinsic, e2_intrinsic, 1.)
 
-    # Convolve with a gaussian PSF
-    #psf = galsim.Gaussian(sigma= psf_size, gsparams = gspars)
-    psf = galsim.Moffat(fwhm = psf_size, beta=3.5)
-    objConv = galsim.Convolve([psf,objEllip], gsparams = gspars)
-    image = objConv.drawImage(image=galsim.Image(image_size,image_size,scale=pixscale) )
+    # define the psf.
+    psf = galsim.Gaussian(half_light_radius= psf_size, gsparams = gspars)
+            
+    # Convolve with the PSF
+    objConv = galsim.Convolve([psf,obj_ellip], gsparams = gspars)
 
-    # Create the truth object to compare the metacalibration-generated image to.
-    objEllip_sheared  = objEllip.lens( shear1_step, shear2_step,1.0)
-    psf_dil = psf.dilate(1.+2*np.sqrt(shear1_step**2 + shear2_step**2))
-    objConv_sheared = galsim.Convolve([psf_dil,objEllip_sheared], gsparams = gspars)
-    image_sheared = objConv_sheared.drawImage(image=galsim.Image(image_size,image_size,scale=pixscale) )
+    # Draw the fiducial noise-free data image.
+    image = objConv.drawImage(image=galsim.Image(image_size,image_size,scale=pixscale), scale=pixscale )
 
-    # Convolve our psf objects with the pixel.
-    pixelObj = galsim.Pixel(scale=pixscale)
-    psf = galsim.Convolve([psf,pixelObj])
-    psf_dil = galsim.Convolve([psf_dil,pixelObj])
-
+    # Create the truth object we are trying to compare metacal to. First, shear the original Sersic object..
+    obj_ellip_sheared  = obj_ellip.lens( shear1_step, shear2_step,1.0)
     
-    # Make an image of the psf (the dilated one, which we use for the measurement image)
-    psf_im = psf.drawImage(image=galsim.Image(psf_image_size,psf_image_size,scale=pixscale), method='no_pixel' )
-    psf_dil_im = psf_dil.drawImage(image=galsim.Image(psf_image_size,psf_image_size,scale=pixscale), method='no_pixel' )
-
-    psf = galsim.InterpolatedImage(psf_im)
+    # Then create the dilated psf.
     psf_dil = psf.dilate(1.+2*np.sqrt(shear1_step**2 + shear2_step**2))
+
+    # Finally, convolve with the dilated psf to make the noise-free metacal truth image.
+    objConv_sheared = galsim.Convolve([psf_dil,obj_ellip_sheared], gsparams = gspars)
+
+    # And draw it into an image.
+    image_sheared = objConv_sheared.drawImage(image=galsim.Image(image_size,image_size,scale=pixscale), scale=pixscale)
+    
+    # Make images of both psfs.
+    psf_im = psf.drawImage(image=galsim.Image(psf_image_size,psf_image_size,scale=pixscale),scale=pixscale)
+    psf_dil_im = psf_dil.drawImage(image=galsim.Image(psf_image_size,psf_image_size,scale=pixscale),scale=pixscale)
     
     # Add noise to the image.
 
@@ -63,23 +65,16 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     image_empty.addNoise(noiseModel)
     image_noised = image_empty + image
     image_sheared_noised = image_empty + image_sheared
-    
-
+  
     shearedGal = metacal.metaCalibrateReconvolve(image, psf, psf_dil,
                                                  g1=shear1_step, g2=shear2_step,
                                                  noise_symm = False, variance = noise**2)
     shearedGal_noisy = metacal.metaCalibrateReconvolve(image_noised, psf, psf_dil,
                                                        g1=shear1_step, g2=shear2_step,
                                                        noise_symm = False, variance = noise**2)
-    shearedGal_nofilt = metacal.metaCalibrateReconvolve(image_noised, psf, psf_dil,regularize=False,
-                                                       g1=shear1_step, g2=shear2_step,
-                                                       noise_symm = False, variance = noise**2)
-    shearedGal_symm = metacal.metaCalibrateReconvolve(image_noised, psf, psf_dil,regularize=False,
+    shearedGal_symm = metacal.metaCalibrateReconvolve(image_noised, psf, psf_dil,
                                                        g1=shear1_step, g2=shear2_step,
                                                        noise_symm = True, variance = noise**2)
-
-    #shearedGal_noisy =  image_empty + image_sheared
-    #shearedGal_symm = shearedGal_empty + image_sheared
     
     res_nonoise = galsim.hsm.EstimateShear(image_sheared, psf_dil_im, sky_var= noise**2,strict=False)
     res_white   = galsim.hsm.EstimateShear(image_sheared_noised, psf_dil_im, sky_var= noise**2,strict=False)
@@ -95,9 +90,9 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     #print "no noise:",res_nonoise.corrected_e1
     
     # Get the MetaCal noise correlation function image.
-    pspec_noisy = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_noisy-image_noised).array)))**2
-    pspec_orig = np.abs(np.fft.fftshift(np.fft.fft2((image_sheared-image).array*(1./noise))))**2
-    pspec_mcal = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal - image).array*(1./noise))))**2
+    pspec_orig = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal-image_sheared).array*(1./noise))))**2*(1./image.array.size)
+    pspec_noise = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_noisy-image_sheared_noised).array)))**2 *(1./image.array.size)
+    pspec_symm = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_symm - image_sheared).array*(1./noise))))**2*(1./image.array.size)
 
 
 
@@ -111,26 +106,19 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
         plt3 = ax3.imshow((shearedGal - image_sheared).array,interpolation='nearest')
         ax3.set_title("numerical error \n in metacal procedure")
 
-        plt4 = ax4.imshow(image_noised.array,interpolation='nearest')
+        plt4 = ax4.imshow(image_noised.array,interpolation='nearest',cmap=cmap)
         ax4.set_title("noisy initial image")
-        plt5 = ax5.imshow((shearedGal_noisy).array,interpolation='nearest')
+        plt5 = ax5.imshow((shearedGal_noisy).array,interpolation='nearest',cmap=cmap)
         ax5.set_title("noisy metacal image")
-        #plt6 = ax6.imshow(noiseCorrImage.array,interpolation='nearest')
-        #ax6.set_title("2d noise \n correlation function")
+        plt6 = ax6.imshow((shearedGal_symm).array,interpolation='nearest',cmap=cmap)
+        ax6.set_title("symm.  image")
 
-        plt7 = ax7.imshow(np.log10(pspec_orig),interpolation='nearest')
-        ax7.set_title("log_10 of power spectrum of \n before - after truth images")
-
-        plt8 = ax8.imshow(np.log10(pspec_mcal),interpolation='nearest')
-        ax8.set_title("log_10 of power spectrum of \n before - after noiseless mcal images")    
-        plt9 = ax9.imshow(np.log10(pspec_noisy),interpolation='nearest')
-        ax9.set_title("log_10 of power spectrum of \n before - after noisy mcal images")    
-
-    
-
-    #print "initial noise:",np.std(image_noised.array - image.array)
-    #print "estimated noise after noise symmetrization processing:", np.sqrt(CNobj.getVariance())
-    #print "actual noise after processing::",np.std(shearedGal_noisy.array - image_sheared.array)
+        plt7 = ax7.imshow((pspec_orig),interpolation='nearest',cmap=plt.cm.winter)
+        ax7.set_title("power spectrum of \n metacal -  truth images")
+        plt8 = ax8.imshow((pspec_noise),interpolation='nearest',cmap=plt.cm.winter)
+        ax8.set_title("power spectrum of \n mcal noise")    
+        plt9 = ax9.imshow((pspec_symm),interpolation='nearest',cmap=plt.cm.winter)
+        ax9.set_title(" power spectrum \n of isotropized noise")    
 
 
 
@@ -140,7 +128,7 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
         fig.colorbar(plt3,ax=ax3)
         fig.colorbar(plt4,ax=ax4)
         fig.colorbar(plt5,ax=ax5)
-        #fig.colorbar(plt6,ax=ax6)
+        fig.colorbar(plt6,ax=ax6)
         fig.colorbar(plt7,ax=ax7)
         fig.colorbar(plt8,ax=ax8)
         fig.colorbar(plt9,ax=ax9)
@@ -151,7 +139,7 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
 
 def main(argv):
     npts = 20
-    n_iter = 1000
+    n_iter = 10
     e_arr =  np.linspace(-0.5, 0.5, npts)
     R_true_arr = e_arr*0.
     R_est_arr = e_arr*0.
@@ -191,12 +179,6 @@ def main(argv):
             Etrue2.append(this_Etrue2)
             Ewhite2.append(this_Ewhite2)
             
-            #print "truth, white noise", np.mean(Ewhite_arr-Etrue_arr),"+/-",np.std(Ewhite_arr-Etrue_arr)/np.sqrt(i+1)
-            #print "metacal only: ",np.mean(Enoise_arr-Ewhite_arr)," +/- ",np.std(Enoise_arr - Ewhite_arr)/np.sqrt(i+1)
-            #print "metacal with symm: ",np.mean(Esymm_arr-Ewhite_arr)," +/- ",np.std(Esymm_arr - Ewhite_arr)/np.sqrt(i+1)
-        #else:
-            #print "shape measurement failed."
-
 
 
         

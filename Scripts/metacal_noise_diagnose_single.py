@@ -23,7 +23,7 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
                            do_centroid = False, noise = 0.01):
 
 
-    image_size = 64 #ceil(128 * (0.3/pixscale))
+    image_size = 128 #ceil(128 * (0.3/pixscale))
     psf_image_size = 64
     # We're worried about FFT accuracy, so there should be hooks here for the gsparams.
     gspars = galsim.GSParams()
@@ -75,9 +75,6 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     shearedGal_noisy = metacal.metaCalibrateReconvolve(image_noised, psf, psf_dil,regularize= False,
                                                        g1=shear1_step, g2=shear2_step,
                                                        noise_symm = False, variance = noise**2)
-    shearedGal_nofilt = metacal.metaCalibrateReconvolve(image_noised, psf, psf_dil,regularize=False,
-                                                       g1=shear1_step, g2=shear2_step,
-                                                       noise_symm = False, variance = noise**2)
     shearedGal_symm = metacal.metaCalibrateReconvolve(image_noised, psf, psf_dil,regularize= False,
                                                        g1=shear1_step, g2=shear2_step,
                                                        noise_symm = True, variance = noise**2)
@@ -85,7 +82,7 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     
     res_nonoise = galsim.hsm.EstimateShear(image_sheared, psf_dil_im, sky_var= noise**2,strict=False)
     res_white   = galsim.hsm.EstimateShear(image_sheared_noised, psf_dil_im, sky_var= noise**2,strict=False)
-    res_noise   = galsim.hsm.EstimateShear(shearedGal_nofilt, psf_dil_im, sky_var= noise**2,strict=False)
+    res_noise   = galsim.hsm.EstimateShear(shearedGal_noisy, psf_dil_im, sky_var= noise**2,strict=False)
     res_symm   = galsim.hsm.EstimateShear(shearedGal_symm, psf_dil_im, sky_var= noise**2,strict=False)
     if (res_nonoise.error_message == "") & (res_white.error_message == "") & (res_noise.error_message == "") & (res_symm.error_message == ""):
         status = True
@@ -128,7 +125,6 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     
 
         print "initial noise:",np.std(image_noised.array - image.array)
-        #print "estimated noise after noise symmetrization processing:", np.sqrt(CNobj.getVariance())
         print "actual noise after metacal:",np.std(shearedGal_noisy.array - image_sheared.array)
         print "actual noise after symmetrization", np.std(shearedGal_symm.array - image_sheared.array)
 
