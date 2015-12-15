@@ -24,7 +24,7 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
 
 
     image_size = 64 #ceil(128 * (0.3/pixscale))
-    psf_image_size = 32
+    psf_image_size = 64
     # We're worried about FFT accuracy, so there should be hooks here for the gsparams.
     gspars = galsim.GSParams()
     gspars.noise_pad_factor = 4*image_size
@@ -72,7 +72,7 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     shearedGal = metacal.metaCalibrateReconvolve(image, psf, psf_dil,
                                                  g1=shear1_step, g2=shear2_step,
                                                  noise_symm = False, variance = noise**2)
-    shearedGal_noisy = metacal.metaCalibrateReconvolve(image_noised, psf, psf_dil,regularize= True,
+    shearedGal_noisy = metacal.metaCalibrateReconvolve(image_noised, psf, psf_dil,regularize= False,
                                                        g1=shear1_step, g2=shear2_step,
                                                        noise_symm = False, variance = noise**2)
     shearedGal_nofilt = metacal.metaCalibrateReconvolve(image_noised, psf, psf_dil,regularize=False,
@@ -97,19 +97,18 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     #print "no noise:",res_nonoise.corrected_e1
     
     # Get the MetaCal noise correlation function image.
-    pspec_noise = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_noisy-image_sheared_noised).array)))**2 
-    pspec_orig = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal-image_sheared).array*(1./noise))))**2
-    pspec_symm = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_symm - image_sheared).array*(1./noise))))**2
-    mcal_fft = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_noisy).array)))**2
+    pspec_orig = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal-image_sheared).array*(1./noise))))**2*(1./image.array.size)
+    pspec_noise = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_noisy-image_sheared_noised).array)))**2 *(1./image.array.size)
+    pspec_symm = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_symm - image_sheared).array*(1./noise))))**2*(1./image.array.size)
     
     if doplot is True:
         # First plot: The images (true, metacal, difference):
         fig, ((ax1,ax2,ax3),(ax4,ax5,ax6),(ax7,ax8,ax9)) = plt.subplots(nrows=3,ncols=3,figsize=(20,20))
-        plt1 = ax1.imshow(image_sheared.array,interpolation='nearest',cmap=cmap)
+        plt1 = ax1.imshow(image_sheared.array,interpolation='nearest')
         ax1.set_title("'true' metacal image")
-        plt2 = ax2.imshow(shearedGal.array,interpolation='nearest',cmap=cmap)
+        plt2 = ax2.imshow(shearedGal.array,interpolation='nearest')
         ax2.set_title("metacal image")
-        plt3 = ax3.imshow((shearedGal - image_sheared).array,interpolation='nearest',cmap=cmap)
+        plt3 = ax3.imshow((shearedGal - image_sheared).array,interpolation='nearest')
         ax3.set_title("numerical error \n in metacal procedure")
 
         plt4 = ax4.imshow(image_noised.array,interpolation='nearest',cmap=cmap)
