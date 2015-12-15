@@ -19,8 +19,9 @@ def getTargetPSF(psfImage, pixelscale, g1 =0.0, g2 = 0.0, gal_shear=True):
     psfGrownNoPixel = psfNoPixel.dilate(1 + 2*math.sqrt(g1**2 + g2**2))
 
     # Convolve the grown psf with the pixel
-    psfGrown = galsim.Convolve(psfGrownNoPixel,pixel)
     # Convolve one more time with a tiny, tiny gaussian.
+    delta = galsim.Gaussian(sigma=0.001)
+    psfGrown = galsim.Convolve([psfGrownNoPixel,pixel,delta])
 
     
     # I think it's actually the shear of the effective, PSF-convolved PSF that we're sensitive
@@ -57,8 +58,9 @@ def deCorrelateNoiseObject(galaxyImage, psf, psfTarget, g1=0.0, g2=0.0, variance
     return deCorrCNObj
 
 
+    
 
-def metaCalibrateReconvolve(galaxyImage, psf, psfTarget, g1=0.0, g2=0.0, noise_symm = False, variance = None, regularize= True):
+def metaCalibrateReconvolve(galaxyImage, psf, psfTarget, g1=0.0, g2=0.0, noise_symm = False, variance = None, regularize= False):
 
     # psf, and psfTarget need to be GSObjects.
     # psf and psfTarget should both contain the pixel.
@@ -78,7 +80,7 @@ def metaCalibrateReconvolve(galaxyImage, psf, psfTarget, g1=0.0, g2=0.0, noise_s
 
     # Reconvolve to the target psf
     galaxy_sheared_reconv = galsim.Convolve([galaxy_noPSF, psfTarget])
-
+    
     
     # Draw reconvolved, sheared image to an ImageD object.
     galaxyImageSheared = galaxy_sheared_reconv.drawImage(image=galaxyImage.copy(),method='no_pixel')
@@ -99,8 +101,8 @@ def metaCalibrateReconvolve(galaxyImage, psf, psfTarget, g1=0.0, g2=0.0, noise_s
         imFFT = imFFT * W
         arrFilt = np.ascontiguousarray(np.real(np.fft.ifft2(imFFT)))
         imFilt = galsim.Image(arrFilt,scale=galaxyImageSheared.scale)
-        #imFilt.addNoise(galsim.UncorrelatedNoise(variance=variance))
-        #imFilt.noise = galsim.UncorrelatedNoise(variance=variance)
+        imFilt.addNoise(galsim.UncorrelatedNoise(variance=variance))
+        imFilt.noise = galsim.UncorrelatedNoise(variance=variance)
         return imFilt
         
     

@@ -52,8 +52,8 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     psf_im = psf.drawImage(image=galsim.Image(psf_image_size,psf_image_size,scale=pixscale), method='no_pixel' )
     psf_dil_im = psf_dil.drawImage(image=galsim.Image(psf_image_size,psf_image_size,scale=pixscale), method='no_pixel' )
 
-    #psf = galsim.InterpolatedImage(psf_im)
-    #psf_dil = psf.dilate(1.+2*np.sqrt(shear1_step**2 + shear2_step**2))
+    psf = galsim.InterpolatedImage(psf_im)
+    psf_dil = psf.dilate(1.+2*np.sqrt(shear1_step**2 + shear2_step**2))
     
     # Add noise to the image.
 
