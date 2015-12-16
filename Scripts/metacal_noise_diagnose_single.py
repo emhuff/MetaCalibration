@@ -137,7 +137,7 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
         fig.colorbar(plt5,ax=ax5)
         fig.colorbar(plt6,ax=ax6)
         fig.colorbar(plt7,ax=ax7)
-        fig.colorbar(plt8,ax=ax8)
+        fig.colorbar(plt9,ax=ax8)
         fig.colorbar(plt9,ax=ax9)
         fig.savefig("metacal_noise_images.png")
         fig.clf()
