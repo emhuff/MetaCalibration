@@ -18,7 +18,7 @@ import metacal
 def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 0.00, shear2_step = 0.00,
                            psf_size = .70, sersic_index = 4., pixscale = .265,
                            galaxy_size = 1.0, doplot = False, size = False,
-                           do_centroid = False, noise = 0.01):
+                           do_centroid = False, noise = 0.01, getNoise = False):
 
 
     image_size = 64 #ceil(128 * (0.3/pixscale))
@@ -90,9 +90,9 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     #print "no noise:",res_nonoise.corrected_e1
     
     # Get the MetaCal noise correlation function image.
-    pspec_orig = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal-image_sheared).array*(1./noise))))**2*(1./image.array.size)
+    pspec_white = np.abs(np.fft.fftshift(np.fft.fft2((image_empty).array*(1./noise))))**2*(1./image.array.size)
     pspec_noise = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_noisy-image_sheared).array*(1./noise))))**2 *(1./image.array.size)
-    pspec_symm = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_symm - shearedGal_noisy).array*(1./noise))))**2*(1./image.array.size)
+    pspec_symm = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_symm - image_sheared).array*(1./noise))))**2*(1./image.array.size)
 
 
 
@@ -117,7 +117,7 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
         plt6 = ax6.imshow((shearedGal_symm).array,interpolation='nearest',cmap=cmap)
         ax6.set_title("symm.  image")
 
-        plt7 = ax7.imshow((pspec_orig),interpolation='nearest',cmap=plt.cm.winter)
+        plt7 = ax7.imshow((pspec_white),interpolation='nearest',cmap=plt.cm.winter)
         ax7.set_title("power spectrum of \n metacal -  truth images")
         plt8 = ax8.imshow((pspec_noise),interpolation='nearest',cmap=plt.cm.winter)
         ax8.set_title("power spectrum of \n mcal noise")    
@@ -138,16 +138,19 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
         fig.colorbar(plt9,ax=ax9)
         fig.savefig("metacal_noise_diagnostics.png")
         fig.clf()
-    return status, res_noise.corrected_e1, res_symm.corrected_e1, res_nonoise.corrected_e1, res_white.corrected_e1
-
+    if getNoise is False:
+        return status, res_noise.corrected_e1, res_symm.corrected_e1, res_nonoise.corrected_e1, res_white.corrected_e1
+    else:
+        return pspec_white, pspec_noise, pspec_symm
 
 def main(argv):
-    n_iter = 10
-    shear1_step = 0.001
-    shear2_step = 0.0
-    e1_intrinsic = 0.1
-    e2_intrinsic = 0.
+    n_iter = 1000
+    shear1_step = 0.0
+    shear2_step = 0.01
+    e1_intrinsic = 0.0
+    e2_intrinsic = 0.0
     noise = 0.4
+    getNoise = True
     Enoise1 = []
     Esymm1 = []
     Etrue1 = []
@@ -163,48 +166,78 @@ def main(argv):
 
     for i in xrange(n_iter):
         #print "iter "+str(i)+" of "+str(n_iter)
-        (status1, this_Enoise1, this_Esymm1, this_Etrue1, this_Ewhite1) = metacal_noise_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic,
-                                                                       shear1_step = shear1_step, shear2_step = shear2_step, doplot=False,noise= noise)
-        (status2, this_Enoise2, this_Esymm2, this_Etrue2, this_Ewhite2) = metacal_noise_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic,
-                                                                       shear1_step = -shear1_step, shear2_step = -shear2_step, doplot=False,noise= noise)
-        if (status1 is True) & (status2 is True):
-            Enoise1.append(this_Enoise1)
-            Esymm1.append(this_Esymm1)
-            Etrue1.append(this_Etrue1)
-            Ewhite1.append(this_Ewhite1)
-            Enoise2.append(this_Enoise2)
-            Esymm2.append(this_Esymm2)
-            Etrue2.append(this_Etrue2)
-            Ewhite2.append(this_Ewhite2)
-            
+        if getNoise is False:
+            (status1, this_Enoise1, this_Esymm1, this_Etrue1, this_Ewhite1) = metacal_noise_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic,
+                                                                        shear1_step = shear1_step, shear2_step = shear2_step, doplot=False,noise= noise)
+            (status2, this_Enoise2, this_Esymm2, this_Etrue2, this_Ewhite2) = metacal_noise_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic,
+                                                                        shear1_step = -shear1_step, shear2_step = -shear2_step, doplot=False,noise= noise)
+            if (status1 is True) & (status2 is True):
+                Enoise1.append(this_Enoise1)
+                Esymm1.append(this_Esymm1)
+                Etrue1.append(this_Etrue1)
+                Ewhite1.append(this_Ewhite1)
+                Enoise2.append(this_Enoise2)
+                Esymm2.append(this_Esymm2)
+                Etrue2.append(this_Etrue2)
+                Ewhite2.append(this_Ewhite2)
+        else:
+            if i == 0:
+                noisePower_white, noisePower_mcal, noisePower_symm = metacal_noise_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic,
+                                                                                             shear1_step = shear1_step, shear2_step = shear2_step,
+                                                                                             doplot=False,noise= noise,getNoise = True)
+            else:
+                thisPower_white, thisPower_mcal, thisPower_symm = metacal_noise_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic,
+                                                                        shear1_step = shear1_step, shear2_step = shear2_step, doplot=False,noise= noise,
+                                                                        getNoise = True)
 
+                noisePower_white = noisePower_white + thisPower_white
+                noisePower_mcal = noisePower_mcal + thisPower_mcal
+                noisePower_symm = noisePower_symm + thisPower_symm
+    if getNoise is False:        
+        Enoise1 = np.array(Enoise1)
+        Esymm1 = np.array(Esymm1)
+        Etrue1 = np.array(Etrue1)
+        Ewhite1 = np.array(Ewhite1)
+        Enoise2 = np.array(Enoise2)
+        Esymm2 = np.array(Esymm2)
+        Etrue2 = np.array(Etrue2)
+        Ewhite2 = np.array(Ewhite2)    
+        image_size = 48
+        obj = galsim.Sersic(4, half_light_radius =1.0, flux=100.0)
+        objEllip = obj.lens(e1_intrinsic, e2_intrinsic, 1.)
 
-        
-    Enoise1 = np.array(Enoise1)
-    Esymm1 = np.array(Esymm1)
-    Etrue1 = np.array(Etrue1)
-    Ewhite1 = np.array(Ewhite1)
-    Enoise2 = np.array(Enoise2)
-    Esymm2 = np.array(Esymm2)
-    Etrue2 = np.array(Etrue2)
-    Ewhite2 = np.array(Ewhite2)    
-    image_size = 48
-    obj = galsim.Sersic(4, half_light_radius =1.0, flux=100.0)
-    objEllip = obj.lens(e1_intrinsic, e2_intrinsic, 1.)
-
-    # Convolve with a gaussian PSF
-    psf = galsim.Moffat(fwhm = 0.7, beta=3.5)
-    objConv = galsim.Convolve([psf,objEllip])
-    image = objConv.drawImage(image=galsim.Image(image_size,image_size,scale=0.265) )
-
+        # Convolve with a gaussian PSF
+        psf = galsim.Moffat(fwhm = 0.7, beta=3.5)
+        objConv = galsim.Convolve([psf,objEllip])
+        image = objConv.drawImage(image=galsim.Image(image_size,image_size,scale=0.265) )
     
-    #print "at S/N=",np.sqrt(np.sum(image.array**2)/noise**2)
-    #print "truth, white noise", np.mean(Ewhite-Etrue),"+/-",np.std(Ewhite-Etrue)/np.sqrt(n_iter)
-    #print "metacal only: ",np.mean(Enoise-Ewhite)," +/- ",np.std(Enoise - Ewhite)/np.sqrt(n_iter)
-    #print "metacal with symm: ",np.mean(Esymm-Ewhite)," +/- ",np.std(Esymm - Etrue)/np.sqrt(n_iter)
-    print np.mean(Ewhite1-Etrue1), np.mean(Enoise1-Ewhite1), np.mean(Esymm1-Ewhite1), \
-      np.mean(Ewhite2-Etrue2), np.mean(Enoise2-Ewhite2), np.mean(Esymm2-Ewhite2)
+    
+        #print "at S/N=",np.sqrt(np.sum(image.array**2)/noise**2)
+        #print "truth, white noise", np.mean(Ewhite-Etrue),"+/-",np.std(Ewhite-Etrue)/np.sqrt(n_iter)
+        #print "metacal only: ",np.mean(Enoise-Ewhite)," +/- ",np.std(Enoise - Ewhite)/np.sqrt(n_iter)
+        #print "metacal with symm: ",np.mean(Esymm-Ewhite)," +/- ",np.std(Esymm - Etrue)/np.sqrt(n_iter)
+        print np.mean(Ewhite1-Etrue1), np.mean(Enoise1-Ewhite1), np.mean(Esymm1-Ewhite1), \
+        np.mean(Ewhite2-Etrue2), np.mean(Enoise2-Ewhite2), np.mean(Esymm2-Ewhite2)
+    else:
+        import matplotlib as mpl
+        mpl.use('Agg')
+        import matplotlib.pyplot as plt
+        cmap = plt.cm.Greys
 
+        noisePower_mcal = noisePower_mcal * 1./n_iter
+        noisePower_symm = noisePower_symm * 1./n_iter
+        fig,(ax1,ax2,ax3) = plt.subplots(nrows=1,ncols=3,figsize=(21,7))
+        plt1 = ax1.imshow(noisePower_white,interpolation='nearest')
+        ax1.set_title("averaged white noise power,\n"+str(n_iter)+" iterations")
+        plt2 = ax2.imshow(noisePower_mcal,interpolation='nearest')
+        ax2.set_title("averaged mcal noise power,\n"+str(n_iter)+" iterations")
+        plt3 = ax3.imshow(noisePower_symm,interpolation='nearest')
+        ax3.set_title("averaged mcal symm. noise power,\n"+str(n_iter)+" iterations")
+        fig.colorbar(plt2,ax=ax1)
+        fig.colorbar(plt2,ax=ax2)
+        fig.colorbar(plt2,ax=ax3)
+        fig.savefig("mcal_avg_noise_power.png")
+        
 if __name__ == "__main__":
     import pdb, traceback
     try:

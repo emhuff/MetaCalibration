@@ -23,7 +23,7 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
                            do_centroid = False, noise = 0.01):
 
 
-    image_size = 128 #ceil(128 * (0.3/pixscale))
+    image_size = 48 #ceil(128 * (0.3/pixscale))
     psf_image_size = 48
     # We're worried about FFT accuracy, so there should be hooks here for the gsparams.
     gspars = galsim.GSParams()
@@ -95,8 +95,9 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     
     # Get the MetaCal noise correlation function image.
     pspec_orig = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal-image_sheared).array*(1./noise))))**2*(1./image.array.size)
+    pspec_white = np.abs(np.fft.fftshift(np.fft.fft2((image_empty).array*(1./noise))))**2*(1./image.array.size)
     pspec_noise = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_noisy-image_sheared).array*(1./noise))))**2 *(1./image.array.size)
-    pspec_symm = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_symm - image_sheared).array*(1./noise))))**2*(1./image.array.size)
+    pspec_symm = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_symm-image_sheared).array*(1./noise))))**2 *(1./image.array.size)
     
     if doplot is True:
         # First plot: The images (true, metacal, difference):
@@ -115,12 +116,12 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
         plt6 = ax6.imshow((shearedGal_symm).array,interpolation='nearest',cmap=cmap)
         ax6.set_title("symm.  image")
 
-        plt7 = ax7.imshow((pspec_orig),interpolation='nearest',cmap=plt.cm.winter)
-        ax7.set_title("power spectrum of \n metacal -  truth images")
+        plt7 = ax7.imshow((pspec_white),interpolation='nearest',cmap=plt.cm.winter)
+        ax7.set_title("power spectrum of \n unsheared white noise")
         plt8 = ax8.imshow((pspec_noise),interpolation='nearest',cmap=plt.cm.winter)
         ax8.set_title("power spectrum of \n mcal noise")    
         plt9 = ax9.imshow((pspec_symm),interpolation='nearest',cmap=plt.cm.winter)
-        ax9.set_title(" power spectrum \n of isotropized noise")    
+        ax9.set_title(" power spectrum \n of symmetrized noise")    
 
     
 
@@ -137,8 +138,8 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
         fig.colorbar(plt5,ax=ax5)
         fig.colorbar(plt6,ax=ax6)
         fig.colorbar(plt7,ax=ax7)
-        fig.colorbar(plt9,ax=ax8)
-        fig.colorbar(plt9,ax=ax9)
+        fig.colorbar(plt7,ax=ax8)
+        fig.colorbar(plt7,ax=ax9)
         fig.savefig("metacal_noise_images.png")
         fig.clf()
     return status, res_noise.corrected_e1, res_symm.corrected_e1, res_nonoise.corrected_e1, res_white.corrected_e1
