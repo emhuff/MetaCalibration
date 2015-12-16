@@ -23,8 +23,8 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
                            do_centroid = False, noise = 0.01):
 
 
-    image_size = 128 #ceil(128 * (0.3/pixscale))
-    psf_image_size = 64
+    image_size = 64 #ceil(128 * (0.3/pixscale))
+    psf_image_size = 48
     # We're worried about FFT accuracy, so there should be hooks here for the gsparams.
     gspars = galsim.GSParams()
     gspars.noise_pad_factor = 4*image_size
@@ -95,7 +95,7 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
     
     # Get the MetaCal noise correlation function image.
     pspec_orig = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal-image_sheared).array*(1./noise))))**2*(1./image.array.size)
-    pspec_noise = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_noisy-image_sheared_noised).array)))**2 *(1./image.array.size)
+    pspec_noise = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_noisy-image_sheared).array)))**2 *(1./image.array.size)
     pspec_symm = np.abs(np.fft.fftshift(np.fft.fft2((shearedGal_symm - image_sheared).array*(1./noise))))**2*(1./image.array.size)
     
     if doplot is True:

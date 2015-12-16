@@ -53,8 +53,6 @@ def deCorrelateNoiseObject(galaxyImage, psf, psfTarget, g1=0.0, g2=0.0, variance
     return deCorrCNObj
 
 
-    
-
 def metaCalibrateReconvolve(galaxyImage, psf, psfTarget, g1=0.0, g2=0.0, noise_symm = False, variance = None, regularize= False):
 
     gspars = galsim.GSParams()
