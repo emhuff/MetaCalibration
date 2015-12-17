@@ -159,9 +159,9 @@ def main(argv):
     Esymm2 = []
     Etrue2 = []
     Ewhite2 = []    
-    (status, this_Enoise, this_Esymm, this_Etrue, this_Ewhite) = metacal_noise_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic,
-                                                                                        shear1_step = shear1_step, shear2_step = shear2_step,
-                                                                                        doplot=True,noise= noise)
+    #(status, this_Enoise, this_Esymm, this_Etrue, this_Ewhite) = metacal_noise_diagnose(e1_intrinsic = e1_intrinsic, e2_intrinsic = e2_intrinsic,
+    #                                                                                    shear1_step = shear1_step, shear2_step = shear2_step,
+    #                                                                                    doplot=True,noise= noise)
 
 
     for i in xrange(n_iter):
