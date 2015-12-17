@@ -144,13 +144,13 @@ def metacal_noise_diagnose(e1_intrinsic = 0.0, e2_intrinsic = 0., shear1_step = 
         return pspec_white, pspec_noise, pspec_symm
 
 def main(argv):
-    n_iter = 1000
-    shear1_step = 0.0
-    shear2_step = 0.01
+    n_iter = 10000
+    shear1_step = 0.001
+    shear2_step = 0.0
     e1_intrinsic = 0.0
     e2_intrinsic = 0.0
     noise = 0.4
-    getNoise = True
+    getNoise = False
     Enoise1 = []
     Esymm1 = []
     Etrue1 = []
@@ -226,16 +226,23 @@ def main(argv):
 
         noisePower_mcal = noisePower_mcal * 1./n_iter
         noisePower_symm = noisePower_symm * 1./n_iter
-        fig,(ax1,ax2,ax3) = plt.subplots(nrows=1,ncols=3,figsize=(21,7))
+        fig,((ax1,ax2,ax3),(ax4,ax5,ax6)) = plt.subplots(nrows=2,ncols=3,figsize=(21,7))
         plt1 = ax1.imshow(noisePower_white,interpolation='nearest')
         ax1.set_title("averaged white noise power,\n"+str(n_iter)+" iterations")
         plt2 = ax2.imshow(noisePower_mcal,interpolation='nearest')
         ax2.set_title("averaged mcal noise power,\n"+str(n_iter)+" iterations")
         plt3 = ax3.imshow(noisePower_symm,interpolation='nearest')
         ax3.set_title("averaged mcal symm. noise power,\n"+str(n_iter)+" iterations")
+
+        plt4 = ax4.imshow(noisePower_white - noisePower_white.transpose(),interpolation='nearest')
+        plt5 = ax5.imshow(noisePower_mcal - noisePower_mcal.transpose(),interpolation='nearest')
+        plt6 = ax6.imshow(noisePower_symm - noisePower_symm.transpose(),interpolation='nearest')                
         fig.colorbar(plt2,ax=ax1)
         fig.colorbar(plt2,ax=ax2)
         fig.colorbar(plt2,ax=ax3)
+        fig.colorbar(plt2,ax=ax4)
+        fig.colorbar(plt2,ax=ax5)
+        fig.colorbar(plt2,ax=ax6)
         fig.savefig("mcal_avg_noise_power.png")
         
 if __name__ == "__main__":
