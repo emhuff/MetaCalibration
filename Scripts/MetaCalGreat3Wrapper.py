@@ -39,7 +39,7 @@ def log(msg):
 # unique number by combining 4 numbers of similar order.  If you don't want to use this whole
 # caching scheme, then set `use_cache=False` to revert to the previous behavior, which gives a new
 # noise symmetrization field for each postage stamp (and is thus verrrrrry expensive).
-use_symm = False # make noise symmetrization optional
+use_symm = True # make noise symmetrization optional
 use_cache = True # decide whether to use the caching trick or not
 cached_noise_field = {}
 
@@ -357,10 +357,10 @@ def metaCalibrateReconvolve(galaxyImage, psfImage, psfTarget, g1=0.0, g2=0.0, va
         else:
             # For this we need to know something about the noise field. Let this be represented by
             # the noise object CN.  Initialize as uncorrelated noise with fixed (known) variance.
-            GN = galsim.GaussianNoise(sigma=numpy.double(numpy.sqrt(variance)))
-            test_im = galsim.Image(512,512,scale=pixel)
-            test_im.addNoise(GN)
-            CN = galsim.CorrelatedNoise(test_im, scale=pixel)
+            #GN = galsim.GaussianNoise(sigma=numpy.double(numpy.sqrt(variance)))
+            #test_im = galsim.Image(512,512,scale=pixel)
+            #test_im.addNoise(GN)
+            CN = galsim.UncorrelatedNoise(variance = variance, wcs = galaxyImage.wcs)
             # Now apply the same set of operations to this...
             CN = CN.convolvedWith(psfInv)
             CN = CN.shear(g1 = g1, g2 = g2)
