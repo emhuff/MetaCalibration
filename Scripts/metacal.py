@@ -65,7 +65,7 @@ def metaCalibrateReconvolve(galaxyImage, psf, psfTarget, g1=0.0, g2=0.0, noise_s
     galaxy = galsim.InterpolatedImage(galaxyImage,gsparams=gspars)
     
     if variance is not None:
-        galaxy.noise = galsim.UncorrelatedNoise(variance=variance)
+        galaxy.noise = galsim.UncorrelatedNoise(variance=variance,wcs=galaxyImage.wcs)
     psfInv = galsim.Deconvolve(psf)
     galaxy_noPSF = galsim.Convolve([galaxy,psfInv])
 
@@ -95,8 +95,8 @@ def metaCalibrateReconvolve(galaxyImage, psf, psfTarget, g1=0.0, g2=0.0, noise_s
         imFFT = imFFT * W
         arrFilt = np.ascontiguousarray(np.real(np.fft.ifft2(imFFT)))
         imFilt = galsim.Image(arrFilt,scale=galaxyImageSheared.scale)
-        imFilt.addNoise(galsim.UncorrelatedNoise(variance=variance))
-        imFilt.noise = galsim.UncorrelatedNoise(variance=variance)
+        imFilt.addNoise(galsim.UncorrelatedNoise(variance=variance),wcs=galaxyImage.wcs)
+        imFilt.noise = galsim.UncorrelatedNoise(variance=variance,wcs=galaxyImage.wcs)
         return imFilt
         
     

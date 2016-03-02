@@ -51,7 +51,9 @@ def getAllCatalogs( path = '../Great3/', mc_type = None, sn_cut = None ):
     elif mc_type=='rgc-fixedaber-regauss':
         path = path+'Outputs-Real-Regauss-FixedAber-BugFix/rgc_fixedaber_metacalfix_regauss*.fits'
         truthFile = 'rgc-fixedaber-truthtable.txt'
-
+    elif mc_type=='cgc-regauss-sym':
+        path = path+'Outputs-CGC-Regauss-SymNoise/output_catalog-*.fits'
+        truthFile = 'cgc-truthtable.txt'
     else:
         raise RuntimeError('Unrecognized mc_type: %s'%mc_type)
 
@@ -75,6 +77,7 @@ def getAllCatalogs( path = '../Great3/', mc_type = None, sn_cut = None ):
             # regressed the galaxy shapes against the wrong psf
             # ellipticity. I've disabled this for the time being.
         this_catalog = fits.getdata(thisFile)
+        #this_catalog = np.random.choice(this_catalog,size=this_catalog.size/2,replace=False)
         keep  =   (this_catalog['g1'] != -10) & (this_catalog['g2'] != -10) & (this_catalog['weight'] > 0)
         this_catalog = this_catalog[keep]
         if (mc_type=='moments') or (mc_type=='ksb'):
@@ -511,7 +514,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         fig.savefig(figName)
     else:
         fig,((ax1,ax2), (ax3,ax4), (ax5, ax6), (ax7,ax8)) = plt.subplots( nrows=4,ncols=2,figsize=(14,28) )
-        ax1.errorbar(truthTable['g1'],obsTable['g1'],obsTable['err1'],linestyle='.')
+        ax1.errorbar(truthTable['g1'],obsTable['g1'],obsTable['err1'],linestyle=' ')
         ax1.plot(truthTable['g1'],truthTable['g1'],linestyle='--',color='red')
         ax1.plot(truthTable['g1'],coeff1[0]*truthTable['g1'] + coeff1[2] + truthTable['g1'],linestyle='--',color='cyan')
         ax1.set_title('g1')
@@ -519,7 +522,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
                      (0.01,-0.03))
         if logLcut is not None:
             ax1.plot(truthTable[outliers]['g1'],obsTable[outliers]['g1'],'s',color='red')
-        ax2.errorbar(truthTable['g2'],obsTable['g2'],obsTable['err2'],linestyle='.')
+        ax2.errorbar(truthTable['g2'],obsTable['g2'],obsTable['err2'],linestyle=' ')
         ax2.plot(truthTable['g2'],truthTable['g2'],'--',color='red')
         ax2.plot(truthTable['g2'],coeff2[0]*truthTable['g2'] + coeff2[2] + truthTable['g2'],linestyle='--',color='cyan')
         ax2.set_title('g2')
@@ -637,7 +640,7 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
 
     
     fig,((ax1,ax2), (ax3,ax4), (ax5,ax6)) = plt.subplots(nrows=3, ncols=2,figsize=(14,21))
-    ax1.errorbar(truthTable['g1'],obsTable['g1'],obsTable['err1'],linestyle='.')
+    ax1.errorbar(truthTable['g1'],obsTable['g1'],obsTable['err1'],linestyle=' ')
     ax1.plot(truthTable['g1'],(1+coeff1[0])*truthTable['g1'] + coeff1[2],linestyle='--',color='cyan')
     ax1.plot(truthTable['g1'],truthTable['g1'],linestyle='--',color='red')
     ax1.set_title('g1')
@@ -647,7 +650,7 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
                  (0.01,-0.03))
     #ax1.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
     
-    ax2.errorbar(truthTable['g2'],obsTable['g2'],obsTable['err2'],linestyle='.')
+    ax2.errorbar(truthTable['g2'],obsTable['g2'],obsTable['err2'],linestyle=' ')
     ax2.plot(truthTable['g2'],(1+coeff2[0])*truthTable['g2'] + coeff2[2],linestyle='--',color='cyan')
     ax2.plot(truthTable['g2'],truthTable['g2'],'--',color='red')
     ax2.set_title('g2')
@@ -765,7 +768,7 @@ def main(argv):
     import argparse
 
     description = """Analyze MetaCalibration outputs from Great3 and Great3++ simulations."""
-    mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym','noaber-regauss','rgc-regauss','rgc-noaber-regauss','rgc-fixedaber-regauss', 'rgc-ksb','cgc-noaber-precise']
+    mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym','noaber-regauss','rgc-regauss','rgc-noaber-regauss','rgc-fixedaber-regauss', 'rgc-ksb','cgc-noaber-precise','cgc-regauss-sym']
     # Note: The above line needs to be consistent with the choices in getAllCatalogs.
 
     parser = argparse.ArgumentParser(description=description)

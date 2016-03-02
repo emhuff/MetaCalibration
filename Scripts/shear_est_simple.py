@@ -52,6 +52,9 @@ def getAllCatalogs( path = '../Great3/', mc_type = None, sn_cut = None ):
     elif mc_type=='rgc-fixedaber-regauss':
         path = path+'Outputs-Real-Regauss-FixedAber-BugFix/rgc_fixedaber_metacalfix_regauss*.fits'
         truthFile = 'rgc-fixedaber-truthtable.txt'
+    elif mc_type=='cgc-regauss-sym':
+        path = path+'Outputs-CGC-Regauss-SymNoise/output_catalog-*.fits'
+        truthFile = 'cgc-truthtable.txt'
 
     else:
         raise RuntimeError('Unrecognized mc_type: %s'%mc_type)
@@ -447,7 +450,7 @@ def main(argv):
     import argparse
 
     description = """Analyze MetaCalibration outputs from Great3 and Great3++ simulations."""
-    mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym','noaber-regauss','rgc-regauss','rgc-noaber-regauss','rgc-fixedaber-regauss', 'rgc-ksb','cgc-noaber-precise']
+    mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym','noaber-regauss','rgc-regauss','rgc-noaber-regauss','rgc-fixedaber-regauss', 'rgc-ksb','cgc-noaber-precise','cgc-regauss-sym']
     # Note: The above line needs to be consistent with the choices in getAllCatalogs.
 
     parser = argparse.ArgumentParser(description=description)
