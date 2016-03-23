@@ -147,10 +147,10 @@ def main(argv):
     n_iter = 10000
     shear1_step = 0.001
     shear2_step = 0.0
-    e1_intrinsic = 0.0
+    e1_intrinsic = 0.3
     e2_intrinsic = 0.0
     noise = 0.4
-    getNoise = False
+    getNoise = True
     Enoise1 = []
     Esymm1 = []
     Etrue1 = []
