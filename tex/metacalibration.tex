@@ -38,7 +38,7 @@ Department of Physics, The Ohio State University, OH 43210, USA}
   methods: observational}
 
 \begin{abstract}
-  One of the major limiting sources of systematic error in forthcoming
+  One of the primary limiting sources of systematic error in forthcoming
   weak lensing measurements is systematic uncertainty in the
   quantitative relationship between the distortions due to
   gravitational lensing and the measurable properties of galaxy
@@ -344,7 +344,7 @@ how inference is performed on the full ensemble of galaxies.
 \subsection{MetaCalibrating the Ensemble}
 We test the MetaCalibration procedure on two different shear
 estimation methods -- {\sc regauss} and {\sc KSB} -- each of which has
-known calibration biases [REF; also see figure XXX]. For each of these
+known calibration biases (). For each of these
 methods, we use the entire ensemble of validation simulations to build
 a prior the {\it unlensed} shape distribution, $p_0(\vec{e})$. There
 is no guarantee that the average shear over the ensemble is actually
@@ -426,8 +426,10 @@ each separate field, and evaluate equations~\ref{eqn:hist_est} and
 
 
 \begin{figure*}
+\begin{center}
 \includegraphics[width=0.3\textwidth]{./Plots/regauss-opt-shear_plots-prior_derivs.png}
 \includegraphics[width=0.3\textwidth]{./Plots/ksb-opt-shear_plots-prior_derivs.png}
+\end{center}
 \caption{I do not like these figures. Treat them as placeholders for now.\\
   Constructing the histogram estimator for the three shape measurement
   methods. {\bf Top} panels show measured shape distribution for the
@@ -655,14 +657,6 @@ zero, to ensure reasonable consistency of data quality.  Note that the
 atmospheric PSF is still drawn from a distribution of seeing values
 for each subfield.
 
-\begin{figure}
-\includegraphics[width=0.31\linewidth]{./Plots/rgc-noaber-regauss-opt-shear_plots.png}
-\caption{Results of metacalibration for regauss on RGC with no aberrations. }
-\end{figure}
-
-
-
-
 \subsubsection{Real Ground Constant without Aberrations}
 
 The next branch we analyze is similar to the previous one, but with
@@ -678,13 +672,6 @@ calibration biases for regauss on this branch are reduced by MetaCal
 to a level consistent with zero. No trend with PSF ellipticity is
 detected before or after detrending. Realistic galaxy morphologies do
 not appear to have a significant impact on our correction procedure.
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=0.31\linewidth]{./Plots/noaber-regauss-opt-shear_plots.png}
-\caption{Results of metacalibration for regauss on CGC-no aberrations}
-\end{center}
-\end{figure}
 
 
 \subsubsection{Control Ground Constant}
@@ -709,23 +696,28 @@ after metacalibration tend fo be driven by fields with very large psf
 ellipticity. These could be (and often would be) excluded in a real
 analysis. 
 
-\begin{figure}
-\includegraphics[width=0.32\linewidth]{./Plots/regauss-opt-shear_plots.png}
-\includegraphics[width=0.32\linewidth]{./Plots/ksb-opt-shear_plots.png}
-\includegraphics[width=0.32\linewidth]{./Plots/moments-opt-shear_plots.png}
-\caption{Results of metacalibration for regauss ({\bf left}), KSB ({\bf
-    center}) and Linear Moments ({\bf right}) on CGC.}
-\label{fig:cgc_corrected}
-\end{figure}
 
-\begin{figure}
+\begin{figure*}[t]
 \includegraphics[width=0.32\linewidth]{./Plots/regauss-no_corrections.png}
 \includegraphics[width=0.32\linewidth]{./Plots/ksb-no_corrections.png}
 \includegraphics[width=0.32\linewidth]{./Plots/moments-no_corrections.png}
 \caption{Results {\it without} metacalibration for the regauss ({\bf left}), KSB ({\bf
-    center}), and Linear Moments ({\bf right}) algorithms on the CGC branch.}
+    center}), and Linear Moments ({\bf right}) algorithms on the CGC
+  branch.}
 \label{fig:cgc_uncorrected}
-\end{figure}
+\end{figure*}
+
+\begin{figure*}
+\begin{center}
+\includegraphics[width=0.32\linewidth]{./Plots/regauss-opt-shear_plots.png}
+\includegraphics[width=0.32\linewidth]{./Plots/ksb-opt-shear_plots.png}
+\includegraphics[width=0.32\linewidth]{./Plots/moments-opt-shear_plots.png}
+\end{center}
+\caption{Results of metacalibration for regauss ({\bf left}), KSB ({\bf
+    center}) and Linear Moments ({\bf right}) on CGC.}
+\label{fig:cgc_corrected}
+\end{figure*}
+
 
 
 
@@ -737,13 +729,6 @@ results continue to be consistent with no shear calibration bias. The
 KSB results retain a noticeable calibration error, but it has again
 been reduced by a factor of $\sim3-4$ below its uncorrected value. 
 
-\begin{figure}
-\begin{center}
-\includegraphics[width= 0.49\linewidth]{./Plots/rgc-regauss-opt-shear_plots.png}
-\caption{Results of metacalibration for regauss on RGC with aberrations. }
-\end{center}
-\end{figure}
-
 
 
 \subsubsection{Real Ground Constant with constant aberrations}
@@ -752,14 +737,6 @@ One issue of concern is how to understand outlier fields.  In GREAT3,
 there was a concern that some outliers were due to failure of our
 model for interpreting the per-object shapes in fields that had large
 aberrations.
-
-\begin{figure}
-\begin{center}
-  \includegraphics[width=0.5\linewidth]{./Plots/rgc-fixedaber-regauss-opt-shear_plots.png}
-  \caption{Results of metacalibration for regauss on RGC with large
-    fixed aberrations. }
-\end{center}
-\end{figure}
 
 As a way to understand this, we generated a version of RGC that had
 quite large aberrations that were identical in each field:
