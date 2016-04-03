@@ -668,15 +668,14 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
     ax3.plot(truthTable['g1'],coeff1[0]*truthTable['g1'] + coeff1[2],linestyle='--',color='cyan')
     ax3.set_xlabel('g1 (truth)')
     ax3.set_ylabel('g1 (est) - g1 (truth)')
-    ax3.text(0.01,0.015,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5])) 
     ax3.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
     if "moments" in mc:
         ax3.set_ylim([-1.,1.])
+        ax3.text(0.01,-0.5,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5])) 
+    else:
+        ax3.text(0.01,0.015,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5])) 
     ax3.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
     ax3.axhline(0.,linestyle='--',color='red')
-    ax3.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%
-                 (coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5]),
-                 (0.6,0.8), textcoords='axes fraction')
     
     
     ax4.plot(truthTable['g2'], obsTable['g2'] - truthTable['g2'],'.')
@@ -684,14 +683,14 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
     ax4.set_ylim([-.03,.03])#.set_ylim([-shear_range, shear_range])
     if "moments" in mc:
         ax4.set_ylim([-1.,1.])
+        ax4.text(0.01,-0.5,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]))    
+    else:
+        ax4.text(0.01,0.015,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]))    
     ax4.set_xlabel('g2 (truth)')
     ax4.set_ylabel('g2 (est) - g2 (truth)')
-    ax4.text(0.01,0.015,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]))    
+
     ax4.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
     ax4.axhline(0.,linestyle='--',color='red')
-    ax4.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%
-                 (coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]),
-                 (0.6,0.8), textcoords='axes fraction')
 
     
     ax5.plot(obsTable['psf_e1'], obsTable['g1'] - truthTable['g1'],'.')
