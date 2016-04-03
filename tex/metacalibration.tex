@@ -344,14 +344,14 @@ how inference is performed on the full ensemble of galaxies.
 \subsection{MetaCalibrating the Ensemble}
 We test the MetaCalibration procedure on two different shear
 estimation methods -- {\sc regauss} and {\sc KSB} -- each of which has
-known calibration biases (). For each of these
-methods, we use the entire ensemble of validation simulations to build
-a prior the {\it unlensed} shape distribution, $p_0(\vec{e})$. There
-is no guarantee that the average shear over the ensemble is actually
-sufficiently small, however, so we symmetrize this prior distribution
-by averaging the raw prior with its reflection about $\vec{e}=0$. The
-newly symmetrized prior is $p_{0,\rm sym}$. The model for each field
-is
+known calibration biases (). For each of these methods, we use the
+entire ensemble of validation simulations to build a model of the {\it
+  unlensed} shape distribution, $p_0(\vec{e})$. There is no guarantee
+that the average shear over the ensemble is actually sufficiently
+small to allow unbiased inference, however, so we symmetrize this
+model distribution by averaging it with its reflection about
+$\vec{e}=0$. The newly symmetrized model unlensed distribution is
+$p_{0,\rm sym}$. The model for each field is
 \begin{align}
 \vec{e}_{\rm meas} = \vec{e}_{0} + R_{\rm psf} \vec{e}_{\rm psf} + R\vec{\gamma} + \vec{c}
 \label{eqn:edist_model}
@@ -359,7 +359,7 @@ is
 where $e_{\rm meas}$ is the vector of measured ellipticities, and the
 constants $R_{\rm psf}$, $R$, and $c$ have been determined separately
 for each galaxy, as described above, during the image modification
-step. This prior is then used to construct a linear estimator for the
+step. This is then used to construct a linear estimator for the
 shapes, as follows.
 
 If the measured shape distribution $n(\vec{e}_{\rm meas})$ is linear
@@ -403,13 +403,12 @@ and it has variance
 \end{align}
 
 This method for shear inference has as its tunable parameter only the
-histogram binning scheme, about which more below. Once we've chosen a
-suitable scheme, we then bin the prior into equal-number bins and
-calculate its shear derivative using equation
-\ref{eqn:edist_model}\footnote{We add a small shear $\vec{\gamma}$,
-  then rebin.}. We calculate a shape histogram with these bins for
-each separate field, and evaluate equations~\ref{eqn:hist_est} and
-\ref{eqn:hist_est_var}.
+histogram binning scheme. Once we've chosen a suitable scheme, we then
+bin the prior into equal-number bins and calculate its shear
+derivative using equation \ref{eqn:edist_model}\footnote{We add a
+  small shear $\vec{\gamma}$, then rebin.}. We calculate a shape
+histogram with these bins for each separate field, and evaluate
+equations~\ref{eqn:hist_est} and \ref{eqn:hist_est_var}.
 
 \begin{figure}
 \includegraphics[width=0.45\textwidth]{./Plots/regauss-r-histogram.png}
@@ -444,15 +443,15 @@ each separate field, and evaluate equations~\ref{eqn:hist_est} and
 \end{figure*}
 
 If we have a poor model for the unlensed histogram, $h_{\rm fid}$,
-then the results will be biased. We can evaulate the distance from
-each field to the unlensed prior using equation~\ref{eqn:multnomial},
-taking the probabilities $q_i$ from the unlensed prior and the
-histogram amplitudes from the current field, {after correcting for the
-  estimated shear}. If the shear response measured for the unlensed
-prior is correct, then the performance of the estimator will depend
-only on the similarity of the prior to the measurement field. The
-likelihood can then be used as an objective criterion for the quality
-of the inference.
+then the results will be biased. We can define a distance between each
+field and the unlensed model using equation~\ref{eqn:multnomial},
+taking the probabilities $q_i$ from the unlensed model and the
+histogram amplitudes from the current field, after correcting for the
+estimated shear. If the shear response measured for the unlensed prior
+is correct, then the performance of the estimator will depend only on
+the similarity of the model to the measurement field. The likelihood
+can then be used as an objective criterion for the quality of the
+inference.
 
 \subsection{Relationship to previous implementations}
 
@@ -482,7 +481,7 @@ object moments.  One method is not a standard shear estimation method
 at all: we use linear combinations of the directly observed second
 moments without correcting for the PSF at all.  In principle, the
 information about how those respond to shear should be determined by
-metacalibration to correctly infer the shear.  THe difference in this
+metacalibration to correctly infer the shear.  The difference in this
 case is that instead of providing a small correction to the outputs of
 a PSF correction method, we rely on metacalibration to do the entirety
 of the PSF correction, which is a very stringent test.
@@ -575,12 +574,12 @@ combinations of moments:
 \hat{M}_i = (M_{11}-M_{22}, 2M_{12}).
 \end{equation}
 
-Clearly these moments include a number of nuisance quantities, like
-the galaxy flux and size.  They also do not include any PSF correction
-whatsoever.  In principle, metacalibration should be able to
-nonetheless determine the response of this statistic to shear,
-$\mathrm{d}\hat{M}_i/\mathrm{d}\gamma$, and produce a reliable shear
-estimate, provided that the model for the predominant sources of
+Clearly these moments are sensitive to a number of nuisance
+quantities, like the galaxy flux and size.  They also do not include
+any PSF correction whatsoever.  In principle, metacalibration should
+be able to nonetheless determine the response of this statistic to
+shear, $\mathrm{d}\hat{M}_i/\mathrm{d}\gamma$, and produce a reliable
+shear estimate, provided that the model for the predominant sources of
 systematics follows that in Eq.~\ref{eqn:edist_model}.  This is a
 quite stringent test of the metacalibration method.
 
@@ -682,8 +681,8 @@ including parametric galaxies.
 
 For this branch, we have tested the performance of MetaCal on all
 three shape estimation algorithms described in Section
-\ref{sec:testing}. Figures \ref{fig:cgc_corrected} and
-\ref{fig:cgc_uncorrected} show the results of shear estimation with
+\ref{sec:testing}. Figures \ref{fig:cgc_uncorrected} and \ref{fig:cgc_corrected}
+show the results of shear estimation with
 and without metacalibration for each algorithm. In all three cases,
 our technique has substantially reduced shear calibration biases below
 their uncorrected levels. The linear moments, in particular carry
@@ -692,29 +691,24 @@ after correction, their performance is superior to that of uncorrected
 KSB.
 
 Also notable in these figures is the fact that residual psf trends
-after metacalibration tend fo be driven by fields with very large psf
+after metacalibration tend to be driven by fields with very large psf
 ellipticity. These could be (and often would be) excluded in a real
 analysis. 
 
 
 \begin{figure*}[t]
+\begin{center}
 \includegraphics[width=0.32\linewidth]{./Plots/regauss-no_corrections.png}
 \includegraphics[width=0.32\linewidth]{./Plots/ksb-no_corrections.png}
 \includegraphics[width=0.32\linewidth]{./Plots/moments-no_corrections.png}
-\caption{Results {\it without} metacalibration for the regauss ({\bf left}), KSB ({\bf
-    center}), and Linear Moments ({\bf right}) algorithms on the CGC
-  branch.}
-\label{fig:cgc_uncorrected}
-\end{figure*}
-
-\begin{figure*}
-\begin{center}
 \includegraphics[width=0.32\linewidth]{./Plots/regauss-opt-shear_plots.png}
 \includegraphics[width=0.32\linewidth]{./Plots/ksb-opt-shear_plots.png}
 \includegraphics[width=0.32\linewidth]{./Plots/moments-opt-shear_plots.png}
 \end{center}
-\caption{Results of metacalibration for regauss ({\bf left}), KSB ({\bf
-    center}) and Linear Moments ({\bf right}) on CGC.}
+\caption{{\bf Top:} Results {\it without} metacalibration for the regauss ({\bf left}), KSB ({\bf
+    center}), and Linear Moments ({\bf right}) algorithms on the CGC.
+  branch.  {\bf Bottom:} Results {\it with} metacalibration for the regauss ({\bf left}), KSB ({\bf
+    center}) and Linear Moments algorithms ({\bf right}) on CGC.}
 \label{fig:cgc_corrected}
 \end{figure*}
 
@@ -751,11 +745,11 @@ ellipticity trend in the uncorrected regauss results.
 
 
 \section{Results}
-Metacalibration is a perturbative technique that appears to work well
+Metacalibration is a perturbative technique that appears to work best
 on shear estimation algorithms with small calibration biases. Those
 cases we have examined where the initial biases are large or not
 linear are not completely corrected by our linear detrending scheme,
-though in every case we have described the method appears to
+though in every case we have studied the algorithm appears to
 substantially improve biases resulting from faulty PSF correction and
 shear miscalibration. Even the nearly information-free linear moments
 algorithm appears to be calibrated by our procedure to a level
@@ -813,11 +807,37 @@ significant when this is applied to realistic catalogs.
 
 In a follow-up paper (Sheldon et al. 2016) we will demonstrate
 algorithmic improvements that allow this technique to be used on Dark
-Energy Survey data with more modern shear estimation algorithms.
-
-
+Energy Survey data with state-of-the-art shear estimation algorithms.
 
 \section{Conclusions}
+We have described a new technique for introducing synthetic lensing
+signal into real data, and shown that our algorithm can be used to
+remove shear calibration biases while making almost no assumptions
+about the properties of the galaxies in the data. This works because
+the images depend linearly on the shear in the limit of interest for
+weak lensing, while the shear catalogs that ultimately result from
+subsequent measurement and processing have a much less straightforward
+functional dependence on the signal.
+
+We also argue that simple extensions of this approach are likely to be
+able to deal with important sources of calibration bias that are not
+easily testable in the GREAT3 simulations. Shear-dependent selection
+biases are difficult to constrain with existing techniques, as they
+require a realistic model for the ensemble properties of the galaxies
+at the boundary of the sample selection. If metacalibration is applied
+before the detection and selection steps, however, the estimated shear
+calibration will include selection biases. Noise biases -- in
+particular the effects of the correlated noise produced by our image
+manipulations -- are also likely to matter for galaxies at
+signal-to-noise ratios lower than those simulated in GREAT3.
+
+In the forthcoming Sheldon et al. 2016, we will test metacalibration
+on a larger and more realistic set of image simulations, and examine
+whether this new technique can address the remaining sources of
+calibration bias untested in GREAT3.
+
+
+
 
 \section*{Acknowledgments}
 
