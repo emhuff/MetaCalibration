@@ -513,6 +513,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax4.set_ylim([-0.02,0.02])
         fig.savefig(figName)
     else:
+        '''
         fig,((ax1,ax2), (ax3,ax4), (ax5, ax6), (ax7,ax8)) = plt.subplots( nrows=4,ncols=2,figsize=(14,28) )
         ax1.errorbar(truthTable['g1'],obsTable['g1'],obsTable['err1'],linestyle=' ')
         ax1.plot(truthTable['g1'],truthTable['g1'],linestyle='--',color='red')
@@ -528,8 +529,8 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax2.text(0.01,-0.03,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]))
         if logLcut is not None:
             ax2.plot(truthTable[outliers]['g2'],obsTable[outliers]['g2'],'s',color='red')
-
-    
+        '''
+        fig,((ax3,ax4), (ax5, ax6), (ax7,ax8)) = plt.subplots( nrows=3,ncols=2,figsize=(14,14) )
         ax3.plot(truthTable['g1'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
         if logLcut is not None:
             ax3.plot(truthTable[outliers]['g1'],obsTable[outliers]['g1'] - truthTable[outliers]['g1'],'s',color='red')        
@@ -537,6 +538,12 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax3.plot(truthTable['g1'],coeff1[0]*truthTable['g1'] + coeff1[2],linestyle='--',color='cyan')
         ax3.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')
         ax3.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
+        ax3.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%
+                     (coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5]),
+                     (0.6,0.8), textcoords='axes fraction')
+        ax3.set_ylabel('shear bias (g2)')
+        ax3.set_xlabel('true shear (g2)')
+        
         
         ax4.plot(truthTable['g2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
         if logLcut is not None:
@@ -545,10 +552,15 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax4.plot(truthTable['g2'],coeff2[0]*truthTable['g2'] + coeff2[2],linestyle='--',color='cyan')
         ax4.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')        
         ax4.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
-
+        ax4.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%
+                     (coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5]),
+                     (0.6,0.8), textcoords='axes fraction')
+        ax4.set_ylabel('shear bias (g2)')
+        ax4.set_xlabel('true shear (g2)')
+        
         ax5.plot(obsTable['e1_logL'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
         ax5.set_xlabel('multinomial log likelihood')
-        ax5.set_ylabel('shear error (e1)')
+        ax5.set_ylabel('shear bias (g1)')
         ax5.set_xscale('symlog')
         ax5.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
         if logLcut is not None:
@@ -560,7 +572,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         if logLcut is not None:
             ax6.axvline(logLcut,color='red')
         ax6.set_xlabel('multinomial log likelihood')
-        ax6.set_ylabel('shear error (e2)')
+        ax6.set_ylabel('shear bias (e2)')
         ax6.set_xscale('symlog')
         
         ax7.plot(obsTable['psf_e1'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
@@ -571,7 +583,8 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax7.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
         ax7.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
         #ax7.set_xlim([-0.01,0.03])
-        ax7.set_title('psf trend (e1)')
+        ax7.set_xlabel('psf e1')
+        ax7.set_ylabel('shear bias (g1)')
         
         ax8.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
         ax8.plot(obsTable['psf_e2'],coeff2[1]*obsTable['psf_e2'] + coeff2[2],linestyle='--',color='cyan')
@@ -580,7 +593,8 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
 
         ax8.axhline(0.,linestyle='--',color='red')
         ax8.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
-        ax8.set_title('psf trend (e2)')
+        ax8.set_xlabel('psf e2')
+        ax8.set_ylabel('shear bias (g2)')
         ax8.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
         #ax8.set_xlim([-0.03,0.03])
         fig.savefig(figName)
@@ -601,9 +615,6 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
     obsTable = np.empty(len(catalogs), [('field_id',np.int), ('g1',np.double), ('g2',np.double ),
                                         ('err1',np.double),('err2',np.double),
                                         ('psf_e1',np.double),('psf_e2',np.double)])
-
-
-
     
     for catalog,i in zip(catalogs, xrange(len(catalogs))):
         obsTable[i]['field_id'] = catalog[0]['id']/ 1000000
@@ -637,15 +648,19 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
                            psf_e=obsTable['psf_e2'], errType = 'bootstrap')
 
     
-    fig,((ax1,ax2), (ax3,ax4), (ax5,ax6)) = plt.subplots(nrows=3, ncols=2,figsize=(14,21))
+    '''
+    fig,((ax1,ax2), (ax3,ax4), (ax5,ax6)) = plt.subplots(nrows=3, ncols=2,figsize=(14,21))    
     ax1.errorbar(truthTable['g1'],obsTable['g1'],obsTable['err1'],linestyle=' ')
     ax1.plot(truthTable['g1'],(1+coeff1[0])*truthTable['g1'] + coeff1[2],linestyle='--',color='cyan')
     ax1.plot(truthTable['g1'],truthTable['g1'],linestyle='--',color='red')
     ax1.set_title('g1')
     ax1.set_xlabel('g1 (truth)')
     ax1.set_ylabel('g1 (est)')
+<<<<<<< Updated upstream
     ax1.text(0.01,-0.03,
              'm = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5]))
+=======
+>>>>>>> Stashed changes
     #ax1.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
     
     ax2.errorbar(truthTable['g2'],obsTable['g2'],obsTable['err2'],linestyle=' ')
@@ -654,24 +669,40 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
     ax2.set_title('g2')
     ax2.set_xlabel('g2 (truth)')
     ax2.set_ylabel('g2 (est)')
+<<<<<<< Updated upstream
     ax2.text(0.01,-0.03,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]))
+=======
+>>>>>>> Stashed changes
     #ax2.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
-    
+    '''
+
+    fig,((ax3,ax4), (ax5,ax6)) = plt.subplots(nrows=2, ncols=2,figsize=(14,14))
     ax3.plot(truthTable['g1'], obsTable['g1'] - truthTable['g1'],'.')
     ax3.plot(truthTable['g1'],coeff1[0]*truthTable['g1'] + coeff1[2],linestyle='--',color='cyan')
     ax3.set_xlabel('g1 (truth)')
     ax3.set_ylabel('g1 (est) - g1 (truth)')
-    ax3.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
+    ax3.set_ylim([-.03,.03])#set_ylim([-shear_range, shear_range])
+    if "moments" in mc:
+        ax3.set_ylim([-1.,1.])
     ax3.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
     ax3.axhline(0.,linestyle='--',color='red')
+    ax3.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%
+                 (coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5]),
+                 (0.6,0.8), textcoords='axes fraction')
+    
     
     ax4.plot(truthTable['g2'], obsTable['g2'] - truthTable['g2'],'.')
     ax4.plot(truthTable['g2'],coeff2[0]*truthTable['g2'] + coeff2[2],linestyle='--',color='cyan')
-    ax4.set_ylim([-0.03,0.03])#.set_ylim([-shear_range, shear_range])
+    ax4.set_ylim([-.03,.03])#.set_ylim([-shear_range, shear_range])
+    if "moments" in mc:
+        ax4.set_ylim([-1.,1.])
     ax4.set_xlabel('g2 (truth)')
     ax4.set_ylabel('g2 (est) - g2 (truth)')
     ax4.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
     ax4.axhline(0.,linestyle='--',color='red')
+    ax4.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%
+                 (coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]),
+                 (0.6,0.8), textcoords='axes fraction')
 
     
     ax5.plot(obsTable['psf_e1'], obsTable['g1'] - truthTable['g1'],'.')
@@ -679,14 +710,20 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
     ax5.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
     ax5.axhline(0.,linestyle='--',color='red')
     ax5.set_xlabel('psf_e1')
-    ax5.set_ylim([-0.03,0.03])
+    ax5.set_ylabel('shear bias (g1)')
+    ax5.set_ylim([-.03,.03])
+    if "moments" in mc:
+        ax5.set_ylim([-1.,1.])
     
     ax6.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g2'],'.')
     ax6.plot(obsTable['psf_e2'],coeff2[1]*obsTable['psf_e2'] + coeff2[2],linestyle='--',color='cyan')
     ax6.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
     ax6.axhline(0.,linestyle='--',color='red')
     ax6.set_xlabel('psf_e2')
-    ax6.set_ylim([-0.03,0.03])
+    ax6.set_ylabel('shear bias (g1)')
+    ax6.set_ylim([-.03,.03])
+    if "moments" in mc:
+        ax6.set_ylim([-1.,1.])
         
     fig.savefig(mc+'-no_corrections')
     return coeff1, coeff2
