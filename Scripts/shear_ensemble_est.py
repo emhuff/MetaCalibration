@@ -518,16 +518,14 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax1.plot(truthTable['g1'],truthTable['g1'],linestyle='--',color='red')
         ax1.plot(truthTable['g1'],coeff1[0]*truthTable['g1'] + coeff1[2] + truthTable['g1'],linestyle='--',color='cyan')
         ax1.set_title('g1')
-        ax1.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5]),
-                     (0.01,-0.03))
+        ax1.text(0.01,-0.03,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5]))
         if logLcut is not None:
             ax1.plot(truthTable[outliers]['g1'],obsTable[outliers]['g1'],'s',color='red')
         ax2.errorbar(truthTable['g2'],obsTable['g2'],obsTable['err2'],linestyle=' ')
         ax2.plot(truthTable['g2'],truthTable['g2'],'--',color='red')
         ax2.plot(truthTable['g2'],coeff2[0]*truthTable['g2'] + coeff2[2] + truthTable['g2'],linestyle='--',color='cyan')
         ax2.set_title('g2')
-        ax2.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]),
-                     (0.01,-0.03))
+        ax2.text(0.01,-0.03,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]))
         if logLcut is not None:
             ax2.plot(truthTable[outliers]['g2'],obsTable[outliers]['g2'],'s',color='red')
 
@@ -646,8 +644,8 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
     ax1.set_title('g1')
     ax1.set_xlabel('g1 (truth)')
     ax1.set_ylabel('g1 (est)')
-    ax1.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5]),
-                 (0.01,-0.03))
+    ax1.text(0.01,-0.03,
+             'm = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5]))
     #ax1.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
     
     ax2.errorbar(truthTable['g2'],obsTable['g2'],obsTable['err2'],linestyle=' ')
@@ -656,8 +654,7 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
     ax2.set_title('g2')
     ax2.set_xlabel('g2 (truth)')
     ax2.set_ylabel('g2 (est)')
-    ax2.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]),
-                 (0.01,-0.03))
+    ax2.text(0.01,-0.03,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]))
     #ax2.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
     
     ax3.plot(truthTable['g1'], obsTable['g1'] - truthTable['g1'],'.')
