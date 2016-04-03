@@ -530,7 +530,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         if logLcut is not None:
             ax2.plot(truthTable[outliers]['g2'],obsTable[outliers]['g2'],'s',color='red')
         '''
-        fig,((ax3,ax4), (ax5, ax6), (ax7,ax8)) = plt.subplots( nrows=3,ncols=2,figsize=(14,14) )
+        fig,((ax3,ax4), (ax5, ax6), (ax7,ax8)) = plt.subplots( nrows=2,ncols=2,figsize=(14,14) )
         ax3.plot(truthTable['g1'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
         if logLcut is not None:
             ax3.plot(truthTable[outliers]['g1'],obsTable[outliers]['g1'] - truthTable[outliers]['g1'],'s',color='red')        
