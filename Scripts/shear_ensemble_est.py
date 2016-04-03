@@ -538,7 +538,7 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax3.plot(truthTable['g1'],coeff1[0]*truthTable['g1'] + coeff1[2],linestyle='--',color='cyan')
         ax3.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')
         ax3.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
-        ax3.text(0.01,-0.03,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5]))        
+        ax3.text(0.01,0.03,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5]))        
         ax3.set_ylabel('shear bias (g2)')
         ax3.set_xlabel('true shear (g2)')
         
@@ -668,7 +668,7 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
     ax3.plot(truthTable['g1'],coeff1[0]*truthTable['g1'] + coeff1[2],linestyle='--',color='cyan')
     ax3.set_xlabel('g1 (truth)')
     ax3.set_ylabel('g1 (est) - g1 (truth)')
-    ax3.text(0.01,-0.03,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5])) 
+    ax3.text(0.01,0.03,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5])) 
     ax3.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
     if "moments" in mc:
         ax3.set_ylim([-1.,1.])
@@ -686,7 +686,7 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
         ax4.set_ylim([-1.,1.])
     ax4.set_xlabel('g2 (truth)')
     ax4.set_ylabel('g2 (est) - g2 (truth)')
-    ax4.text(0.01,-0.03,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]))    
+    ax4.text(0.01,0.03,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]))    
     ax4.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
     ax4.axhline(0.,linestyle='--',color='red')
     ax4.annotate('m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%
