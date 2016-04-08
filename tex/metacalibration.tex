@@ -18,7 +18,7 @@
 \newcommand\todoemh[1]{\todo[color=red, inline, size=\small]{To do: #1}}
 
 \newcommand\towrite[1]{\todo[color=gray, inline, size=\small]{Write: #1}}
-
+\newcommand\rmcomment[1]{\textcolor{red}{(RM: #1)}}
 
 \citestyle{aa}
 
@@ -419,7 +419,15 @@ equations~\ref{eqn:hist_est} and \ref{eqn:hist_est_var}.
     Bottom:} Distribution of meta-calibration psf ellipticity
   responsivities from Regaussianization, on the
   Control-Ground-Constrant branch of the GREAT3 simulations. Vertical
-  red dashed lines are drawn at zero for reference in both panels.}
+  red dashed lines are drawn at zero for reference in both panels.
+\rmcomment{I agree with Erin about converting to PDF figures.  Quality is more reliable and MNRAS
+  prefers them.  Also, I recommend checking what this looks like with a symlog horizontal
+  scale, so that people can make out how wide the central peak actually is, and not have the plot
+  100\% dominated by the tails (but still include the tails).  The caption says ``normalized'' but
+  what is it normalized to?  It doesn't look like it integrates to 1, but maybe I'm just confused by
+the vertical log scale.  Are these plots averaged over both shear components?  I recommend including
+$R_\text{psf}$ in the horizontal axis of the bottom panel, to connect to the notation in the text.}
+}
 \label{fig:calibhist}
 \end{figure}
 
@@ -438,7 +446,10 @@ equations~\ref{eqn:hist_est} and \ref{eqn:hist_est_var}.
   $\frac{d\,p(e)}{d{e}}$ for each of the histograms. Abscissa are
   truncated at $\pm 4$, but the estimator runs over bins including all
   objects. To stabilize the estimator, we set the values of the
-  histogram derivatives in the outermost two bins to zero.}
+  histogram derivatives in the outermost two bins to zero.
+\rmcomment{I don't love these either, but since you already plan to change them, I won't include
+  detailed comments here.}
+}
 \label{fig:estimator}
 \end{figure*}
 
@@ -708,7 +719,24 @@ analysis.
 \caption{{\bf Top:} Results {\it without} metacalibration for the regauss ({\bf left}), KSB ({\bf
     center}), and Linear Moments ({\bf right}) algorithms on the CGC.
   branch.  {\bf Bottom:} Results {\it with} metacalibration for the regauss ({\bf left}), KSB ({\bf
-    center}) and Linear Moments algorithms ({\bf right}) on CGC.}
+    center}) and Linear Moments algorithms ({\bf right}) on CGC.
+\rmcomment{Figure is impossible to read in current form.  I recommend a lot of changes: within a
+  given set of figures, use the same vertical axis for both panels in each row, and join the
+  panels (no space between them).  Increase font size by a lot; it should be similar to the font
+  size in the text of the paper according to the MNRAS editors.  The axis labels need to use the
+  same notation as the paper (e.g., $g_2$ instead of ``g2'').  And actually, I think the best thing
+  to do would be to completely rearrange this: have a $6\times 2$ figure showing what are currently
+  the top 2 figures in each of the 6 panels (so we always show figures related to calibration bias
+  together), have another $6\times 2$ figure with the middle two figures in each of the 6 panels (all
+the multinomial log likelihood vs. bias plots), and another with shear bias vs PSF ellipticity.
+Basically, this will turn a single plot with 36 panels into 3 figures each with 12 panels, where the
+12 panels in a given figure are all making the same point.  I realize
+this is a lot of work, but the figure is extremely hard to read as-is, and if you make it readable
+then it'll be too large for one figure.  Given that this is the key result, we want people to be
+able ot understand it and refer to it easily! Also, on the vertical axes, let's not
+say ``shear bias'' (which is ambiguous and sounds like it could be multiplicative).  Let's say
+something like ``$g_{1,\text{est}}-g_{1,\text{true}}$'' or ``estimated - true shear''. }
+}
 \label{fig:cgc_corrected}
 \end{figure*}
 
