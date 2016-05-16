@@ -476,7 +476,7 @@ def EstimateAllShearsStar(args):
 
 def EstimateAllShears(subfield, sim_dir, output_dir, shear_est, output_prefix="output_catalog", output_type="fits",
                       clobber=True, sn_weight=False, calib_factor=0.98, coadd=False,
-                      variable_psf_dir=""):
+                      variable_psf_dir="", extra_noise = False):
     """Main driver for all routines in this file, and the implementation of most of the command-line
     interface.
 
@@ -607,6 +607,12 @@ def EstimateAllShears(subfield, sim_dir, output_dir, shear_est, output_prefix="o
         
         # We need to infer the background noise somehow, for use in the metaCalibration noise symmetrization.
         variance = estimateVariance(gal_ps)
+
+        # if extra noise is called for, add it.
+        if ((extra_noise is not False) | (extra_noise > 0.)):
+            extra_variance = extra_noise*extra_noise*variance
+            CN = galsim.UncorrelatedNoise(variance = variance, wcs = gal_ps.wcs)
+            gal_ps.addNoise(CN)
         
         # Here are the bits that are needed for a calibration bias (multiplicative) correction.
         
@@ -841,7 +847,8 @@ def main(argv):
                       help="Don't call Pool.Map")
     parser.add_option("--algorithm","-a", dest="algorithm", default="regauss",
                       choices = ["regauss","ksb"], help="metcalibration catalog type to use")
-
+    parser.add_option("--extra_noise",dest="extra_noise",type=float,default=0.0,
+                      help="Extra noise to add, as a fraction of the estimated current standard deviation.")
     opts, args = parser.parse_args()
     try:
         subfield, sim_dir, output_dir = args
@@ -884,7 +891,8 @@ def main(argv):
             calib_factor=opts.calib_factor,
             coadd=opts.coadd,
             variable_psf_dir=opts.variable_psf_dir,
-            shear_est = opts.algorithm
+            shear_est = opts.algorithm,
+            extra_noise = opts.extra_noise
             )
     else:
         # Run on all available CPUs.
@@ -897,7 +905,8 @@ def main(argv):
         iterator = itertools.izip(subfield_range,
                                   itertools.repeat(sim_dir),
                                   itertools.repeat(output_dir),
-                                  itertools.repeat(opts.algorithm))
+                                  itertools.repeat(opts.algorithm),
+                                  itertools.repeat(opts.extra_noise))
         R = pool.map(EstimateAllShearsStar,iterator)
 
  
