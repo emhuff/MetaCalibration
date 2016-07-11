@@ -1,4 +1,4 @@
-\begin{thebibliography}{26}
+\begin{thebibliography}{29}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 
 \bibitem[{{Bartelmann} \& {Schneider}(2001)}]{2001PhR...340..291B}
@@ -19,10 +19,32 @@
   {Berge}, J., {Bernstein}, G., {Dahle}, H., {Erben}, T., \& et~al. 2009,
   Annals of Applied Statistics, 3, 6
 
+\bibitem[{{Fenech Conti} {et~al.}(2016){Fenech Conti}, {Herbonnet}, {Hoekstra},
+  {Merten}, {Miller}, \& {Viola}}]{2016arXiv160605337F}
+{Fenech Conti}, I., {Herbonnet}, R., {Hoekstra}, H., {Merten}, J., {Miller},
+  L., \& {Viola}, M. 2016, ArXiv e-prints
+
 \bibitem[{{Heymans} {et~al.}(2006){Heymans}, {Van Waerbeke}, {Bacon}, {Berge},
   {Bernstein}, {Bertin}, {Bridle}, \& et~al.}]{2006MNRAS.368.1323H}
 {Heymans}, C., {Van Waerbeke}, L., {Bacon}, D., {Berge}, J., {Bernstein}, G.,
   {Bertin}, E., {Bridle}, S., \& et~al. 2006, \mnras, 368, 1323
+
+\bibitem[{{Hildebrandt} {et~al.}(2016){Hildebrandt}, {Viola}, {Heymans},
+  {Joudaki}, {Kuijken}, {Blake}, {Erben}, {Joachimi}, {Klaes}, {Miller},
+  {Morrison}, {Nakajima}, {Verdoes Kleijn}, {Amon}, {Choi}, {Covone}, {de
+  Jong}, {Dvornik}, {Fenech Conti}, {Grado}, {Harnois-D{\'e}raps}, {Herbonnet},
+  {Hoekstra}, {K{\"o}hlinger}, {McFarland}, {Mead}, {Merten}, {Napolitano},
+  {Peacock}, {Radovich}, {Schneider}, {Simon}, {Valentijn}, {van den Busch},
+  {van Uitert}, \& {Van Waerbeke}}]{KiDS450}
+{Hildebrandt}, H., {Viola}, M., {Heymans}, C., {Joudaki}, S., {Kuijken}, K.,
+  {Blake}, C., {Erben}, T., {Joachimi}, B., {Klaes}, D., {Miller}, L.,
+  {Morrison}, C.~B., {Nakajima}, R., {Verdoes Kleijn}, G., {Amon}, A., {Choi},
+  A., {Covone}, G., {de Jong}, J.~T.~A., {Dvornik}, A., {Fenech Conti}, I.,
+  {Grado}, A., {Harnois-D{\'e}raps}, J., {Herbonnet}, R., {Hoekstra}, H.,
+  {K{\"o}hlinger}, F., {McFarland}, J., {Mead}, A., {Merten}, J., {Napolitano},
+  N., {Peacock}, J.~A., {Radovich}, M., {Schneider}, P., {Simon}, P.,
+  {Valentijn}, E.~A., {van den Busch}, J.~L., {van Uitert}, E., \& {Van
+  Waerbeke}, L. 2016, ArXiv e-prints
 
 \bibitem[{{Hirata} \& {Seljak}(2003)}]{2003MNRAS.343..459H}
 {Hirata}, C. \& {Seljak}, U. 2003, \mnras, 343, 459
@@ -30,6 +52,43 @@
 \bibitem[{{Hoekstra} \& {Jain}(2008)}]{2008ARNPS..58...99H}
 {Hoekstra}, H. \& {Jain}, B. 2008, Annual Review of Nuclear and Particle
   Science, 58, 99
+
+\bibitem[{{Jarvis} {et~al.}(2016){Jarvis}, {Sheldon}, {Zuntz}, {Kacprzak},
+  {Bridle}, {Amara}, {Armstrong}, {Becker}, {Bernstein}, {Bonnett}, {Chang},
+  {Das}, {Dietrich}, {Drlica-Wagner}, {Eifler}, {Gangkofner}, {Gruen},
+  {Hirsch}, {Huff}, {Jain}, {Kent}, {Kirk}, {MacCrann}, {Melchior}, {Plazas},
+  {Refregier}, {Rowe}, {Rykoff}, {Samuroff}, {S{\'a}nchez}, {Suchyta},
+  {Troxel}, {Vikram}, {Abbott}, {Abdalla}, {Allam}, {Annis}, {Benoit-L{\'e}vy},
+  {Bertin}, {Brooks}, {Buckley-Geer}, {Burke}, {Capozzi}, {Rosell}, {Kind},
+  {Carretero}, {Castander}, {Clampitt}, {Crocce}, {Cunha}, {D'Andrea}, {da
+  Costa}, {DePoy}, {Desai}, {Diehl}, {Doel}, {Neto}, {Flaugher}, {Fosalba},
+  {Frieman}, {Gaztanaga}, {Gerdes}, {Gruendl}, {Gutierrez}, {Honscheid},
+  {James}, {Kuehn}, {Kuropatkin}, {Lahav}, {Li}, {Lima}, {March}, {Martini},
+  {Miquel}, {Mohr}, {Neilsen}, {Nord}, {Ogando}, {Reil}, {Romer}, {Roodman},
+  {Sako}, {Sanchez}, {Scarpine}, {Schubnell}, {Sevilla-Noarbe}, {Smith},
+  {Soares-Santos}, {Sobreira}, {Swanson}, {Tarle}, {Thaler}, {Thomas},
+  {Walker}, \& {Wechsler}}]{2016MNRAS.tmp..827J}
+{Jarvis}, M., {Sheldon}, E., {Zuntz}, J., {Kacprzak}, T., {Bridle}, S.~L.,
+  {Amara}, A., {Armstrong}, R., {Becker}, M.~R., {Bernstein}, G.~M., {Bonnett},
+  C., {Chang}, C., {Das}, R., {Dietrich}, J.~P., {Drlica-Wagner}, A., {Eifler},
+  T.~F., {Gangkofner}, C., {Gruen}, D., {Hirsch}, M., {Huff}, E.~M., {Jain},
+  B., {Kent}, S., {Kirk}, D., {MacCrann}, N., {Melchior}, P., {Plazas}, A.~A.,
+  {Refregier}, A., {Rowe}, B., {Rykoff}, E.~S., {Samuroff}, S., {S{\'a}nchez},
+  C., {Suchyta}, E., {Troxel}, M.~A., {Vikram}, V., {Abbott}, T., {Abdalla},
+  F.~B., {Allam}, S., {Annis}, J., {Benoit-L{\'e}vy}, A., {Bertin}, E.,
+  {Brooks}, D., {Buckley-Geer}, E., {Burke}, D.~L., {Capozzi}, D., {Rosell},
+  A.~C., {Kind}, M.~C., {Carretero}, J., {Castander}, F.~J., {Clampitt}, J.,
+  {Crocce}, M., {Cunha}, C.~E., {D'Andrea}, C.~B., {da Costa}, L.~N., {DePoy},
+  D.~L., {Desai}, S., {Diehl}, H.~T., {Doel}, P., {Neto}, A.~F., {Flaugher},
+  B., {Fosalba}, P., {Frieman}, J., {Gaztanaga}, E., {Gerdes}, D.~W.,
+  {Gruendl}, R.~A., {Gutierrez}, G., {Honscheid}, K., {James}, D.~J., {Kuehn},
+  K., {Kuropatkin}, N., {Lahav}, O., {Li}, T.~S., {Lima}, M., {March}, M.,
+  {Martini}, P., {Miquel}, R., {Mohr}, J.~J., {Neilsen}, E., {Nord}, B.,
+  {Ogando}, R., {Reil}, K., {Romer}, A.~K., {Roodman}, A., {Sako}, M.,
+  {Sanchez}, E., {Scarpine}, V., {Schubnell}, M., {Sevilla-Noarbe}, I.,
+  {Smith}, R.~C., {Soares-Santos}, M., {Sobreira}, F., {Swanson}, M.~E.~C.,
+  {Tarle}, G., {Thaler}, J., {Thomas}, D., {Walker}, A.~R., \& {Wechsler},
+  R.~H. 2016, \mnras
 
 \bibitem[{{Kaiser} {et~al.}(1995){Kaiser}, {Squires}, \&
   {Broadhurst}}]{1995ApJ...449..460K}
