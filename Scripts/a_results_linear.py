@@ -76,10 +76,24 @@ def main(argv):
         this_raw = (np.array(bralgorithm) == this_id) & ~np.array(is_mc)
         # plot the effects on m.
 
-        ax1.errorbar([results[this_raw][0]['a1'],results[this_mc][0]['a1']],[index-.25,index-0.1],xerr= [2*results[this_raw][0]['a1err'],2*results[this_mc][0]['a1err']],linestyle=' ',mfc=(1, 1, 0, 0.5),ecolor='b',capsize=1.5,alpha=0.75)
-        ax1.errorbar([results[this_raw][0]['a2'],results[this_mc][0]['a2']],[index+.25,index+0.1], xerr = [2*results[this_raw][0]['a2err'],2*results[this_mc][0]['a2err']],linestyle=' ',mfc=(1, 1, 0, 0.5),ecolor='b',capsize=1.5,alpha=0.75)
-        ax1.errorbar([results[this_raw][0]['a1'],results[this_mc][0]['a1']],[index-.25,index-0.1],xerr = [results[this_raw][0]['a1err'],results[this_mc][0]['a1err']],linestyle=' ',marker='.',mfc='y',mec='y',ecolor='b',alpha=0.75)
-        ax1.errorbar([results[this_raw][0]['a2'],results[this_mc][0]['a2']],[index+.25,index+0.1],xerr = [results[this_raw][0]['a2err'], results[this_mc][0]['a2err']],linestyle=' ',marker='.',mfc='y',mec='y',ecolor='b',alpha=0.75)
+        ax1.errorbar([results[this_raw][0]['a2'],results[this_mc][0]['a2']],[index-.25,index-0.1],
+                     xerr= [2*results[this_raw][0]['a2err'],2*results[this_mc][0]['a2err']],
+                     linestyle=' ',mfc=(1, 1, 0, 0.5),ecolor='b',capsize=1.5,alpha=0.75)
+        ax1.errorbar([results[this_raw][0]['a1'],results[this_mc][0]['a1']],[index+.25,index+0.1],
+                     xerr = [2*results[this_raw][0]['a1err'],2*results[this_mc][0]['a1err']],
+                     linestyle=' ',mfc=(1, 1, 0, 0.5),ecolor='b',capsize=1.5,alpha=0.75)
+        ax1.errorbar([results[this_raw][0]['a2'],results[this_mc][0]['a2']],[index-.25,index-0.1],
+                     xerr = [results[this_raw][0]['a2err'],results[this_mc][0]['a2err']],
+                     linestyle=' ',marker='.',mfc='y',mec='y',ecolor='b',alpha=0.75)
+        ax1.errorbar([results[this_raw][0]['a1'],results[this_mc][0]['a1']],[index+.25,index+0.1],
+                     xerr = [results[this_raw][0]['a1err'], results[this_mc][0]['a1err']],
+                     linestyle=' ',marker='.',mfc='y',mec='y',ecolor='b',alpha=0.75)
+
+        ax1.plot([results[this_raw][0]['a1']],[index+0.25],'s',mfc='w',mec='k',markeredgewidth=0.75)
+        ax1.plot([results[this_raw][0]['a2']],[index-0.25],'o',mfc='w',mec='k',markeredgewidth=0.75)
+        ax1.plot([results[this_mc][0]['a1']],[index+0.1],'s',mfc='k',mec='k',markeredgewidth=0.75)
+        ax1.plot([results[this_mc][0]['a2']],[index-0.1],'o',mfc='k',mec='k',markeredgewidth=0.75)
+                
 
         if results[this_raw][0]['a1'] > 200:
             upper1 = 200
@@ -98,21 +112,21 @@ def main(argv):
         barfraa2 = 15/a2sep
         print 'seps:',a1sep,a2sep
         if ((results[this_raw][0]['a1']) > (results[this_mc][0]['a1'])):
-            connectionstyle = 'bar,fraction=-'+str(barfraa1)
-        else:
             connectionstyle = 'bar,fraction='+str(barfraa1)
+        else:
+            connectionstyle = 'bar,fraction=-'+str(barfraa1)
             
         ax1.annotate("",
-                     xytext= (upper1, index-.25),
-                     xy= ( results[this_mc][0]['a1'], index-.25),
+                     xytext= (upper1, index+.27),
+                     xy= ( results[this_mc][0]['a1'], index+.27),
                      arrowprops=dict(arrowstyle="->",alpha=0.3,connectionstyle=connectionstyle) )
         if ((results[this_raw][0]['a2']) > (results[this_mc][0]['a2'])):
-            connectionstyle = 'bar,fraction='+str(barfraa2)
-        else:
             connectionstyle = 'bar,fraction=-'+str(barfraa2)
+        else:
+            connectionstyle = 'bar,fraction='+str(barfraa2)
         ax1.annotate("",
-                     xytext= ( upper2, index+.25),
-                     xy= ( results[this_mc][0]['a2'],index+.25),                     
+                     xytext= ( upper2, index-.27),
+                     xy= ( results[this_mc][0]['a2'],index-.27),
                      arrowprops=dict(arrowstyle="->",alpha=0.3,connectionstyle=connectionstyle) )
         
 

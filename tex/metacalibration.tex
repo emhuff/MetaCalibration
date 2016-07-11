@@ -109,14 +109,14 @@ from first principles. For this reason, the weak lensing community has
 organized a series of blind measurement challenges, where participants
 attempted to extract an unkown lensing signal from simulated images.
 The earliest of these were the first two Shear TEsting Programmes
-\citep[STEP1,STEP2]{2006MNRAS.368.1323H,2007MNRAS.376...13M}. The
+\citep[STEP1, STEP2]{2006MNRAS.368.1323H,2007MNRAS.376...13M}. The
 results made two things clear: that lensing measurement algorithms
 needed to improve, and that shear measurement was complex enough that
 successive simulation challenges should focus on a subset of the
 issues.
 
 The next round of simulation challenges, GREAT08, GREAT10, and GREAT3,
-\citep{2009AnApS...3....6B,2013ApJS..205...12K,2015MNRAS.450.2963M}
+\citep{2009AnApS...3....6B,2013ApJS..205...12K, 2015MNRAS.450.2963M}
 embraced a narrower focus and saw significant performance
 improvements. In particular, the best-performing algorithms from the
 most recent challenge, GREAT3, were able to reduce $m$ and $c$ to
@@ -198,7 +198,7 @@ In an ideal world, we would vary the gravitational shear experienced
 by the image before is smeared by $P$, constructing the counterfactual
 image $I'(\mathbf{x}| {\boldsymbol \gamma})$:
 \begin{equation}
-  I'({\mathbf{x}}|\gamma) = P \otimes\left( \hat{\mathbf{s}_{\gamma}}G\right)
+  I'({\mathbf{x}}|\gamma) = P \otimes\left( \hat{\mathbf{s}}_{\gamma}G\right)
 \end{equation}
 
 where $\hat{\mathbf{s}}_{\boldsymbol \gamma}$ is the shear operator that produces the shear
@@ -344,7 +344,7 @@ how inference is performed on the full ensemble of galaxies.
 \subsection{MetaCalibrating the Ensemble}
 We test the MetaCalibration procedure on two different shear
 estimation methods -- {\sc regauss} and {\sc KSB} -- each of which has
-known calibration biases (). For each of these methods, we use the
+known calibration biases. For each of these methods, we use the
 entire ensemble of validation simulations to build a model of the {\it
   unlensed} shape distribution, $p_0(\vec{e})$. There is no guarantee
 that the average shear over the ensemble is actually sufficiently
@@ -410,48 +410,42 @@ derivative using equation \ref{eqn:edist_model}\footnote{We add a
 histogram with these bins for each separate field, and evaluate
 equations~\ref{eqn:hist_est} and \ref{eqn:hist_est_var}.
 
-\begin{figure}
-\includegraphics[width=0.45\textwidth]{./Plots/regauss-r-histogram.png}
-\includegraphics[width=0.45\textwidth]{./Plots/regauss-a-histogram.png}
+\begin{figure*}
+\begin{center}
+\includegraphics[width=0.45\textwidth]{./Plots/R1_hist.pdf}
+\includegraphics[width=0.45\textwidth]{./Plots/a1_hist.pdf}
+\end{center}
 \caption{{\bf Top:} Normalized distribution of meta-calibration shear
   responsivities from Regaussianization, on the
   Control-Ground-Constrant branch of the GREAT3 simulations.  {\bf
     Bottom:} Distribution of meta-calibration psf ellipticity
   responsivities from Regaussianization, on the
   Control-Ground-Constrant branch of the GREAT3 simulations. Vertical
-  red dashed lines are drawn at zero for reference in both panels.
-\rmcomment{I agree with Erin about converting to PDF figures.  Quality is more reliable and MNRAS
-  prefers them.  Also, I recommend checking what this looks like with a symlog horizontal
-  scale, so that people can make out how wide the central peak actually is, and not have the plot
-  100\% dominated by the tails (but still include the tails).  The caption says ``normalized'' but
-  what is it normalized to?  It doesn't look like it integrates to 1, but maybe I'm just confused by
-the vertical log scale.  Are these plots averaged over both shear components?  I recommend including
-$R_\text{psf}$ in the horizontal axis of the bottom panel, to connect to the notation in the text.}
-}
+  red dashed lines are drawn at zero for reference in both panels.}
 \label{fig:calibhist}
-\end{figure}
-
-
-\begin{figure*}
-\begin{center}
-\includegraphics[width=0.3\textwidth]{./Plots/regauss-opt-shear_plots-prior_derivs.png}
-\includegraphics[width=0.3\textwidth]{./Plots/ksb-opt-shear_plots-prior_derivs.png}
-\end{center}
-\caption{I do not like these figures. Treat them as placeholders for now.\\
-  Constructing the histogram estimator for the three shape measurement
-  methods. {\bf Top} panels show measured shape distribution for the
-  regauss ({\bf left}) and {\bf right} ksb algorithms. Vertical red
-  lines show bin edges for a scheme with 20 bins, as used in the
-  estimation. {\bf Bottom} panels show the derivative
-  $\frac{d\,p(e)}{d{e}}$ for each of the histograms. Abscissa are
-  truncated at $\pm 4$, but the estimator runs over bins including all
-  objects. To stabilize the estimator, we set the values of the
-  histogram derivatives in the outermost two bins to zero.
-\rmcomment{I don't love these either, but since you already plan to change them, I won't include
-  detailed comments here.}
-}
-\label{fig:estimator}
 \end{figure*}
+
+
+%\begin{figure*}
+%\begin{center}
+%\includegraphics[width=0.3\textwidth]{./Plots/regauss-opt-shear_plots-prior_derivs.png}
+%\includegraphics[width=0.3\textwidth]{./Plots/ksb-opt-shear_plots-prior_derivs.png}
+%\end{center}
+%\caption{I do not like these figures. Treat them as placeholders for now.\\
+%  Constructing the histogram estimator for the three shape measurement
+%  methods. {\bf Top} panels show measured shape distribution for the
+%  regauss ({\bf left}) and {\bf right} ksb algorithms. Vertical red
+%  lines show bin edges for a scheme with 20 bins, as used in the
+%  estimation. {\bf Bottom} panels show the derivative
+%  $\frac{d\,p(e)}{d{e}}$ for each of the histograms. Abscissa are
+%  truncated at $\pm 4$, but the estimator runs over bins including all
+%  objects. To stabilize the estimator, we set the values of the
+%  histogram derivatives in the outermost two bins to zero.
+%\rmcomment{I don't love these either, but since you already plan to change them, I won't include
+%  detailed comments here.}
+%}
+%\label{fig:estimator}
+%\end{figure*}
 
 If we have a poor model for the unlensed histogram, $h_{\rm fid}$,
 then the results will be biased. We can define a distance between each
@@ -707,22 +701,22 @@ Also notable in these figures is the fact that residual psf trends
 after metacalibration tend to be driven by fields with very large psf
 ellipticity. These could be (and often would be) excluded in a real
 analysis. 
-\begin{figure}[t]
+\begin{figure*}[t]
 \begin{center}
-\includegraphics[width=0.49\linewidth]{./Plots/m1-no_corrections-regauss.pdf}
-\includegraphics[width=0.49\linewidth]{./Plots/m1-regauss-opt-shear_plots.pdf}
-\includegraphics[width=0.49\linewidth]{./Plots/m1-no_corrections-ksb.pdf}
-\includegraphics[width=0.49\linewidth]{./Plots/m1-ksb-opt-shear_plots.pdf}
-\includegraphics[width=0.49\linewidth]{./Plots/m1-no_corrections-moments.pdf}
-\includegraphics[width=0.49\linewidth]{./Plots/m1-moments-opt-shear_plots.pdf}
+\includegraphics[width=0.46\linewidth]{./Plots/m1-no_corrections-regauss.pdf}
+\includegraphics[width=0.46\linewidth]{./Plots/m1-regauss-opt-shear_plots.pdf}\\
+\includegraphics[width=0.46\linewidth]{./Plots/m1-no_corrections-ksb.pdf}
+\includegraphics[width=0.46\linewidth]{./Plots/m1-ksb-opt-shear_plots.pdf}\\
+\includegraphics[width=0.46\linewidth]{./Plots/m1-no_corrections-moments.pdf}
+\includegraphics[width=0.46\linewidth]{./Plots/m1-moments-opt-shear_plots.pdf}
 \end{center}
 \caption{Shear calibration bias $m_1$ {\it before} ({\bf left}) and
   {\it after} {\bf right} metacalibration for the regauss ({\bf top}),
   KSB ({\bf middle}), and Linear Moments ({\bf bottom}) algorithms on
   the CGC branch.}
-\end{figure}
+\end{figure*}
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \begin{center}
 \includegraphics[width=0.48\linewidth]{./Plots/logL1-regauss-opt-shear_plots.pdf}
 \includegraphics[width=0.48\linewidth]{./Plots/logL1-rgc-regauss-opt-shear_plots.pdf}
@@ -733,16 +727,17 @@ analysis.
   cuts. Vertical red line indicates location of $20\%$ $\log L$
   cut. This metric tends to be a reliable indicator whether
   the inference procedure will fail.}
-\end{figure}
+\end{figure*}
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \begin{center}
 \includegraphics[width=0.48\linewidth]{./Plots/m1-no_corrections-rgc-fixedaber-regauss.pdf}
 \includegraphics[width=0.48\linewidth]{./Plots/m1-rgc-fixedaber-regauss-opt-shear_plots.pdf}
 \includegraphics[width=0.48\linewidth]{./Plots/m2-no_corrections-rgc-fixedaber-regauss.pdf}
 \includegraphics[width=0.48\linewidth]{./Plots/m2-rgc-fixedaber-regauss-opt-shear_plots.pdf}
 \end{center}
-\end{figure}
+\caption{Multiplicative calibration results for the rgc-fixedaber branch.}
+\end{figure*}
 
 
 \subsubsection{Real Ground Constant}
