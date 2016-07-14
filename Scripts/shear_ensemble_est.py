@@ -9,9 +9,9 @@ from astropy.io import fits
 import re
 import galsim
 import matplotlib as mpl
+mpl.rcParams.update({'font.size':20})
 #mpl.use('Agg')
 
-    
 def getAllCatalogs( path = '../Great3/', mc_type = None, sn_cut = None ):
 
     globalPath = path
@@ -54,6 +54,9 @@ def getAllCatalogs( path = '../Great3/', mc_type = None, sn_cut = None ):
     elif mc_type=='cgc-regauss-sym':
         path = path+'Outputs-CGC-Regauss-SymNoise/output_catalog-*.fits'
         truthFile = 'cgc-truthtable.txt'
+    elif mc_type=='cgc-regauss-noisy':
+        path = path+'Outputs-Regauss-ExtraNoise-4/output_catalog-*.fits'
+        truthFile = 'cgc-truthtable.txt'        
     else:
         raise RuntimeError('Unrecognized mc_type: %s'%mc_type)
 
@@ -112,7 +115,6 @@ def reconstructMetacalMeas(g=None, R=None, a = None, c=None, psf_e=None, delta_g
     em = (esum - ediff)/2. - a * psf_e
     return ep,em
 
-    
 
 def getHistogramDerivative(catalogs=None, bin_edges=None, delta_g = 0.01):
     e1_p_list = []
@@ -445,7 +447,7 @@ def getCalibCoeff(g_true = None, g_meas=None, g_var=None, psf_e=None, errType = 
     return m,a,c,sig_m,sig_a,sig_c
     
 
-def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalogs = None,
+def makeFigures(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalogs = None,
               psf_e1 = None, psf_e2 = None, e1_logL = None, e2_logL = None, g1var=None, g2var=None,
               truthFile = 'cgc-truthtable.txt', figName= None, logLcut = None ):
     truthTable = np.loadtxt(truthFile, dtype = [('field_id',np.int), ('g1',np.double), ('g2',np.double ) ])
@@ -476,8 +478,6 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
     truthTable.sort(order='field_id')
     obsTable.sort(order='field_id')
     shear_range = 2*( np.percentile( np.concatenate( (g1, g2) ), 75) - np.percentile( np.concatenate( (g1, g2) ), 50))
-
-
     if logLcut is not None:
         outliers =  ((obsTable['e1_logL'] <= logLcut) & (obsTable['e2_logL'] <= logLcut) ) #| ( (obsTable['psf_e1'] == -10) | (obsTable['psf_e2'] == -10) )
         kept = ~outliers
@@ -530,17 +530,28 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         if logLcut is not None:
             ax2.plot(truthTable[outliers]['g2'],obsTable[outliers]['g2'],'s',color='red')
         '''
-        fig,((ax3,ax4), (ax5, ax6), (ax7,ax8)) = plt.subplots( nrows=3,ncols=2,figsize=(14,21) )
+        #fig,((ax3,ax4), (ax5, ax6), (ax7,ax8)) = plt.subplots( nrows=3,ncols=2,figsize=(14,21) )
+        fig3,ax3 = plt.subplots()
+        fig4,ax4 = plt.subplots()
+        fig5,ax5 = plt.subplots()
+        fig6,ax6 = plt.subplots()
+        fig7,ax7 = plt.subplots()
+        fig8,ax8 = plt.subplots()
+        plt.rc('text',usetex=True)
+        plt.rc('font',family='serif')
         ax3.plot(truthTable['g1'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
         if logLcut is not None:
             ax3.plot(truthTable[outliers]['g1'],obsTable[outliers]['g1'] - truthTable[outliers]['g1'],'s',color='red')        
         ax3.axhline(0.,linestyle='--',color='red')
         ax3.plot(truthTable['g1'],coeff1[0]*truthTable['g1'] + coeff1[2],linestyle='--',color='cyan')
         ax3.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')
-        ax3.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
-        ax3.text(0.01,0.015,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5]))        
-        ax3.set_ylabel('shear bias (g2)')
-        ax3.set_xlabel('true shear (g2)')
+        ax3.set_ylim([-0.03,0.03])#
+        #ax3.set_ylim([-shear_range, shear_range])
+        ax3.text(0.0,0.015,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5]))        
+        ax3.set_ylabel(r'$g_{1,{\rm obs}} - g_{1,{\rm true}}$')
+        ax3.set_xlabel(r'true shear ($g_1$)')
+        fig3.tight_layout()        
+        fig3.savefig('m1-'+figName+'.pdf',format='pdf')
         
         ax4.plot(truthTable['g2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
         if logLcut is not None:
@@ -548,27 +559,35 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
         ax4.axhline(0.,linestyle='--',color='red')
         ax4.plot(truthTable['g2'],coeff2[0]*truthTable['g2'] + coeff2[2],linestyle='--',color='cyan')
         ax4.axhspan(obsTable[0]['err1'],-obsTable[0]['err1'],alpha=0.2,color='red')        
-        ax4.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
-        ax4.text(0.01,0.015,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]))        
-        ax4.set_ylabel('shear bias (g2)')
-        ax4.set_xlabel('true shear (g2)')
+        ax4.set_ylim([-0.03,0.03])
+        #ax4.set_ylim([-shear_range, shear_range])
+        ax4.text(0.0,0.015,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]))
+        ax4.set_ylabel(r'$g_{2,{\rm obs}} - g_{2,{\rm true}}$')
+        ax4.set_xlabel(r'true shear ($g_2$)')
+        fig4.tight_layout()        
+        fig4.savefig('m2-'+figName+'.pdf',format='pdf')
         
         ax5.plot(obsTable['e1_logL'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
         ax5.set_xlabel('multinomial log likelihood')
-        ax5.set_ylabel('shear bias (g1)')
+        ax5.set_ylabel(r'$g_{1,{\rm obs}} - g_{1,{\rm true}}$')
         ax5.set_xscale('symlog')
+        ax5.set_ylim([-0.03,0.03])
         ax5.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
         if logLcut is not None:
             ax5.axvline(logLcut,color='red')
-
+        fig5.tight_layout()
+        fig5.savefig('logL1-'+figName+'.pdf',format='pdf')
         
         ax6.plot(obsTable['e2_logL'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
         ax6.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
         if logLcut is not None:
             ax6.axvline(logLcut,color='red')
         ax6.set_xlabel('multinomial log likelihood')
-        ax6.set_ylabel('shear bias (e2)')
+        ax6.set_ylabel(r'$g_{2,{\rm obs}} - g_{2,{\rm true}}$')
         ax6.set_xscale('symlog')
+        ax6.set_ylim([-0.03,0.03])
+        fig6.tight_layout()
+        fig6.savefig('logL2-'+figName+'.pdf',format='pdf')
         
         ax7.plot(obsTable['psf_e1'], obsTable['g1'] - truthTable['g1'],'.',color='blue')
         ax7.plot(obsTable['psf_e1'],coeff1[1]*obsTable['psf_e1'] + coeff1[2],linestyle='--',color='cyan')
@@ -576,29 +595,36 @@ def makePlots(field_id=None, g1=None, g2=None, err1 = None, err2 = None, catalog
             ax7.plot(obsTable[outliers]['psf_e1'],obsTable[outliers]['g1'] - truthTable[outliers]['g1'],'s',color='red')
         ax7.axhline(0.,linestyle='--',color='red')
         ax7.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
-        ax7.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
+        ax7.set_ylim([-0.03,0.03])#
+        ax7.set_ylim([-shear_range, shear_range])
         #ax7.set_xlim([-0.01,0.03])
-        ax7.set_xlabel('psf e1')
-        ax7.set_ylabel('shear bias (g1)')
+        ax7.set_xlabel(r'$e_{1,{\rm PSF}}$')
+        ax7.set_ylabel(r'$g_{1,{\rm obs}} - g_{1,{\rm true}}$)')
+        fig7.tight_layout()
+        fig7.savefig('psf_e1-'+figName+'.pdf',format='pdf')
         
         ax8.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g2'],'.',color='blue')
         ax8.plot(obsTable['psf_e2'],coeff2[1]*obsTable['psf_e2'] + coeff2[2],linestyle='--',color='cyan')
         if logLcut is not None:
             ax8.plot(obsTable[outliers]['psf_e2'],obsTable[outliers]['g2'] - truthTable[outliers]['g2'],'s',color='red')
-
         ax8.axhline(0.,linestyle='--',color='red')
         ax8.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
-        ax8.set_xlabel('psf e2')
-        ax8.set_ylabel('shear bias (g2)')
-        ax8.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
+        ax8.set_xlabel(r'$e_{2,{\rm PSF}}$')
+        ax8.set_ylabel(r'$g_{2,{\rm obs}} - g_{2,{\rm true}}$')
+        ax8.set_ylim([-0.03,0.03])#
+        ax8.set_ylim([-shear_range, shear_range])
         #ax8.set_xlim([-0.03,0.03])
-        fig.savefig(figName)
+        fig8.tight_layout()
+        fig8.savefig('psf_e2-'+figName+'.pdf',format='pdf')
+        
         print 'Found coeff:\n m1 = %.4f +/- %.4f \n a1 = %.4f +/- %.4f \n c1 = %.4f +/- %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5])
         print 'Found coeff:\n m2 = %.4f +/- %.4f \n a2 = %.4f +/- %.4f \n c2 = %.4f +/- %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5])
     if catalogs is not None:
         bin_edges, e1_prior_hist, e2_prior_hist, de1_dg, de2_dg = buildPrior(catalogs, nbins=20, doplot = True, mc_type = figName)
 
     return coeff1, coeff2
+
+
 
 
 def no_correction_plots(catalogs= None,truthtable = None, mc= None):
@@ -663,57 +689,68 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
     ax2.text(0.01,-0.03,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]))
     #ax2.set_ylim([-0.01,0.01])#set_ylim([-shear_range, shear_range])
     '''
-    fig,((ax3,ax4), (ax5,ax6)) = plt.subplots(nrows=2, ncols=2,figsize=(14,14))
+    #fig,((ax3,ax4), (ax5,ax6)) = plt.subplots(nrows=2, ncols=2,figsize=(14,14))
+    plt.rc('text',usetex=True)
+    plt.rc('font',family='serif')
+    fig3,ax3 = plt.subplots()
+    fig4,ax4 = plt.subplots()
+    fig5,ax5 = plt.subplots()
+    fig6,ax6 = plt.subplots()
+
     ax3.plot(truthTable['g1'], obsTable['g1'] - truthTable['g1'],'.')
     ax3.plot(truthTable['g1'],coeff1[0]*truthTable['g1'] + coeff1[2],linestyle='--',color='cyan')
-    ax3.set_xlabel('g1 (truth)')
-    ax3.set_ylabel('g1 (est) - g1 (truth)')
+    ax3.set_xlabel(r'$g_{1,{\rm true}}$')
+    ax3.set_ylabel(r'$g_{1,{\rm obs}} - g_{1,{\rm true}}$')
     ax3.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
     if "moments" in mc:
         ax3.set_ylim([-1.,1.])
-        ax3.text(0.01,-0.5,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5])) 
+        ax3.text(0.0,-0.9,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5])) 
     else:
-        ax3.text(0.01,0.015,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5])) 
+        ax3.text(0.0,0.015,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff1[0],coeff1[3],coeff1[1],coeff1[4],coeff1[2],coeff1[5])) 
     ax3.axhspan(np.median(obsTable['err1']),-np.median(obsTable['err1']),alpha=0.2,color='red')
     ax3.axhline(0.,linestyle='--',color='red')
-    
+    fig3.tight_layout()
+    fig3.savefig('m1-no_corrections-'+mc+'.pdf',format='pdf')
     
     ax4.plot(truthTable['g2'], obsTable['g2'] - truthTable['g2'],'.')
     ax4.plot(truthTable['g2'],coeff2[0]*truthTable['g2'] + coeff2[2],linestyle='--',color='cyan')
     ax4.set_ylim([-.03,.03])#.set_ylim([-shear_range, shear_range])
     if "moments" in mc:
         ax4.set_ylim([-1.,1.])
-        ax4.text(0.01,-0.5,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]))    
+        ax4.text(0.0,-0.5,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]))    
     else:
-        ax4.text(0.01,0.015,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]))    
-    ax4.set_xlabel('g2 (truth)')
-    ax4.set_ylabel('g2 (est) - g2 (truth)')
-
+        ax4.text(0.0,0.015,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]))    
+    ax4.set_xlabel(r'$g_{2,{\rm true}}$')
+    ax4.set_ylabel(r'$g_{2,{\rm obs}} - g_{2,{\rm true}}$')
     ax4.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
     ax4.axhline(0.,linestyle='--',color='red')
-
+    fig4.tight_layout()
+    fig4.savefig('m2-no_corrections-'+mc+'.pdf',format='pdf')
     
     ax5.plot(obsTable['psf_e1'], obsTable['g1'] - truthTable['g1'],'.')
     ax5.plot(obsTable['psf_e1'],coeff1[1]*obsTable['psf_e1'] + coeff1[2],linestyle='--',color='cyan')
     ax5.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
     ax5.axhline(0.,linestyle='--',color='red')
-    ax5.set_xlabel('psf_e1')
-    ax5.set_ylabel('shear bias (g1)')
+    ax5.set_xlabel(r'$e_{1,{\rm PSF}}$')
+    ax5.set_ylabel(r'$g_{1,{\rm obs}} - g_{1,{\rm true}}$')
     ax5.set_ylim([-.03,.03])
     if "moments" in mc:
         ax5.set_ylim([-1.,1.])
+    fig5.tight_layout()
+    fig5.savefig('psf_e1-no_corrections-'+mc+'.pdf',format='pdf')
+    
     
     ax6.plot(obsTable['psf_e2'], obsTable['g2'] - truthTable['g2'],'.')
     ax6.plot(obsTable['psf_e2'],coeff2[1]*obsTable['psf_e2'] + coeff2[2],linestyle='--',color='cyan')
     ax6.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
     ax6.axhline(0.,linestyle='--',color='red')
-    ax6.set_xlabel('psf_e2')
-    ax6.set_ylabel('shear bias (g1)')
+    ax6.set_xlabel(r'$e_{1,{\rm PSF}}$')
+    ax6.set_ylabel(r'$g_{2,{\rm obs}} - g_{2,{\rm true}}$')
     ax6.set_ylim([-.03,.03])
     if "moments" in mc:
         ax6.set_ylim([-1.,1.])
-        
-    fig.savefig(mc+'-no_corrections')
+    fig6.tight_layout()
+    fig6.savefig('psf_e2-no_corrections-'+mc+'.pdf',format='pdf')
     return coeff1, coeff2
         
 def calculate_likelihood_cut(fieldstr = None, mc=None):
@@ -790,7 +827,7 @@ def main(argv):
     import argparse
 
     description = """Analyze MetaCalibration outputs from Great3 and Great3++ simulations."""
-    mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym','noaber-regauss','rgc-regauss','rgc-noaber-regauss','rgc-fixedaber-regauss', 'rgc-ksb','cgc-noaber-precise','cgc-regauss-sym']
+    mc_choices =['regauss', 'regauss-sym', 'ksb', 'none-regauss', 'moments', 'noaber-regauss-sym','noaber-regauss','rgc-regauss','rgc-noaber-regauss','rgc-fixedaber-regauss', 'rgc-ksb','cgc-noaber-precise','cgc-regauss-sym','cgc-regauss-noisy']
     # Note: The above line needs to be consistent with the choices in getAllCatalogs.
 
     parser = argparse.ArgumentParser(description=description)
@@ -837,15 +874,15 @@ def main(argv):
         if args.doplot:
             print "Making plots..."
             no_correction_plots(catalogs= catalogs,truthtable = truthfile, mc= mc_type)
-            makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
+            makeFigures(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),
                     psf_e1 = psf_e1, psf_e2 = psf_e2, g1var=  g1var, g2var = g2var,
                     e1_logL = e1_logL, e2_logL = e2_logL, catalogs = catalogs,
                     truthFile = truthfile,figName=mc_type+'-opt-shear_plots', logLcut = logLcut)
-            print "wrote plots to "+mc_type+'-opt-shear_plots.png'
+            print "wrote plots to "+mc_type+'-opt-shear_plots.pdf'
     else:
         final_mc_choices = ['regauss', 'ksb', 'moments','noaber-regauss','rgc-regauss',\
-                         'rgc-noaber-regauss','rgc-fixedaber-regauss', 'rgc-ksb']
-        final_cuts = [10, 10, 0, 0, 10, 0, 10, 10]
+                         'rgc-noaber-regauss','rgc-fixedaber-regauss', 'rgc-ksb','cgc-regauss-noisy']
+        final_cuts = [10, 10, 0, 0, 10, 0, 0, 10, 10]
         all_coeff = []
         for mc_type, percentile_cut in zip(final_mc_choices, final_cuts):
             nbins = args.nbins
@@ -865,13 +902,13 @@ def main(argv):
             logLcut = np.min( (np.percentile(e1_logL,percentile_cut), np.percentile(e2_logL,percentile_cut)) )
             print "Making plots..."
             coeff1_nc, coeff2_nc = no_correction_plots(catalogs= catalogs,truthtable = truthfile, mc= mc_type)
-            coeff1, coeff2 = makePlots(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),\
+            coeff1, coeff2 = makeFigures(field_id=field_id, g1=g1opt, g2=g2opt, err1 = np.sqrt(g1var), err2 = np.sqrt(g2var),\
                         psf_e1 = psf_e1, psf_e2 = psf_e2, g1var=  g1var, g2var = g2var,\
                         e1_logL = e1_logL, e2_logL = e2_logL, catalogs = catalogs,\
                         truthFile = truthfile,figName=mc_type+'-opt-shear_plots', logLcut = logLcut)
 
             all_coeff.append(np.hstack((mc_type, coeff1_nc, coeff2_nc, coeff1, coeff2) ))
-            print "wrote plots to "+mc_type+'-opt-shear_plots.png'
+            print "wrote plots to "+mc_type+'-opt-shear_plots.pdf'
         outfile_coeff = "final_field_fit_coefficients.txt"
         with open(outfile_coeff,'w') as f:
             for row in all_coeff:

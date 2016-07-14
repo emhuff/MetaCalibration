@@ -39,7 +39,7 @@ def log(msg):
 # unique number by combining 4 numbers of similar order.  If you don't want to use this whole
 # caching scheme, then set `use_cache=False` to revert to the previous behavior, which gives a new
 # noise symmetrization field for each postage stamp (and is thus verrrrrry expensive).
-use_symm = True # make noise symmetrization optional
+use_symm = False # make noise symmetrization optional
 use_cache = True # decide whether to use the caching trick or not
 cached_noise_field = {}
 
@@ -474,9 +474,9 @@ def EstimateAllShearsStar(args):
     # Python's pool.map seems only to want to deal with functions of a single argument.
     return EstimateAllShears(*args)
 
-def EstimateAllShears(subfield, sim_dir, output_dir, shear_est, output_prefix="output_catalog", output_type="fits",
+def EstimateAllShears(subfield, sim_dir, output_dir, shear_est, extra_noise=False, output_prefix="output_catalog", output_type="fits",
                       clobber=True, sn_weight=False, calib_factor=0.98, coadd=False,
-                      variable_psf_dir="", extra_noise = False):
+                      variable_psf_dir=""):
     """Main driver for all routines in this file, and the implementation of most of the command-line
     interface.
 
