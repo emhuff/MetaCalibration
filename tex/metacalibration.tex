@@ -216,7 +216,7 @@ estimate directly.
    articulated.  For example, I think we're assuming that the intrinsic (before the real shear)
    $p(e)$ is the same as the post-shear $p(e)$, or at least close enough as to not affect the shear
    calibration bias.  In fact we are also assuming that all higher moments are the same too, so in
-   regions of high shear / significant flexion, this assumption might break down.  Other
+   regions of high shear / significant flexion or magnification, this assumption might break down.  Other
    assumptions?}
 
 \subsection{Generating a Counterfactual Image}
@@ -307,53 +307,66 @@ images as above.
 We have created a simple pipeline that takes as inputs postage stamps
 of the galaxy and PSF model, and returns a set of modified images, as
 described below. A shape measurement code -- the details of which
-MetaCalibration is agnostic about -- returns shear or shape estimates
-for each of the modified images. The resulting set of shapes is used
-to derive calibration and PSF biases for each galaxy. These
+MetaCalibration is agnostic about -- returns shape estimates
+for each of the modified images. Shear estimation typically involves taking a weighted average of
+those shape estimates.  In MetaCalibration, the resulting set of shapes for the modified images is used
+to derive calibration and PSF biases for each galaxy. \rmcomment{we should be careful about what
+  exactly is valid for each object vs. what is used to get estimates of ensemble quantities, both
+  for shear estimation and the MetaCalibration corrections}  These
 parameters, along with a shape prior inferred from the full ensemble
 of shapes, are used to derive a mean shear per field. Virtually any
 measurement method can be embedded in this loop, and as long as it is
-sensitive to the shear and not catastrophically biased, the linear
+sensitive to the shear and not catastrophically biased \rmcomment{what does this mean?  Has a
+  nonlinear shear response, has a linear shear response larger than some value?}, the linear
 shear and PSF calibration biases will be removed. MetaCalibration can
 also calibrate away shear selection biases, so long as detection is
-also performed separately on the counterfactual images.
+also performed separately on the counterfactual images. 
+\rmcomment{we need to be clear about the fact that the simple pipeline / implementation described
+  here does {\em not} include the step of rerunning detection for the metacalibrated images}
+
+\rmcomment{say how this might fit into real life, where we're not trying to just get average shears
+  all the time?  Comment on MetaCalibration for g-g lensing vs.\ cosmic shear?  (Not necessarily
+  here, but somewhere)}
 
 \subsection{Image Modification}
 We use
 GalSim\footnote{\url{https://github.com/GalSim-developers/GalSim}}
-\citep{2015A&C....10..121R} to manipulate the images and to generate
+%\citep{2015A&C....10..121R} %already cited a few times%
+to manipulate the images and to generate
 simulations for validation. For each galaxy, we create nine modified
 images: two for each shear component, two for each PSF ellipticity
-component, and one for the final measurement. We run the provided
+component, and one for the final measurement using the enlarged PSF $\Gamma$. \rmcomment{this sounds
+  like 5 instead of 9; clarify re: two-sidedness} We run the provided
 shape measurement pipeline on each of these images, and the results
 are used to construct a set of finite difference estimates of
 calibration and PSF biases.
 
-This sort of image manipulation is very similar the simulation design
-goals of the GalSim project, so we rely on the rigorous testing of the
-image convolution, interpolation, and resampling algorithms the
+This sort of image manipulation is trivial to carry out using GalSim; 
+we rely on the rigorous testing of the
+image convolution, interpolation, and resampling algorithms that the
 development team performed to enable the GREAT3 shear testing
 simulations.  From the perspective of numerical validation, the tests
 in section 9 of \cite{2015A&C....10..121R} illustrate that GalSim can
 accurately render sheared images of quite complex galaxy and PSF light
 profiles with its default settings that control numerical accuracy.
 
-For each galaxy and PSF postage stamp, we first create an Interpolated
-Image object. This object is deconvolved by the PSF model (including
+For each galaxy and PSF postage stamp, we first create an \texttt{InterpolatedImage} object. This
+object is deconvolved by the PSF model (including 
 the pixel response). For the shear finite differences, we apply a
 small shear $\Delta\gamma$ (typically 1\%) to the resulting
 deconvolved image. The original PSF is dilated by twice the shear
-distortion, and then re-convolved with the sheared deconvolved
+distortion to produce $\Gamma$, and then re-convolved with the sheared deconvolved
 image. This reconvolved, sheared image is then passed to the shape
-measurement routine, along with the newly dilated PSF. For the PSF
+measurement routine, along with the image representation of the new, enlarged PSF $\Gamma$. For the PSF
 sensitivity, we follow a similar procedure, but shear the dilated PSF
-image, rather than the deconvolved galaxy image. Finally, we create a
-reconvolved image with no added shear, on which we perform the
+image rather than the deconvolved galaxy image. Finally, we create a
+reconvolved image with no added shear but with the PSF $\Gamma$, on which we perform the
 final shape measurement.
 
 Shape measurements on these images are used to derive shear
 calibration and PSF biases {introduced by the chosen shape measurement
-  method}. The shapes measured from the sheared reconvolved images,
+  method}. The shapes measured from the sheared reconvolved images with positive and negative
+applied shears,
 $\vec{e}_{+}$ and $\vec{e}_{-}$, admit a straightforward
 finite-difference estimate of the multiplicative shear calibration
 \begin{align}
@@ -371,7 +384,7 @@ of at least the linear-order residual PSF ellipticity biases:
 \begin{align}
 R_{\rm PSF} = \frac{\vec{e}_{+,\rm PSF} - \vec{e}_{-,\rm PSF}}{2\Delta\gamma}.
 \end{align}
-The result of this is a catalog of shear responsibities, PSF
+The result of this process is a catalog of shear responsivities, PSF
 responsivities, and additive biases for every galaxy. A histogram of
 these quantities is shown in figure~\ref{fig:calibhist}. The derived
 biases and responsivities are very noisy, so attention must be paid to
