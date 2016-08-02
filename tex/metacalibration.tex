@@ -30,7 +30,7 @@
 \author{Rachel Mandelbaum\altaffilmark{2}}
 
 \altaffiltext{1}{Center for Cosmology and Astroparticle Physics, 
-Department of Physics, The Ohio State University, OH 43210, USA}
+Department of Physics, The Ohio State University, OH 43210, USA \rmcomment{and JPL affiliation too?}}
 \altaffiltext{2}{McWilliams Center for Cosmology, Department of Physics, Carnegie Mellon University,
   Pittsburgh, PA 15213, USA}
 
@@ -38,60 +38,77 @@ Department of Physics, The Ohio State University, OH 43210, USA}
   methods: observational}
 
 \begin{abstract}
-  One of the primary limiting sources of systematic error in forthcoming
-  weak lensing measurements is systematic uncertainty in the
-  quantitative relationship between the distortions due to
-  gravitational lensing and the measurable properties of galaxy
-  images. We present a statistically principled, general solution to
-  this problem. Our technique infers calibration parameters for an
-  arbitrary shape measuremtoent technique by modifying the real images
-  to simulate the effects a known shear. We test our results on
-  simulated timages from the Great3 shear calibration challenge, and
-  show that the method eliminates calibration biases for a variety of
-  shape measurement techniques at the level of precision measurable
-  with the available Great3 simulations.
+  One of the primary limiting sources of systematic uncertainty in forthcoming weak lensing
+  measurements is systematic uncertainty in the quantitative relationship between the distortions
+  due to gravitational lensing and the measurable properties of galaxy images. We present a
+  statistically principled, general solution to this problem. Our technique infers multiplicative
+  shear calibration parameters by modifying the actual survey data to simulate the effects of a known
+  shear. It can be applied to any shear estimation method based on weighted averages of galaxy shape
+  measurements, which includes all methods used to date for shear estimation with real data.  Use of
+  the real images mitigates uncertainty due to unknown galaxy morphology, which is a serious concern
+  for calibration of shear estimates based on image simulations.  We test our results on simulated
+  images from the GREAT3 challenge, and show that the method eliminates calibration biases for
+  several different shape measurement techniques at the level of precision measurable with the
+  GREAT3 simulations (a few tenths of a percent).
+\rmcomment{I obnoxiously edited abstract; please make sure you're OK with it.}
 \end{abstract}
-
-
 
 \section{Introduction}
 
+\rmcomment{where do you want to submit this?  Do you have \$ for page fees, do you want me to check
+  if I have \$ for page fees, or should we be using
+  MNRAS\dots?}
+
+\rmcomment{Chris  Hirata?}
+
+\rmcomment{do you want to release the code?  If so, we should do some cleanup.  Let's discuss.}
 
 Accurate measurement of weak gravitational lensing offers the most
 direct probe of the dark sector of the universe
 \citep[e.g.,][]{2001PhR...340..291B,2003ARA&A..41..645R,schneider06,2008ARNPS..58...99H,2010RPPh...73h6901M,2013PhR...530...87W}.
 Weak lensing measurements are thus a core part of the international
 cosmology program, and a key science driver for several wide-field
-astronomical imaging surveys (KiDS, DES, SuMIRE,
-LSST\footnote{\url{http://www.lsst.org/lsst/}},
+astronomical imaging surveys -- KiDS, HSC, DES, 
+LSST\footnote{\url{http://www.lsst.org/lsst/}} \citep{2009arXiv0912.0201L},
 Euclid\footnote{\url{http://sci.esa.int/euclid/}\url{http://www.euclid-ec.org}}
-\citep{2011arXiv1110.3193L},
-WFIRST-AFTA\footnote{\url{http://wfirst.gsfc.nasa.gov}}
-\citep{2009arXiv0912.0201L,2011arXiv1110.3193L,2015arXiv150303757S}).
+\citep{2011arXiv1110.3193L}, and 
+WFIRST\footnote{\url{http://wfirst.gsfc.nasa.gov}} 
+\citep{2015arXiv150303757S}.
+% official project name is WFIRST, not WFIRST-AFTA
+\rmcomment{why not links and/or refs for the ongoing surveys?}
 
-Despite this investment, it is not yet clear that the statistical
-power of these measurements will ultimately be matched by their
-accuracy. There are several sources of systematic uncertainty that may
-turn out to be significant when compared to the expected statistical
-errors of these experiments. One of the largest such systematic error
+Despite this investment, the weak lensing community has more work to do in order to ensure that the
+algorithms for inferring shear are unbiased at the required levels to avoid systematic errors from
+dominating over the statistical errors.
+%it is not yet clear that the statistical
+%power of these measurements will ultimately be matched by their
+%accuracy.
+%There are several sources of systematic uncertainty that may
+%turn out to be significant when compared to the expected statistical
+%errors of these experiments. 
+One of the largest such systematic error
 sources is the {\it shear calibration bias}, the quantitative
 realationship between the gravitational lensing signal and its chief
 observables.
 
-The major physical effect studied by weak lensing surveys is the
-gravitational shear, $\boldsymbol{\gamma}$. The major observable
+The major physical effect measured by weak lensing surveys is the
+gravitational lensing shear, $\boldsymbol{\gamma}$. \rmcomment{technically they measure/study
+  reduced shear\dots} The major observable
 effect of a weak shear is a perturbation to the observed ellipticities
 $\boldsymbol{e}$ of distant galaxies. The intrinsic properties of
 galaxies know no preferred direction, so the mean $\boldsymbol{e}$
-should vanish over a wide enough field. Weak lensing measurements
+should vanish over a wide enough field. \rmcomment{Not exactly, because intrinsic alignments.}  
+Weak lensing measurements
 exploit this intrinsic symmetry, and search for spatially coherent
 anisotropies in observed galaxy shapes from lensing distortions due to
 foreground matter.
 
-In the domain of weakest lensing, which is the major focus for
+In the domain of weak lensing, which is the major focus for
 dark energy measurements, shears linearly modify the observed
 ellipticities, and the calibration problem is quantitatively reduced
 to constraining the coefficients of the linear relation
+\rmcomment{ack no.  This implies a per-object linear modification of shape due to shear and a
+  per-object $m$ and $c$.  Everything here needs to be rephrased to refer to ensemble relationships.}
 \begin{align}
 \boldsymbol{e} = (1+m)\:\boldsymbol{\gamma} + c.
 \end{align}
@@ -100,29 +117,33 @@ correction for the point-spread function) that introduce a preferred
 direction in the image plane. It can in principle be known or removed
 with sufficient knowledge of the experiment. $m$ depends in part on
 the ensemble of (unobserved) galaxy properties, so it is impossible in
-principle to know exactly {\it a priori}.
+principle to know exactly {\it a priori}. \rmcomment{This statement is only true when inferring shear
+  by averaging galaxy shapes.  I don't think it applies to, e.g., the Bernstein \& Armstrong method.}
 
 In practice, nonlinearities introduced by the algorithms used for
-measurement of $\boldsymbol{e}$ can introduce both multiplicative and
+measurement of $\boldsymbol{e}$ \rmcomment{the nonlinearity isn't algorithm-specific, it's a generic
+  feature of measuring ellipticity from images, isn't it?} can introduce both multiplicative and
 additive biases in a manner that interacts with the unknown true
-ensemble properties of galaxies. and are very difficult to predict
+ensemble properties of galaxies \rmcomment{I'd cite the papers that demonstrated this statement, as
+  it's far from obvious. You can find some citations in my ``Precision Simulation\dots'' paper from 2012.}, and are very difficult to predict
 from first principles. For this reason, the weak lensing community has
 organized a series of blind measurement challenges, where participants
 attempted to extract an unkown lensing signal from simulated images.
 The earliest of these were the first two Shear TEsting Programmes
 \citep[STEP1, STEP2]{2006MNRAS.368.1323H,2007MNRAS.376...13M}. The
 results made two things clear: that lensing measurement algorithms
-needed to improve, and that shear measurement was complex enough that
+needed to improve, and that shear measurement was sufficiently complex that
 successive simulation challenges should focus on a subset of the
 issues.
 
-The next round of simulation challenges, GREAT08, GREAT10, and GREAT3,
-\citep{2009AnApS...3....6B,2013ApJS..205...12K, 2015MNRAS.450.2963M}
+The next round of simulation challenges -- GREAT08, GREAT10, and GREAT3
+\citep{2009AnApS...3....6B,2013ApJS..205...12K, 2015MNRAS.450.2963M} --
 embraced a narrower focus and saw significant performance
-improvements. In particular, the best-performing algorithms from the
-most recent challenge, GREAT3, were able to reduce $m$ and $c$ to
-levels that are good enough for even the most ambitious planned
-lensing measurements.
+improvements. They also drove improvements in our understanding of 
+various sources of bias in shear estimation, which is of use in future algorithmic development.  The best-performing algorithms from the
+most recent challenge, GREAT3, reduced $m$ and $c$ to
+levels approaching those needed for the most ambitious planned
+lensing measurements, albeit with simulations that did not include all the features of real data.
 
 While this was certainly good news, the narrowed focus of the GREAT
 challenges necessarily left some of the most important sources of
@@ -137,7 +158,7 @@ concern include biases resulting from:
 \item non-white pixel noise
 \item cosmic rays and other image artifacts
 \item redshift-dependent calibration biases
-\item shear estimation for low-resolution and/or low signal-to-noise ratio galaxies
+\item shear estimation for low-resolution and/or low signal-to-noise ratio ($<12$) galaxies
 \end{itemize}
 The impact of these factors depends strongly on the specifics of the
 experiment. For this reason, shear calibration in current and future
@@ -152,12 +173,15 @@ Generation simulations described in \citealt{2013A&C.....1...23B}, or
 the calibration simulations used for the KiDS weak lensing cosmology
 in \citealt{2016arXiv160605337F}).
 
-This paper is motivated by the observation that introducing a
+This method outlined in this paper is motivated by the observation that introducing a
 synthetic shear signal into real data is much easier than building a
 realistic comprehensive simulation suite. Perturbing the actual data
 automatically incorporates features present in real images (e.g.,
 image artifacts or selection biases) that are otherwise difficult to
 accurately simulate.
+
+\rmcomment{we should somewhere cite the Nick Kaiser paper that is the origin of this idea. 
+  You can find this paper cited in my 2012 simulation paper.}
 
 We have implemented this idea, which we call MetaCalibration, using
 the public GalSim \citep{2015A&C....10..121R} image simulation
