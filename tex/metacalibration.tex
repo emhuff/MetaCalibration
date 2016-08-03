@@ -178,7 +178,11 @@ synthetic shear signal into real data is much easier than building a
 realistic comprehensive simulation suite. Perturbing the actual data
 automatically incorporates features present in real images (e.g.,
 image artifacts, selection biases, unusual high-redshift galaxy morphologies) that are otherwise difficult to
-accurately simulate.
+accurately simulate. \rmcomment{I think that it depends what kinds of features you are talking
+  about.  For example, cosmic rays that impinge on the objects will get deconvolved and reconvolved
+  with shear and a larger PSF, so their impact won't be quite right.  We should at some point
+  acknowledge that their inclusion isn't 100\% perfect (but it is still likely better than trying to
+  simulate all of these from first principles).}
 
 \rmcomment{we should somewhere cite the Nick Kaiser paper that is the origin of this idea. 
   You can find this paper cited in my 2012 simulation paper.}
@@ -367,7 +371,11 @@ Shape measurements on these images are used to derive shear
 calibration and PSF biases {introduced by the chosen shape measurement
   method}. The shapes measured from the sheared reconvolved images with positive and negative
 applied shears,
-$\vec{e}_{+}$ and $\vec{e}_{-}$, admit a straightforward
+$\vec{e}_{+}$ and $\vec{e}_{-}$ \rmcomment{mathematically speaking, two-component ellipticities are not vectors in
+  the traditional sense, so I recommend against adopting vector notation for them here and in the
+  rest of what's below; or, if the vector notation is meant to signify the list of ellipticities for
+all objects, then you are missing some subscript or whatever to indicate that this process is done
+per-component (and a statement about what this vector is!)}, admit a straightforward
 finite-difference estimate of the multiplicative shear calibration
 \begin{align}
 R &= \frac{\partial \vec{e}}{\partial \vec{\gamma}}  \\
@@ -395,25 +403,36 @@ how inference is performed on the full ensemble of galaxies.
 
 \subsection{MetaCalibrating the Ensemble}
 We test the MetaCalibration procedure on two different shear
-estimation methods -- {\sc regauss} and {\sc KSB} -- each of which has
-known calibration biases. For each of these methods, we use the entire
-ensemble of validation simulations to build a model of the {\it
+estimation methods -- {\sc regauss} and {\sc KSB} \rmcomment{this is the first time these are
+  mentioned, so you should use the full name, and also reference the sections where they are
+  defined.  Also, why small caps?  They aren't software packages, which is what I thought small caps
+  are normally for} -- each of which is known to have calibration biases that depend on the $S/N$,
+galaxy size and morphology, and so on. For both methods, we use the entire
+ensemble of validation simulations \rmcomment{you haven't defined what the phrase ``validation
+  simulations'' means} to build a model of the {\it
   unlensed} shape distribution, $p_0(\vec{e})$. There is no guarantee
 that the average shear over the ensemble is actually sufficiently
 small to allow unbiased inference, however, so we symmetrize this
 model distribution by averaging it with its reflection about
-$\vec{e}=0$. The newly symmetrized model unlensed distribution is
+$\vec{e}=0$. \rmcomment{in what limit is this correct?  I think the underlying $p(e)$ is still
+  different at some level?  And are we being helped by the shape noise cancellation?}  
+The newly symmetrized model unlensed distribution is
 $p_{0,\rm sym}$. We assume that the ellipticities in each field
 transform as
 \begin{align}
 \vec{e}_{\rm meas} = \vec{e}_{0} + R_{\rm PSF} \vec{e}_{\rm PSF} + R\vec{\gamma} + \vec{c}
 \label{eqn:edist_model}
 \end{align}
-where $e_{\rm meas}$ is the vector of measured ellipticities, and the
+where $e_{\rm meas}$ is the vector of measured ellipticities \rmcomment{here it seems the vector is
+  a list of per-object ellipticities, while in the previous subsections it seemed this was being
+  used for components}, and noisy estimates of the
 constants $R_{\rm PSF}$, $R$, and $c$ have been determined separately
 for each galaxy, as described above, during the image modification
-step. This is then used to construct a linear estimator for the
-shaps, as follows.
+step. \rmcomment{should clarify that we expect each galaxy to have a different value of these
+  constants based on its intrinsic ellipticity and ohter properties; the distributions have finite
+  width both because of the intrinsically different responses to shear for each galaxy, and because
+  of noise in the images} This is then used to construct a linear estimator for the
+shaps \rmcomment{ensemble shear?}, as follows.
 
 If the measured shape distribution $n(\vec{e}_{\rm meas})$ is linear
 in the shear, then we can write
