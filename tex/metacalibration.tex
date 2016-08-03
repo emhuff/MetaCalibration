@@ -508,6 +508,8 @@ equations~\ref{eqn:hist_est} and~\ref{eqn:hist_est_var} using the globally-deriv
 \label{fig:calibhist}
 \end{figure*}
 
+\rmcomment{inconsistency in reference to ``meta-calibration'' vs ``metacalibration'' vs ``MetaCal'' throughout
+  paper.  Should choose a convention.}
 
 %\begin{figure*}
 %\begin{center}
@@ -559,21 +561,23 @@ relevant to the implementation described here.
 \section{Testing Framework}
 \label{sec:testing}
 
-\subsection{Estimation Algorithms}
+\subsection{Shear Estimation Algorithms}
 
 Since the metacalibration method can in principle be used to calibrate
-shears from any per-object shear algorithm, we chose three easily
+shears from any shear estimation algorithm derived using an average of per-object shapes, we chose three easily
 available shear estimation methods, all of which are implemented in
-GalSim.  Two of these methods are more traditional shear estimation
+GalSim.  Two of these methods are traditional shear estimation
 methods that have somewhat different assumptions but are both based on
 object moments.  One method is not a standard shear estimation method
 at all: we use linear combinations of the directly observed second
-moments without correcting for the PSF at all.  In principle, the
+moments without any correction for the PSF.  In principle, the
 information about how those respond to shear should be determined by
 metacalibration to correctly infer the shear.  The difference in this
 case is that instead of providing a small correction to the outputs of
 a PSF correction method, we rely on metacalibration to do the entirety
-of the PSF correction, which is a very stringent test.
+of the PSF correction, which is a very stringent test that may at least 
+partially violate some of the assumptions about
+linearity of responses to shear.  The three methods are described below.
 
 \subsubsection{Regaussianization}
 
@@ -589,13 +593,14 @@ algorithm has been extensively studied in real data and simulations
 The outputs of the re-Gaussianization algorithm are PSF-corrected
 ``distortions'', which for an object with purely elliptical isophotes
 with minor-to-major axis ratio $q$ and position angle $\theta$ with
-respect to the $x$ axis in pixel coordinates would be defined as
+respect to the $x$ axis in pixel coordinates are defined as
 \begin{equation}
 (e_1, e_2) = \frac{1-q^2}{1+q^2}\left(\cos{2\theta},\sin{2\theta}\right).
 \end{equation}
 As discussed in \cite{2002AJ....123..583B}, the response of a
 distribution of galaxies with some intrinsic distribution of
-distortions $p(e)$ to a shear is nonlinear in a way that depends on
+distortions $p(e)$ to a shear %is nonlinear in a way that 
+depends on
 the $p(e)$ itself.  Conceptually, we can think of an ensemble shear
 estimator using re-Gaussianization outputs as
 \begin{equation}
@@ -605,7 +610,13 @@ where the denominator gives the response of the ensemble average
 distortion to a shear (often called the responsivity).  Estimators of
 this shear responsivity use the observed galaxy $p(e)$ and its
 moments, and for typical $p(e)$, the denominator is around
-$1.7$--$1.8$.
+$1.7$--$1.8\approx 2 (1-e_\text{RMS}^2)$ in terms of the per-component RMS distortion.
+
+\rmcomment{should we use different symbols for distortion vs.\ the $(1-q)/(1+q)$ shape definition?
+  See, e.g., what we did for the GREAT3 handbook or results paper.}
+
+\rmcomment{We should take the comment from the GREAT3 results paper about the difference between
+  {\em this} regaussianization implementation, vs.\ those used for SDSS science.}
 
 \subsubsection{KSB}
 
@@ -630,8 +641,8 @@ weight of scale length $r_g$ is used, where $r_g$ is galaxy size.
 
 The KSB method returns a per-object estimate of the shears
 $(\hat{\gamma}_1, \hat{\gamma}_2)$. We can use metacalibration to
-infer the shear while removing multiplicative and additive biases in
-the method.
+infer the ensemble shear, removing multiplicative and additive biases that come from averaging the
+per-object KSB shear estimates.
 
 \subsubsection{Linear Moments}
 
@@ -652,7 +663,7 @@ for $i,j=1,2$, and finally
 e_1 = \frac{M_{11}-M_{22}}{M_{11}+M_{22}}, \qquad e_2 \frac{2M_{12}}{M_{11}+M_{22}}.
 \end{equation}
 
-One source of noise in traditional moments based methods is the
+One source of noise (including noise bias) in traditional moments-based methods is the
 division of two noisy quantities in Eq.~\ref{eq:moments-div},
 typically followed by further division by other noisy quantities to
 remove the dilution of the galaxy shape by the PSF.  Thus, as a final
@@ -664,13 +675,16 @@ combinations of moments:
 \end{equation}
 
 Clearly these moments are sensitive to a number of nuisance
-quantities, like the galaxy flux and size.  They also do not include
-any PSF correction whatsoever.  In principle, metacalibration should
+quantities, like the galaxy flux and size, and the PSF size and shape.  In principle,
+metacalibration should 
 be able to nonetheless determine the response of this statistic to
 shear, $\mathrm{d}\hat{M}_i/\mathrm{d}\gamma$, and produce a reliable
 shear estimate, provided that the model for the predominant sources of
 systematics follows that in Eq.~\ref{eqn:edist_model}.  This is a
-quite stringent test of the metacalibration method.
+quite stringent test of the metacalibration method, as it is unclear whether that purely linear
+model will be valid in this case.
+\rmcomment{Can we connect the imperfection of metacal in this case to clear places where that
+  assumption is violated?}
 
 \subsection{Simulated Images}
 
@@ -691,7 +705,9 @@ and morphology based on that in the {\it Hubble Space Telescope} ({\it
 \citep{2007ApJS..172..196K,2007ApJS..172....1S,2007ApJS..172...38S},
 roughly approximating a galaxy sample with a depth of $I<25$.  To
 ensure that most methods will be able to measure all galaxies, an
-effective signal-to-noise cut of $\gtrsim 12$ and a minimal resolution
+effective signal-to-noise cut\footnote{This was initially advertised as a cut at 20, however the
+  GREAT3 results paper shows that for a more realistic signal-to-noise estimator, the effective cut
+  is around 12.} of $\gtrsim 12$ and a minimal resolution
 cut was imposed (resulting in different sets of galaxies in subfields
 that have different-sized PSFs).  90$^\circ$ rotated pairs of galaxies
 were included, to cancel out shape noise \citep{2007MNRAS.376...13M}.
@@ -715,6 +731,8 @@ of the true shears per component as a known quantity instead of doing
 a fully blind analysis, since the deviation of those quantities from
 zero is just due to the artificial nature of the simulation design.
 
+\rmcomment{Should be systematic about HST vs {\it HST} (we use both).}
+
 We consider two sets of galaxy populations.  One comes directly from
 {\it HST} images, and includes a process to remove the HST PSF before
 shearing (both operations being carried out in Fourier space) and
@@ -730,6 +748,12 @@ ground-based simulated data, with a constant per-subfield shear) and
 real$\_$galaxy-ground-constant (the realistic galaxy sample), denoted
 CGC and RGC.
 
+\rmcomment{I am confused about what is happening below.  This section (section 4) is supposed to be
+  about ``Testing Framework''.  Then a later section is about ``Results''.  But in section 4.2.2
+  onwards (not 4.2.1) you are giving all the results and then the ``Results'' section has basically
+  no content.  I don't think this makes sense?  It seems to me that the no-aber and constant-aber
+  branches should be briefly motivated here, and the results section should step through the results
+  in a systematic way.}
 
 \subsubsection{Control Ground Constant without Aberrations}
 
@@ -744,6 +768,8 @@ exactly like CGC but with all aberrations in the optical PSF set to
 zero, to ensure reasonable consistency of data quality.  Note that the
 atmospheric PSF is still drawn from a distribution of seeing values
 for each subfield.
+
+\rmcomment{Should we define a short name, like CGCNA?}
 
 \subsubsection{Real Ground Constant without Aberrations}
 
@@ -761,6 +787,7 @@ to a level consistent with zero. No trend with PSF ellipticity is
 detected before or after detrending. Realistic galaxy morphologies do
 not appear to have a significant impact on our correction procedure.
 
+\rmcomment{Should we define a short name, like RGCNA?}
 
 \subsubsection{Control Ground Constant}
 
@@ -774,7 +801,7 @@ three shape estimation algorithms described in Section
 shear estimation with and without metacalibration for each
 algorithm. In all three cases, our technique has substantially reduced
 shear calibration biases below their uncorrected levels. The linear
-moments, in particular carry almost no useful shear information in the
+moments, in particular, carry almost no useful shear information in the
 absence of metacalibration; after correction, their performance is
 superior to that of uncorrected KSB.
 
@@ -797,7 +824,8 @@ analysis.
   {\it after} {\bf right} metacalibration for the regauss ({\bf top}),
   KSB ({\bf middle}), and Linear Moments ({\bf bottom}) algorithms on
   the CGC branch. The shaded region covers the same vertical range in
-  each panel.}
+  each panel.  \rmcomment{I don't think you've defined $a$ yet, have you?  Also, why are the axis
+    labels different on left and right panels?}}
 \label{fig:m_comparison}
 \end{figure*}
 
@@ -834,7 +862,9 @@ realistic galaxy morphology. Here the metacalibrated regaussianization
 results continue to be consistent with no shear calibration bias. The
 KSB results retain a noticeable calibration error, but it has again
 been reduced by a factor of $\sim3-4$ below its uncorrected value. 
-
+\rmcomment{It would be helpful if we could explicitly connect this to some failure of the model,
+  e.g., failure to respond linearly to shear.  Could we use a comparison of one-sided vs.\ two-sided
+  derivatives to test this?  Or change the derivative step size?}
 
 
 \subsubsection{Real Ground Constant with constant aberrations}
@@ -847,13 +877,14 @@ aberrations.
 As a way to understand this, we generated a version of RGC that had
 quite large aberrations that were identical in each field:
 specifically defocus of $0.5$ waves and one component of trefoil of
-$0.1$ wave.
+$0.1$ wave. \rmcomment{Do you want me to make thumbnails showing this PSF compared to a typical one?
+  I have code for making nice PSF images that I used in the GREAT3 results paper.}
 
 This removes the difficulties in building a null ellipticity
 distribution, isolating the impact of a complex PSF. Here the results
 remain very positive: metacalibration removes the $\sim0.06$ shear
 calibration bias, and successfully eliminates the small residual PSF
-ellipticity trend in the uncorrected regauss results.
+ellipticity trend in the uncorrected regauss results. 
 
 \begin{figure*}
 \begin{center}
@@ -874,7 +905,7 @@ ellipticity trend in the uncorrected regauss results.
   combination of the MetaCalibration algorithm with our
   maximum-likelihood averaging procedure makes accurate corrections
   when the PSF ellipticities are small or comparable to the magnitude
-  of ths shear signal. It is clear that a large fraction of the trend
+  of the shear signal. It is clear that a large fraction of the trend
   remaining after correction is driven by high-PSF-ellipticity outlier
   fields, which would typically not pass the image quality
   requirements in a realistic experiment.}
@@ -883,14 +914,17 @@ ellipticity trend in the uncorrected regauss results.
 
 \section{Results}
 Metacalibration is a perturbative technique that appears to work best
-on shear estimation algorithms with small calibration biases. Those
+on shear estimation algorithms with small calibration biases. \rmcomment{I don't think this
+  statement should be made qualitatively, as everyone will interpret ``small'' differently when
+  concluding whether they should use Metacalibration or not.  Say the range of biases exhibited by
+  the methods we used for this test.} Those
 cases we have examined where the initial biases are large or not
 linear are not completely corrected by our linear detrending scheme,
 though in every case we have studied the algorithm appears to
 substantially improve biases resulting from faulty PSF correction and
 shear miscalibration. Even the nearly information-free linear moments
 algorithm appears to be calibrated by our procedure to a level
-superior to a KSB, a widely used traditional shear estimation algorithm.
+superior to uncorrected KSB, a widely used traditional shear estimation algorithm.
 
 
 \begin{figure*}
@@ -923,7 +957,8 @@ RGC-FixedAber  & regauss  &  $61.6\pm6.6$ & $63.7\pm5.2$  & $-30.0\pm12.1$ & $-3
   branches considered. Rows with MetaCalibrated parameters are shown
   above their un-calibrated counterparts. Note that in every case,
   MetaCalibrating removes multiplicative biases within the precision
-  allowed by the simulation volume, and reduces the amplitude of PSF
+  allowed by the simulation volume \rmcomment{this statement is questionable for one KSB result and
+    the linear moments}, and reduces the amplitude of PSF
   calibration biases.}
 \label{table:results}
 \end{figure*}
@@ -936,7 +971,7 @@ that our proposed algorithm has the potential to deal with selection
 biases, we have not demonstrated that capability here.  The simulated
 galaxies used in the GREAT3 simulations are arranged to cancel shape
 noise, which would tend to eliminate additive measurement
-biases. While we do not see any reason why metacalibration
+biases. \rmcomment{wait, why would it do that?} While we do not see any reason why metacalibration
 measurements would be susceptible to additive biases, these
 simulations do not provide strong evidence to that effect. Finally,
 the average signal-to-noise of the GREAT3 galaxies is higher than that
@@ -944,16 +979,23 @@ of those currently used for shear estimation in the Dark Energy
 Survey, so it is possible that noise rectification biases may become
 significant when this is applied to realistic catalogs.
 
-In a follow-up paper (Sheldon et al. 2016) we will demonstrate
+\rmcomment{Here is a good place to address the whole ``how to make a practical implementation for
+  g-g lensing or cosmic shear, since the real sky doesn't have constant shears in patches'' issue.}
+
+In a follow-up paper (Sheldon et al.\ 2016) we will demonstrate
 algorithmic improvements that allow this technique to be used on Dark
 Energy Survey data with state-of-the-art shear estimation algorithms.
 
+\rmcomment{I would think that for real data, it may be that we need a more complicated systematics
+  model.  I think that we should comment on this.}
+
 \section{Conclusions}
 We have described a new technique for introducing synthetic lensing
-signal into real data, and shown that our algorithm can be used to
+signal into real data in order to 
 remove shear calibration biases while making almost no assumptions
 about the properties of the galaxies in the data. This works because
-the images depend linearly on the shear in the limit of interest for
+the images \rmcomment{do you really mean images?  you don't actually use derivatives of images but
+  rather of ellipticities} depend linearly on the shear in the limit of interest for
 weak lensing, while the shear catalogs that ultimately result from
 subsequent measurement and processing have a much less straightforward
 functional dependence on the signal.
@@ -995,7 +1037,7 @@ particular the effects of the correlated noise produced by our image
 manipulations -- are also likely to matter for galaxies at
 signal-to-noise ratios lower than those simulated in GREAT3.
 
-In the forthcoming Sheldon et al. 2016, we will test metacalibration
+In the forthcoming Sheldon et al.\ 2016, we will test metacalibration
 on a larger and more realistic set of image simulations, and examine
 whether this new technique can address the remaining sources of
 calibration bias untested in GREAT3.
@@ -1005,6 +1047,9 @@ calibration bias untested in GREAT3.
 
 \section*{Acknowledgments}
 
+RM acknowledges the support of the
+Department of Energy Early Career Award program.
+\rmcomment{We should definitely thank Mike Jarvis for useful discussions.  Probably others??}
 
 \bibliographystyle{apj}
 \bibliography{bibliography}
