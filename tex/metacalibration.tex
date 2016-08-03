@@ -447,8 +447,11 @@ an observed histogram is exactly the multinomial likelihood
 p( \left\{N_i\right\} |\left\{ q_i\right\} ) = \frac{N_{\rm tot}!}{\prod\limits_i (N_i!)}\prod\limits_j q_j^{N_j}
 \label{eqn:multnomial}
 \end{align}
-where $N_{\rm tot} = \sum\limits_i N_i$ is the total number of samples
-in the histogram.  The covariance matrix for the bin amplitudes of
+where $N_{\rm tot} = \sum\limits_i N_i$ \rmcomment{you define this but then don't use it in later
+  equations, is there a reason why?  they would be a bit easier to look at if you use this}  
+is the total number of samples
+in the histogram. \rmcomment{any assumptions behind this derivation of the likelihood that we should
+  state?} The covariance matrix for the bin amplitudes of
 this histogram is
 \begin{align}
 {\rm cov}(N_i, N_j) = C_{ij} = \begin{cases}
@@ -468,32 +471,40 @@ minimum-variance estimator for $\gamma$ is
 \hat{\gamma} = \frac{\vec{\Delta}_h^T C^{-1}\left( \vec{h}_{\rm meas} - \vec{h}_{\rm fid}\right)} {\vec{\Delta}_h^TC^{-1}\vec{\Delta}_h},
 \label{eqn:hist_est}
 \end{align}
-and it has variance
+with variance 
 \begin{align}
 \sigma^2_{\hat{\gamma}} = \frac{1}{\vec{\Delta}_h^TC^{-1}\vec{\Delta}_h}
 \label{eqn:hist_est_var}
 \end{align}
 
 This method for shear inference has as its tunable parameter only the
-histogram binning scheme. Once we've chosen a suitable scheme, we then
+histogram binning scheme. Once we have chosen a suitable scheme, we then
 bin the prior into equal-number bins and calculate its shear
-derivative using equation \ref{eqn:edist_model}\footnote{We add a
-  small shear $\vec{\gamma}$, then rebin.}. We calculate a shape
+derivative using equation~\ref{eqn:edist_model} by adding  a
+  small shear $\vec{\gamma}$ using the per-object responses, then rebinning. This provides the
+  inputs for the per-field shear estimation.  To carry out the per-field shear estimation, we calculate a shape
 histogram with these bins for each separate field, and evaluate
-equations~\ref{eqn:hist_est} and \ref{eqn:hist_est_var}.
+equations~\ref{eqn:hist_est} and~\ref{eqn:hist_est_var} using the globally-derived $\vec{\Delta}_h^T$.
 
 \begin{figure*}
 \begin{center}
 \includegraphics[width=0.45\textwidth]{./Plots/R1_hist.pdf}
 \includegraphics[width=0.45\textwidth]{./Plots/a1_hist.pdf}
 \end{center}
-\caption{{\bf Top:} Normalized distribution of meta-calibration shear
+\caption{{\bf Left:} Normalized distribution of meta-calibration shear
   responsivities from Regaussianization, on the
   Control-Ground-Constrant branch of the GREAT3 simulations.  {\bf
-    Bottom:} Distribution of meta-calibration PSF ellipticity
+    Right:} Distribution of meta-calibration PSF ellipticity
   responsivities from Regaussianization, on the
   Control-Ground-Constrant branch of the GREAT3 simulations. Vertical
-  red dashed lines are drawn at zero for reference in both panels.}
+  red dashed lines are drawn at zero for reference in both panels. \rmcomment{Why?  It seems to imply
+    the weird distribution around 0 in the left panel is a problem, when really it's expected.
+    Could put a vertical line at responsivity of 2 as well, given that that's what we expect for
+    perfectly round objects?  Similarly, we should probably mention that we expect $R_{PSF}$ to be
+    of order 10\%, which explains why it looks symmetric around 0 (given the logarithmic horizontal
+    axis and the wide axis range).  Also, I think it would be interesting to show
+    the prediction for the responsivity for a noise-free population with the $p(e)$ for the GREAT3
+    simulations, since the observed histogram is basically that convolved with some noise kernel.}}
 \label{fig:calibhist}
 \end{figure*}
 
@@ -537,7 +548,8 @@ early version of metacalibration was used in the GREAT3 challenge.
 That implementation differs from the one presented here and released
 publicly in association with this paper in two important ways: the
 model for systematics was simpler than the one presented below (in
-particular, it neglected additive systematics entirely) and the method
+particular, it neglected additive systematics entirely in favor of focusing exclusively on
+multiplicative systematics) and the method
 for inferring shears from an ensemble of objects was entirely
 different.  These differences are of sufficient importance that the
 GREAT3 results (especially the ones for additive systematics) are not
