@@ -63,6 +63,9 @@ Department of Physics, The Ohio State University, OH 43210, USA \rmcomment{and J
 
 \rmcomment{do you want to release the code?  If so, we should do some cleanup.  Let's discuss.}
 
+\rmcomment{There seem to be quite a few results figures that have no label and are not explicitly
+  referenced in the text.  This should be fixed.}
+
 Accurate measurement of weak gravitational lensing offers the most
 direct probe of the dark sector of the universe
 \citep[e.g.,][]{2001PhR...340..291B,2003ARA&A..41..645R,schneider06,2008ARNPS..58...99H,2010RPPh...73h6901M,2013PhR...530...87W}.
@@ -877,8 +880,16 @@ aberrations.
 As a way to understand this, we generated a version of RGC that had
 quite large aberrations that were identical in each field:
 specifically defocus of $0.5$ waves and one component of trefoil of
-$0.1$ wave. \rmcomment{Do you want me to make thumbnails showing this PSF compared to a typical one?
-  I have code for making nice PSF images that I used in the GREAT3 results paper.}
+$0.1$ wave.  An example of a PSF in one subfield is shown in Fig.~\ref{fig:trefoil}; they do not all look
+identical, since the atmospheric component was still allowed to vary stochastically according to
+some seeing distribution.
+\begin{figure}
+\begin{center}
+\includegraphics[width=0.8\columnwidth]{../Plots/rgc_fixedaber_psf_005.pdf}
+\end{center}
+\caption{Example of a PSF in one of the simulations with fixed, large aberrations.  The most obvious
+feature in this case is the trefoil, which gives rise to the triangular shape. \label{fig:trefoil}}
+\end{figure}
 
 This removes the difficulties in building a null ellipticity
 distribution, isolating the impact of a complex PSF. Here the results
