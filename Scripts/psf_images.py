@@ -24,7 +24,7 @@ if __name__ == "__main__":
     import diagnostics
 
     # plot PSFs themselves:  Let's choose some subfields, and plot for RGC-noaber, RGC-aber (large aberrations in all fields)
-    subfields = [0, 37, 142]
+    subfields = [1, 3, 5, 7]
     for subfield in subfields:
         plot = diagnostics.show_psf(subfield, os.path.join(sim_parent, 'great3-eric-noaber'), 'real_galaxy',
                                     'ground', 'constant', vmin=-0.003, vmax=0.042,
