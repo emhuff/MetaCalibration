@@ -29,8 +29,8 @@
 \author{Eric M. Huff\altaffilmark{1}}
 \author{Rachel Mandelbaum\altaffilmark{2}}
 
-\altaffiltext{1}{Center for Cosmology and Astroparticle Physics, 
-Department of Physics, The Ohio State University, OH 43210, USA \rmcomment{and JPL affiliation too?}}
+\altaffiltext{1}{Jet Propulsion Laboratory, 
+4800 Oak Grove Drive, Pasadena, CA 91106, USA}
 \altaffiltext{2}{McWilliams Center for Cosmology, Department of Physics, Carnegie Mellon University,
   Pittsburgh, PA 15213, USA}
 
@@ -50,7 +50,6 @@ Department of Physics, The Ohio State University, OH 43210, USA \rmcomment{and J
   images from the GREAT3 challenge, and show that the method eliminates calibration biases for
   several different shape measurement techniques at the level of precision measurable with the
   GREAT3 simulations (a few tenths of a percent).
-\rmcomment{I obnoxiously edited abstract; please make sure you're OK with it.}
 \end{abstract}
 
 \section{Introduction}
@@ -71,47 +70,50 @@ direct probe of the dark sector of the universe
 \citep[e.g.,][]{2001PhR...340..291B,2003ARA&A..41..645R,schneider06,2008ARNPS..58...99H,2010RPPh...73h6901M,2013PhR...530...87W}.
 Weak lensing measurements are thus a core part of the international
 cosmology program, and a key science driver for several wide-field
-astronomical imaging surveys -- KiDS, HSC, DES, 
-LSST\footnote{\url{http://www.lsst.org/lsst/}} \citep{2009arXiv0912.0201L},
+astronomical imaging cameras and associated surveys -- the Kilo Degree
+Survey\footnote{\url{http://kids.strw.leidenuniv.nl}}
+\citep{KiDS_main}, the Dark Energy Survey \citep{DES_main}, the
+Hyper-Suprime Camera\footnote{\url{http://www.naoj.org/Projects/HSC/}}
+\citep{HSC_main}, LSST\footnote{\url{http://www.lsst.org/lsst/}}
+\citep{2009arXiv0912.0201L},
 Euclid\footnote{\url{http://sci.esa.int/euclid/}\url{http://www.euclid-ec.org}}
-\citep{2011arXiv1110.3193L}, and 
-WFIRST\footnote{\url{http://wfirst.gsfc.nasa.gov}} 
+\citep{2011arXiv1110.3193L}, and
+WFIRST\footnote{\url{http://wfirst.gsfc.nasa.gov}}
 \citep{2015arXiv150303757S}.
-% official project name is WFIRST, not WFIRST-AFTA
-\rmcomment{why not links and/or refs for the ongoing surveys?}
 
-Despite this investment, the weak lensing community has more work to do in order to ensure that the
-algorithms for inferring shear are unbiased at the required levels to avoid systematic errors from
+Despite this investment, the weak lensing community has more work to
+do in order to ensure that the algorithms for inferring shear are
+unbiased at the required levels to avoid systematic errors from
 dominating over the statistical errors.
 %it is not yet clear that the statistical
 %power of these measurements will ultimately be matched by their
 %accuracy.
 %There are several sources of systematic uncertainty that may
 %turn out to be significant when compared to the expected statistical
-%errors of these experiments. 
-One of the largest such systematic error
-sources is the {\it shear calibration bias}, the quantitative
-realationship between the gravitational lensing signal and its chief
-observables.
+%errors of these experiments.
+One of the largest such systematic error sources is the {\it shear
+  calibration bias}, the quantitative realationship between the
+gravitational lensing signal and its chief observables.
 
 The major physical effect measured by weak lensing surveys is the
-gravitational lensing shear, $\boldsymbol{\gamma}$. \rmcomment{technically they measure/study
-  reduced shear\dots} The major observable
-effect of a weak shear is a perturbation to the observed ellipticities
-$\boldsymbol{e}$ of distant galaxies. The intrinsic properties of
-galaxies know no preferred direction, so the mean $\boldsymbol{e}$
-should vanish over a wide enough field. \rmcomment{Not exactly, because intrinsic alignments.}  
-Weak lensing measurements
-exploit this intrinsic symmetry, and search for spatially coherent
-anisotropies in observed galaxy shapes from lensing distortions due to
-foreground matter.
+gravitational lensing shear,
+$\boldsymbol{\gamma}$. \rmcomment{technically they measure/study
+  reduced shear\dots} The major observable effect of a weak shear is a
+perturbation to the observed ellipticities $\boldsymbol{e}$ of distant
+galaxies. The intrinsic properties of galaxies know no preferred
+direction, so the mean $\boldsymbol{e}$ should vanish over a wide
+enough field. \rmcomment{Not exactly, because intrinsic alignments.}
+Weak lensing measurements exploit this intrinsic symmetry, and search
+for spatially coherent anisotropies in observed galaxy shapes from
+lensing distortions due to foreground matter.
 
-In the domain of weak lensing, which is the major focus for
-dark energy measurements, shears linearly modify the observed
+In the domain of weak lensing, which is the major focus for dark
+energy measurements, shears linearly modify the observed
 ellipticities, and the calibration problem is quantitatively reduced
-to constraining the coefficients of the linear relation
-\rmcomment{ack no.  This implies a per-object linear modification of shape due to shear and a
-  per-object $m$ and $c$.  Everything here needs to be rephrased to refer to ensemble relationships.}
+to constraining the coefficients of the linear relation \rmcomment{ack
+  no.  This implies a per-object linear modification of shape due to
+  shear and a per-object $m$ and $c$.  Everything here needs to be
+  rephrased to refer to ensemble relationships.}
 \begin{align}
 \boldsymbol{e} = (1+m)\:\boldsymbol{\gamma} + c.
 \end{align}
@@ -120,24 +122,24 @@ correction for the point-spread function) that introduce a preferred
 direction in the image plane. It can in principle be known or removed
 with sufficient knowledge of the experiment. $m$ depends in part on
 the ensemble of (unobserved) galaxy properties, so it is impossible in
-principle to know exactly {\it a priori}. \rmcomment{This statement is only true when inferring shear
-  by averaging galaxy shapes.  I don't think it applies to, e.g., the Bernstein \& Armstrong method.}
+principle to know exactly {\it a priori} (though
+\citealt{2014MNRAS.438.1880B} show how to derive this information for
+their proposed shear estimator from deeper calibration fields).
 
-In practice, nonlinearities introduced by the algorithms used for
-measurement of $\boldsymbol{e}$ \rmcomment{the nonlinearity isn't algorithm-specific, it's a generic
-  feature of measuring ellipticity from images, isn't it?} can introduce both multiplicative and
-additive biases in a manner that interacts with the unknown true
-ensemble properties of galaxies \rmcomment{I'd cite the papers that demonstrated this statement, as
-  it's far from obvious. You can find some citations in my ``Precision Simulation\dots'' paper from 2012.}, and are very difficult to predict
-from first principles. For this reason, the weak lensing community has
-organized a series of blind measurement challenges, where participants
-attempted to extract an unkown lensing signal from simulated images.
-The earliest of these were the first two Shear TEsting Programmes
-\citep[STEP1, STEP2]{2006MNRAS.368.1323H,2007MNRAS.376...13M}. The
-results made two things clear: that lensing measurement algorithms
-needed to improve, and that shear measurement was sufficiently complex that
-successive simulation challenges should focus on a subset of the
-issues.
+In practice, nonlinearities generically introduced by the algorithms
+used for measurement of $\boldsymbol{e}$ can introduce both
+multiplicative and additive biases in a manner that interacts with the
+unknown true ensemble properties of galaxies
+\citep{2007MNRAS.380..229M,2011MNRAS.414.1047Z}, and are very
+difficult to predict from first principles. For this reason, the weak
+lensing community has organized a series of blind measurement
+challenges, where participants attempted to extract an unkown lensing
+signal from simulated images.  The earliest of these were the first
+two Shear TEsting Programmes \citep[STEP1,
+STEP2]{2006MNRAS.368.1323H,2007MNRAS.376...13M}. The results made two
+things clear: that lensing measurement algorithms needed to improve,
+and that shear measurement was sufficiently complex that successive
+simulation challenges should focus on a subset of the issues.
 
 The next round of simulation challenges -- GREAT08, GREAT10, and GREAT3
 \citep{2009AnApS...3....6B,2013ApJS..205...12K, 2015MNRAS.450.2963M} --
@@ -267,10 +269,9 @@ for all $\mathbf{k}$, which can be met without introducing additional
 PSF anisotropy by choosing
 $\Gamma(\mathbf{x}) = P\left((1+2|\gamma|)\mathbf{x}\right)$.
 
-Our chosen procedure for producing a sheared counterfactual image is \rmcomment{why are we now
-  calling it $\hat{\mathbf{A}}$?  inconsistent with previous notation?}
+Our chosen procedure for producing a sheared counterfactual image is
 \begin{equation}
-\hat{\mathbf{A}}  = \Gamma \otimes \left[\hat{\mathbf{s}}_{\boldsymbol \gamma} \left(P^{-1} I \right)\right].
+I' = \Gamma \otimes \left[\hat{\mathbf{s}}_{\boldsymbol \gamma} \left(P^{-1} I \right)\right].
 \end{equation}
 This procedure clearly requires a good model for $P$, but so do all
 shear measurements. PSF model errors enter at the
@@ -309,6 +310,10 @@ to de-trend some of the bias due to of PSF anisotropy. A similar approach
 could be used to measure calibration biases arising from any effect --
 signal or systematic error -- that can be simulated by perturbing the
 images as above.
+
+\subsection{Limitations}
+(this section is outlines the assumptions that we make, and which may
+or may not hold up in reality).
 
 \section{Implementation}
 We have created a simple pipeline that takes as inputs postage stamps

@@ -1,4 +1,4 @@
-\begin{thebibliography}{29}
+\begin{thebibliography}{35}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 
 \bibitem[{{Bartelmann} \& {Schneider}(2001)}]{2001PhR...340..291B}
@@ -8,6 +8,10 @@
   \& {Amara}}]{2013A&C.....1...23B}
 {Berg{\'e}}, J., {Gamper}, L., {R{\'e}fr{\'e}gier}, A., \& {Amara}, A. 2013,
   Astronomy and Computing, 1, 23
+
+\bibitem[{{Bernstein} \&
+  {Armstrong2007MNRAS.380..229}(2014)}]{2014MNRAS.438.1880B}
+{Bernstein}, G.~M. \& {Armstrong2007MNRAS.380..229}, R. 2014, \mnras, 438, 1880
 
 \bibitem[{{Bernstein} \& {Jarvis}(2002)}]{2002AJ....123..583B}
 {Bernstein}, G.~M. \& {Jarvis}, M. 2002, \aj, 123, 583
@@ -19,10 +23,35 @@
   {Berge}, J., {Bernstein}, G., {Dahle}, H., {Erben}, T., \& et~al. 2009,
   Annals of Applied Statistics, 3, 6
 
+\bibitem[{{de Jong} {et~al.}(2015){de Jong}, {Verdoes Kleijn}, {Boxhoorn},
+  {Buddelmeijer}, {Capaccioli}, {Getman}, {Grado}, {Helmich}, {Huang},
+  {Irisarri}, {Kuijken}, {La Barbera}, {McFarland}, {Napolitano}, {Radovich},
+  {Sikkema}, {Valentijn}, {Begeman}, {Brescia}, {Cavuoti}, {Choi}, {Cordes},
+  {Covone}, {Dall'Ora}, {Hildebrandt}, {Longo}, {Nakajima}, {Paolillo},
+  {Puddu}, {Rifatto}, {Tortora}, {van Uitert}, {Buddendiek},
+  {Harnois-D{\'e}raps}, {Erben}, {Eriksen}, {Heymans}, {Hoekstra}, {Joachimi},
+  {Kitching}, {Klaes}, {Koopmans}, {K{\"o}hlinger}, {Roy}, {Sif{\'o}n},
+  {Schneider}, {Sutherland}, {Viola}, \& {Vriend}}]{KiDS_main}
+{de Jong}, J.~T.~A., {Verdoes Kleijn}, G.~A., {Boxhoorn}, D.~R.,
+  {Buddelmeijer}, H., {Capaccioli}, M., {Getman}, F., {Grado}, A., {Helmich},
+  E., {Huang}, Z., {Irisarri}, N., {Kuijken}, K., {La Barbera}, F.,
+  {McFarland}, J.~P., {Napolitano}, N.~R., {Radovich}, M., {Sikkema}, G.,
+  {Valentijn}, E.~A., {Begeman}, K.~G., {Brescia}, M., {Cavuoti}, S., {Choi},
+  A., {Cordes}, O.-M., {Covone}, G., {Dall'Ora}, M., {Hildebrandt}, H.,
+  {Longo}, G., {Nakajima}, R., {Paolillo}, M., {Puddu}, E., {Rifatto}, A.,
+  {Tortora}, C., {van Uitert}, E., {Buddendiek}, A., {Harnois-D{\'e}raps}, J.,
+  {Erben}, T., {Eriksen}, M.~B., {Heymans}, C., {Hoekstra}, H., {Joachimi}, B.,
+  {Kitching}, T.~D., {Klaes}, D., {Koopmans}, L.~V.~E., {K{\"o}hlinger}, F.,
+  {Roy}, N., {Sif{\'o}n}, C., {Schneider}, P., {Sutherland}, W.~J., {Viola},
+  M., \& {Vriend}, W.-J. 2015, \aap, 582, A62
+
 \bibitem[{{Fenech Conti} {et~al.}(2016){Fenech Conti}, {Herbonnet}, {Hoekstra},
   {Merten}, {Miller}, \& {Viola}}]{2016arXiv160605337F}
 {Fenech Conti}, I., {Herbonnet}, R., {Hoekstra}, H., {Merten}, J., {Miller},
   L., \& {Viola}, M. 2016, ArXiv e-prints
+
+\bibitem[{{Flaugher}(2005)}]{DES_main}
+{Flaugher}, B. 2005, International Journal of Modern Physics A, 20, 3121
 
 \bibitem[{{Heymans} {et~al.}(2006){Heymans}, {Van Waerbeke}, {Bacon}, {Berge},
   {Bernstein}, {Bertin}, {Bridle}, \& et~al.}]{2006MNRAS.368.1323H}
@@ -165,15 +194,45 @@
 {Mandelbaum}, R., {Slosar}, A., {Baldauf}, T., {Seljak}, U., {Hirata}, C.~M.,
   {Nakajima}, R., {Reyes}, R., \& {Smith}, R.~E. 2013, \mnras, 432, 1544
 
-\bibitem[{{Massey} {et~al.}(2007){Massey}, {Heymans}, {Berg{\'e}}, {Bernstein},
-  {Bridle}, {Clowe}, {Dahle}, {Ellis}, \& et~al.}]{2007MNRAS.376...13M}
+\bibitem[{{Massey} {et~al.}(2007{\natexlab{a}}){Massey}, {Heymans},
+  {Berg{\'e}}, {Bernstein}, {Bridle}, {Clowe}, {Dahle}, {Ellis}, \&
+  et~al.}]{2007MNRAS.376...13M}
 {Massey}, R., {Heymans}, C., {Berg{\'e}}, J., {Bernstein}, G., {Bridle}, S.,
-  {Clowe}, D., {Dahle}, H., {Ellis}, R., \& et~al. 2007, \mnras, 376, 13
+  {Clowe}, D., {Dahle}, H., {Ellis}, R., \& et~al. 2007{\natexlab{a}}, \mnras,
+  376, 13
 
 \bibitem[{{Massey} {et~al.}(2010){Massey}, {Kitching}, \&
   {Richard}}]{2010RPPh...73h6901M}
 {Massey}, R., {Kitching}, T., \& {Richard}, J. 2010, Reports on Progress in
   Physics, 73, 086901
+
+\bibitem[{{Massey} {et~al.}(2007{\natexlab{b}}){Massey}, {Rowe}, {Refregier},
+  {Bacon}, \& {Berg{\'e}}}]{2007MNRAS.380..229M}
+{Massey}, R., {Rowe}, B., {Refregier}, A., {Bacon}, D.~J., \& {Berg{\'e}}, J.
+  2007{\natexlab{b}}, \mnras, 380, 229
+
+\bibitem[{{Miyazaki} {et~al.}(2012){Miyazaki}, {Komiyama}, {Nakaya}, {Kamata},
+  {Doi}, {Hamana}, {Karoji}, {Furusawa}, {Kawanomoto}, {Morokuma}, {Ishizuka},
+  {Nariai}, {Tanaka}, {Uraguchi}, {Utsumi}, {Obuchi}, {Okura}, {Oguri},
+  {Takata}, {Tomono}, {Kurakami}, {Namikawa}, {Usuda}, {Yamanoi}, {Terai},
+  {Uekiyo}, {Yamada}, {Koike}, {Aihara}, {Fujimori}, {Mineo}, {Miyatake},
+  {Yasuda}, {Nishizawa}, {Saito}, {Tanaka}, {Uchida}, {Katayama}, {Wang},
+  {Chen}, {Lupton}, {Loomis}, {Bickerton}, {Price}, {Gunn}, {Suzuki},
+  {Miyazaki}, {Muramatsu}, {Yamamoto}, {Endo}, {Ezaki}, {Itoh}, {Miwa},
+  {Yokota}, {Matsuda}, {Ebinuma}, \& {Takeshi}}]{HSC_main}
+{Miyazaki}, S., {Komiyama}, Y., {Nakaya}, H., {Kamata}, Y., {Doi}, Y.,
+  {Hamana}, T., {Karoji}, H., {Furusawa}, H., {Kawanomoto}, S., {Morokuma}, T.,
+  {Ishizuka}, Y., {Nariai}, K., {Tanaka}, Y., {Uraguchi}, F., {Utsumi}, Y.,
+  {Obuchi}, Y., {Okura}, Y., {Oguri}, M., {Takata}, T., {Tomono}, D.,
+  {Kurakami}, T., {Namikawa}, K., {Usuda}, T., {Yamanoi}, H., {Terai}, T.,
+  {Uekiyo}, H., {Yamada}, Y., {Koike}, M., {Aihara}, H., {Fujimori}, Y.,
+  {Mineo}, S., {Miyatake}, H., {Yasuda}, N., {Nishizawa}, J., {Saito}, T.,
+  {Tanaka}, M., {Uchida}, T., {Katayama}, N., {Wang}, S.-Y., {Chen}, H.-Y.,
+  {Lupton}, R., {Loomis}, C., {Bickerton}, S., {Price}, P., {Gunn}, J.,
+  {Suzuki}, H., {Miyazaki}, Y., {Muramatsu}, M., {Yamamoto}, K., {Endo}, M.,
+  {Ezaki}, Y., {Itoh}, N., {Miwa}, Y., {Yokota}, H., {Matsuda}, T., {Ebinuma},
+  R., \& {Takeshi}, K. 2012, in \procspie, Vol. 8446, Ground-based and Airborne
+  Instrumentation for Astronomy IV, 84460Z
 
 \bibitem[{{Refregier}(2003)}]{2003ARA&A..41..645R}
 {Refregier}, A. 2003, \araa, 41, 645
@@ -231,5 +290,8 @@
   {Hirata}, {Riess}, \& {Rozo}}]{2013PhR...530...87W}
 {Weinberg}, D.~H., {Mortonson}, M.~J., {Eisenstein}, D.~J., {Hirata}, C.,
   {Riess}, A.~G., \& {Rozo}, E. 2013, \physrep, 530, 87
+
+\bibitem[{{Zhang} \& {Komatsu}(2011)}]{2011MNRAS.414.1047Z}
+{Zhang}, J. \& {Komatsu}, E. 2011, \mnras, 414, 1047
 
 \end{thebibliography}
