@@ -63,7 +63,7 @@ cosmology program, and a key science driver for several wide-field
 astronomical imaging cameras and associated surveys -- the Kilo Degree
 Survey\footnote{\url{http://kids.strw.leidenuniv.nl}}
 \citep{KiDS_main}, the Dark Energy Survey \citep{DES_main}, the
-Hyper-Suprime Camera\footnote{\url{http://www.naoj.org/Projects/HSC/}}
+Hyper Suprime-Cam and associated survey\footnote{\url{http://hsc.mtk.nao.ac.jp/ssp/}}
 \citep{HSC_main}, LSST\footnote{\url{http://www.lsst.org/lsst/}}
 \citep{2009arXiv0912.0201L},
 Euclid\footnote{\url{http://sci.esa.int/euclid/}\url{http://www.euclid-ec.org}}
@@ -76,10 +76,10 @@ do in order to ensure that the algorithms for inferring shear are
 unbiased at the required levels to avoid systematic errors from
 dominating over the statistical errors. One of the largest such
 systematic error sources is the {\it shear calibration bias}, the
-quantitative realationship between the gravitational lensing signal
-and its chief observables.
+quantitative relationship between the true gravitational lensing shear 
+and its observables as estimated from the ensemble of galaxies in the survey.
 
-In the weak limit that is most relevant for wide-field cosmology,
+In the weak shear limit that is most relevant for wide-field cosmology, the
 gravitational lensing signal can be described as a linear
 transformation
 $\boldsymbol{A}\mathbf{x}_{\rm true} = \mathbf{x}_{\rm obs}$ between
@@ -103,32 +103,35 @@ The effects of the shear and convergence on this observable cannot be
 straightforwardly distinguished, so the fundamental quantity
 constrained by lensing is the reduced shear
 \begin{align}
- g = \frac{\gamma}{1 - \kappa + \gamma}.
+ g = \frac{\gamma}{1 - \kappa}.
 \end{align}
 
 The responses of individual galaxy images to $g$ vary depending on
 the choice of ellipticity measure and the intrinsic shape and
 orientation of each galaxy. Lensing studies rely on ensemble averages
-of galaxy ellipticities, and the shears are weak enough that this
-response is usually linear, so it is conventional to define the shear
+of galaxy ellipticities, and the shears are weak enough that these ensemble averages usually respond
+linearly to an applied (reduced) shear, so it is conventional to define the shear
 calibration parameters as
 \begin{align}
 \mathbf{e} = (1 + m) \mathbf{g} + \mathbf{c}
 \label{eqn:calibPars}
 \end{align}
 where $\mathbf{e}$ and $\mathbf{g}$ are ensemble-averaged shears and
-ellipticity measures, respectively. Generally, $\mathbf{c}$ is a
+ellipticity measures, respectively. \rmcomment{Might be better to explicitly use the $\langle\rangle$
+  since this is conventional notation?} Generally, $\mathbf{c}$ is a
 result of measurement biases (such as an incomplete correction for the
 point-spread function) that introduce a preferred direction in the
-image plane. In can in principle  be known or removed with sufficient
+image plane. It can in principle  be known or removed with sufficient
 knowledge of the experiment. $m$ depends in part on the ensemble of
 (unobserved) galaxy properties, so it is impossible in principle to
 know exactly {\it a priori} (though \citealt{2014MNRAS.438.1880B} show
 how to derive this information for their proposed shear estimator from
-deeper calibration fields).
+deeper calibration fields). \rmcomment{That only works because they don't use an ensemble average over
+  ellipticities, though.  So I think this aside is somewhat tangential to the main point, or at
+  least deserves further qualification.}
 
 
-In practice, nonlinearities generically introduced by the algorithms
+In practice, a nonlinear response generically introduced by the algorithms
 used for measurement of $\boldsymbol{e}$ can introduce both
 multiplicative and additive biases in a manner that interacts with the
 unknown true ensemble properties of galaxies
@@ -139,7 +142,8 @@ challenges, where participants attempted to extract an unkown lensing
 signal from simulated images.  The earliest of these were the first
 two Shear TEsting Programmes \citep[STEP1,
 STEP2]{2006MNRAS.368.1323H,2007MNRAS.376...13M}. The results made two
-things clear: that lensing measurement algorithms needed to improve,
+things clear: that lensing measurement algorithms needed to improve in order to avoid being
+systematics-dominated,
 and that shear measurement was sufficiently complex that successive
 simulation challenges should focus on a subset of the issues.
 
@@ -175,21 +179,22 @@ experiment. For this reason, shear calibration in current and future
 experiments relies heavily on simulations designed to match the
 properties of each experiment
 \citep{KiDS450,2016MNRAS.tmp..827J}. Such external simulations are
-always limited in their realism: they must accurately model everything
-relevant about the experiment. Showing that a given simulation suite
+always limited in their realism:  accurately modeling everything
+relevant about the experiment turns out to be extremely difficult. Showing that a given simulation suite
 is adequate for calibrating a lensing measurement is a formidable
-challenge in its own right (c.f. the Ultra Fast Image Generation
+challenge in its own right (c.f.\ the Ultra Fast Image Generation
 simulations described in \citealt{2013A&C.....1...23B}, or the
 calibration simulations used for the KiDS weak lensing cosmology in
 \citealt{2016arXiv160605337F}).
 
-This method outlined in this paper is motivated by the observation
+The method outlined in this paper is motivated by the observation
 that introducing a synthetic shear signal into real data is much
-easier than building a realistic comprehensive simulation
+easier than building a realistic comprehensive first-principles simulation
 suite. Perturbing the actual data automatically incorporates features
 present in real images (e.g., image artifacts, selection biases,
 unusual high-redshift galaxy morphologies) that are otherwise
-difficult to accurately simulate.
+difficult to accurately simulate.  It enables the determination of how the {\em real galaxy
+  population} in the data responds to a shear directly and empirically.
 
 % \rmcomment{I think that it depends what kinds of features you are talking
  % about.  For example, cosmic rays that impinge on the objects will get deconvolved and reconvolved
@@ -197,11 +202,12 @@ difficult to accurately simulate.
  % acknowledge that their inclusion isn't 100\% perfect (but it is still likely better than trying to
  % simulate all of these from first principles).}
 
-We have implemented this idea, which we call metacalibration, using
+We have implemented this concept, which we call metacalibration, using
 the public GalSim \citep{2015A&C....10..121R} image simulation
 package, and designed our algorithm to wrap an arbitrary external
-shear estimation module. We test our technique on simulated GREAT3
-image data, and find that it successfully calibrates older shear
+shear estimation module, provided that it functions by estimation of per-galaxy ellipticities and
+then estimates the ensemble shear through weighted averages. We test our technique on simulated GREAT3
+image data, and find that it successfully calibrates several older shear
 estimation methods to a level of accuracy comparable to the
 best-performing algorithms from the GREAT3 challenge. We also
 demonstrate that our algorithm can detrend additive biases resulting
