@@ -23,10 +23,10 @@
 
 \citestyle{aa}
 
-\shorttitle{Meta-Calibration} \shortauthors{Huff and Mandelbaum}
+\shorttitle{Metacalibration} \shortauthors{Huff and Mandelbaum}
 
 \begin{document}
-\title{Meta-Calibration: Direct Self-Calibration of Biases in Shear Measurement}
+\title{Metacalibration: Direct Self-Calibration of Biases in Shear Measurement}
 \author{Eric M. Huff\altaffilmark{1}}
 \author{Rachel Mandelbaum\altaffilmark{2}}
 
@@ -113,22 +113,20 @@ of galaxy ellipticities, and the shears are weak enough that these ensemble aver
 linearly to an applied (reduced) shear, so it is conventional to define the shear
 calibration parameters as
 \begin{align}
-\mathbf{e} = (1 + m) \mathbf{g} + \mathbf{c}
+\langle \mathbf{e}\rangle = (1 + m)\langle \mathbf{g}\rangle + \mathbf{c}
 \label{eqn:calibPars}
 \end{align}
 where $\mathbf{e}$ and $\mathbf{g}$ are ensemble-averaged shears and
-ellipticity measures, respectively. \rmcomment{Might be better to explicitly use the $\langle\rangle$
-  since this is conventional notation?} Generally, $\mathbf{c}$ is a
+ellipticity measures, respectively. Generally, $\mathbf{c}$ is a
 result of measurement biases (such as an incomplete correction for the
 point-spread function) that introduce a preferred direction in the
-image plane. It can in principle  be known or removed with sufficient
+image plane. It can in principle be known or removed with sufficient
 knowledge of the experiment. $m$ depends in part on the ensemble of
 (unobserved) galaxy properties, so it is impossible in principle to
 know exactly {\it a priori} (though \citealt{2014MNRAS.438.1880B} show
-how to derive this information for their proposed shear estimator from
-deeper calibration fields). \rmcomment{That only works because they don't use an ensemble average over
-  ellipticities, though.  So I think this aside is somewhat tangential to the main point, or at
-  least deserves further qualification.}
+how to derive this information for their proposed shear estimator,
+which does not make use of an ensemble average over ellipticities,
+from deeper calibration fields).
 
 
 In practice, a nonlinear response generically introduced by the algorithms
@@ -220,27 +218,27 @@ There are three layers to the shear calibration method we propose
 here. The first is the generation of the modified images using a procedure similar to one proposed
 in \cite{2000ApJ...537..555K}.
 % Note from RM: removed use of phrase "counterfactual images" before it was defined below.
- We use the GalSim package
-\citep{2015A&C....10..121R} to modify real astronomical images by
-adding synthetic shear and PSF distortions of known amplitude. These
-modified images are counterfactuals; they are a model for what would
-have been observed under (nearly) the same image quality conditions,
-on the same galaxies, with a different shear. If the measurement
-process is repeated on the counterfactual images, the result gives an
-accurate estimate of shear calibration biases.
+We use the GalSim package \citep{2015A&C....10..121R} to modify real
+astronomical images by adding synthetic shear and PSF distortions of
+known amplitude. These modified images are counterfactuals; they are a
+model for what would have been observed under (nearly) the same image
+quality conditions, on the same galaxies, with a different shear. If
+the measurement process is repeated on the counterfactual images, the
+result gives an accurate estimate of shear calibration biases.
 
-The second layer is the choice of ellipticity measure used to estimate per-object shapes. This step is
-the primary focus of most studies that address shear
-calibration biases. Here we are agnostic about the choice of
-measurement algorithm; as long as the algorithm is sufficiently
-well-behaved (in a manner that we will describe in Sec.~\ref{subsec:shapemeas}), the image
-manipulation step can be used to generate an accurate shear
-responsivity.
+The second layer is the choice of ellipticity measure used to estimate
+per-object shapes. This step is the primary focus of most studies that
+address shear calibration biases. Here we are agnostic about the
+choice of measurement algorithm; as long as the algorithm is
+sufficiently well-behaved (in a manner that we will describe in
+Sec.~\ref{subsec:shapemeas}), the image manipulation step can be used
+to generate an accurate shear responsivity.
 
-The final layer is the choice of averaging mechanism to estimate the response of the ensemble shear
-estimate to an applied shear. Noise properties
-of shape measurements can vary widely depending on the shape measurement method, which entails similar variation in
-the metacalibration estimates for shear responsivity. For the cases we
+The final layer is the choice of averaging mechanism to estimate the
+response of the ensemble shear estimate to an applied shear. Noise
+properties of shape measurements can vary widely depending on the
+shape measurement method, which entails similar variation in the
+metacalibration estimates for shear responsivity. For the cases we
 describe below, an optimal strategy for ensemble averaging produces
 significant gains over more straightforward averaging schemes.
 
@@ -268,12 +266,11 @@ produces the reduced shear $\mathbf{g}$, as in
 e.g.~\cite{2002AJ....123..583B}. The shear sensitivity of the image
 would then be a straightforward numerical derivative of $I'$ with
 respect to $\mathbf{g}$, and the shear sensitivity of an ellipticity
-measure $\mathbf{e}$ can be got from measurements on multiple . \rmcomment{this sentence trails off
-  without ending; what was this supposed to say?} We can
-even write down a procedure for producing $I'$ from $I$ if we know
-$P$:
+measure $\mathbf{e}$ can be got from measurements on multiple
+counterfactual images. We can even write down a procedure for
+producing $I'$ from $I$ if we know $P$:
 \begin{equation}
-  I'({\mathbf{x}}) = P \ast \left[\hat{\mathbf{s}}_\mathbf{g}\left( P^{-1} \ast I \right)\right].
+  I'({\mathbf{x}}|\mathbf{g}) = P \ast \left[\hat{\mathbf{s}}_\mathbf{g}\left( P^{-1} \ast I \right)\right].
 \end{equation}
 The noise in $I$ has finite power on scales where $P$ is small or
 vanishing. Deconvolution amplifies noise, and because of the shear,
@@ -293,7 +290,7 @@ $\Gamma(\mathbf{x}) = P\left((1+2|\gamma|)\mathbf{x}\right)$.
 
 Our chosen procedure for producing a sheared counterfactual image is
 \begin{equation}
-I' = \Gamma \otimes \left[\hat{\mathbf{s}}_\mathbf{g} \left(P^{-1} I \right)\right].
+I'({\mathbf{x}}|\mathbf{g}) = \Gamma \ast \left[\hat{\mathbf{s}}_\mathbf{g} \left(P^{-1} \ast I \right)\right].
 \end{equation}
 This procedure clearly requires a good model for $P$, but so do all
 shear measurements. PSF model errors enter at the
@@ -334,35 +331,38 @@ images as above.
 
 \subsection{Shape Measurement Algorithms}
 \label{subsec:shapemeas}
-Accurate ensemble shears can only be derived through measurement of the counterfactual
-images described above if the shape measurement algorithm is
-sufficiently well-behaved. Here, that entails the requirement that the
-quantity reported by the shape measurement algorithm be linear in the
-underlying shear in the regime relevant for the measurement. \rmcomment{I'm not sure that's true on
-  a per-object basis, as long as it's true for the ensemble?  Same comment is relevant on the next
-  paragraph.  I mean, the standard ellipticity and distortion do not have a linear shear response on
-a per-object basis, only for the ensemble.}
+Accurate ensemble shears can only be derived through measurement of
+the counterfactual images described above if the shape measurement
+algorithm is sufficiently well-behaved. Here, that entails the
+requirement that the quantity reported by the shape measurement
+algorithm be linear in the underlying shear in the regime relevant for
+the measurement. \rmcomment{I'm not sure that's true on a per-object
+  basis, as long as it's true for the ensemble?  Same comment is
+  relevant on the next paragraph.  I mean, the standard ellipticity
+  and distortion do not have a linear shear response on a per-object
+  basis, only for the ensemble.}
 
 We test a variety of shape algorithms below that make use of differing
 definitions of ellipticity. As we are attempting to construct a shear
-calibration procedure that is agnostic about the choice of per-object shape measurement 
-algorithm, and which only requires that we use a measured galaxy
-property with approximately linear sensitivity to shear (called a
-shape measure), we will use $\mathbf{e}$ below to signify all of the
-shape measures discussed in this paper, regardless of their precise
-definition.
+calibration procedure that is agnostic about the choice of per-object
+shape measurement algorithm, and which only requires that we use a
+measured galaxy property with approximately linear sensitivity to
+shear (called a shape measure), we will use $\mathbf{e}$ below to
+signify all of the shape measures discussed in this paper, regardless
+of their precise definition.
 
 \subsection{Ensemble Shear Inference}
-Counterfactual images can in principle be used to derive a per-object shear
-response for a modified version of the original image.  
-However, the quantities of interest in Eq.~\ref{eqn:calibPars}
-are ensemble responses.  Hence it is necessary to run the ensemble shear inference step on the
-counterfactual images, in order to get the shear responsivity of the ensemble shear estimate. 
+Counterfactual images can in principle be used to derive a per-object
+shear response for a modified version of the original image.  However,
+the quantities of interest in Eq.~\ref{eqn:calibPars} are ensemble
+responses.  Hence it is necessary to run the ensemble shear inference
+step on the counterfactual images, in order to get the shear
+responsivity of the ensemble shear estimate.
 
 \emhcomment{It's really not clear when averaging should work, and when
-it fails why the histogram estimator should work instead. We have
-precious little theory at this point about when our proposed
-procedure should be expected to break. }
+  it fails why the histogram estimator should work instead. We have
+  precious little theory at this point about when our proposed
+  procedure should be expected to break. }
 
 \section{Implementation}
 \subsection{Image Modification}
@@ -371,39 +371,41 @@ GalSim\footnote{\url{https://github.com/GalSim-developers/GalSim}} to
 manipulate the images and to generate simulations for validation. For
 each galaxy, we create nine modified images: two for each of the two
 shear components, two for each of the two PSF ellipticity components,
-and one for the final measurement using the enlarged PSF $\Gamma$ (two-sided derivatives with
-respect to shear and PSF ellipticity were found to be less noisy than one-sided derivatives). 
-We run the provided shape
-measurement pipeline on each of these images, and the results are used
-to construct a set of finite difference estimates of shear calibration and
-additive PSF biases.
+and one for the final measurement using the enlarged PSF $\Gamma$
+(two-sided derivatives with respect to shear and PSF ellipticity were
+found to be less noisy than one-sided derivatives).  We run the
+provided shape measurement pipeline on each of these images, and the
+results are used to construct a set of finite difference estimates of
+shear calibration and additive PSF biases.
 
-This sort of image manipulation is trivial to carry out using GalSim; 
-we rely on the rigorous testing of the
-image convolution, interpolation, and resampling algorithms that the
-development team performed to enable the GREAT3 shear testing
-simulations.  From the perspective of numerical validation, the tests
-in section~9 of \cite{2015A&C....10..121R} illustrate that GalSim can
-accurately render sheared images of quite complex galaxy and PSF light
-profiles with its default settings that control numerical accuracy.
+This sort of image manipulation is trivial to carry out using GalSim;
+we rely on the rigorous testing of the image convolution,
+interpolation, and resampling algorithms that the development team
+performed to enable the GREAT3 shear testing simulations.  From the
+perspective of numerical validation, the tests in section~9 of
+\cite{2015A&C....10..121R} illustrate that GalSim can accurately
+render sheared images of quite complex galaxy and PSF light profiles
+with its default settings that control numerical accuracy.
 
 For each galaxy and PSF postage stamp, we first create an
 \texttt{InterpolatedImage} object. This object is deconvolved by the
 PSF model (including the pixel response). For the shear finite
-differences, we apply a small shear $\Delta\mathbf{g}$ (typically 1\%) to
-the resulting deconvolved image. The original PSF is dilated by twice
-the shear distortion to produce $\Gamma$, and then re-convolved with
-the sheared deconvolved image. This reconvolved, sheared image is then
-passed to the shape measurement routine, along with the image
+differences, we apply a small shear $\Delta\mathbf{g}$ (typically 1\%)
+to the resulting deconvolved image. The original PSF is dilated by
+twice the shear distortion to produce $\Gamma$, and then re-convolved
+with the sheared deconvolved image. This reconvolved, sheared image is
+then passed to the shape measurement routine, along with the image
 representation of the new, enlarged PSF $\Gamma$. For the PSF
 sensitivity, we follow a similar procedure, but shear the dilated PSF
 image rather than the deconvolved galaxy image. Finally, we create a
 reconvolved image with no added shear but with the PSF $\Gamma$, on
 which we perform the final shape measurement.
 
-\rmcomment{In everything below, we are still kind of conflating the per-object responses with
-  ensemble responses.  We should be very clear and specific about what things we could choose to
-  construct (but don't really use) vs.\ which ones we actually do use in practice. }
+\rmcomment{In everything below, we are still kind of conflating the
+  per-object responses with ensemble responses.  We should be very
+  clear and specific about what things we could choose to construct
+  (but don't really use) vs.\ which ones we actually do use in
+  practice. }
 
 Shape measurements on these images are used to derive shear
 calibration and PSF biases {introduced by the chosen shape measurement
@@ -431,20 +433,22 @@ The result of this process is a catalog of shear responsivities, PSF
 responsivities, and additive biases for every galaxy. A histogram of
 these quantities is shown in figure~\ref{fig:calibhist}. The derived
 biases and responsivities are very noisy, so attention must be paid to
-how inference is performed on the full ensemble of galaxies. 
-\rmcomment{It's not really clear to me how useful this is, considering that we don't use these
-  directly, and the level of noise etc.\ must surely depend on the shape measurement method?  Unless
-  you want to specifically use this to motivate the use of the histogram estimator?}
+how inference is performed on the full ensemble of galaxies.
+\rmcomment{It's not really clear to me how useful this is, considering
+  that we don't use these directly, and the level of noise etc.\ must
+  surely depend on the shape measurement method?  Unless you want to
+  specifically use this to motivate the use of the histogram
+  estimator?}
 
 \begin{figure*}
 \begin{center}
 \includegraphics[width=0.45\textwidth]{./Plots/R1_hist.pdf}
 \includegraphics[width=0.45\textwidth]{./Plots/a1_hist.pdf}
 \end{center}
-\caption{{\bf Left:} Normalized distribution of meta-calibration shear
+\caption{{\bf Left:} Normalized distribution of metacalibration shear
   responsivities from regaussianization, on the
   Control-Ground-Constant branch of the GREAT3 simulations.  {\bf
-    Right:} Distribution of meta-calibration PSF ellipticity
+    Right:} Distribution of metacalibration PSF ellipticity
   responsivities from regaussianization, on the
   Control-Ground-Constant branch of the GREAT3 simulations. A
   vertical red dashed line is drawn for reference at the expected
@@ -807,6 +811,15 @@ in building a null ellipticity distribution, isolating the impact of a
 complex PSF. The results from this simulation are labelled
 ``RGC-FixedAber-regauss''.
 
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=0.8\columnwidth]{../Plots/rgc_fixedaber_psf_005.pdf}
+\end{center}
+\caption{Example of a PSF in one of the simulations with fixed, large aberrations.  The most obvious
+feature in this case is the trefoil, which gives rise to the triangular shape. \label{fig:trefoil}}
+\end{figure}
+
 Finally, we investigate the effects of increasing the noise in the
 images. We re-run the ``CGC-regauss'' analysis five times, increasing
 the noise in the initial image each time. The correlated noise
@@ -825,6 +838,41 @@ The primary results from our correction procedure are shown in
 Figures~\ref{fig:m_results} and \ref{fig:a_results}. The calibration
 biases for individual fields before and after metacalibration for
 several branches are shown in Figure~\ref{fig:m_comparison}. 
+
+\begin{table*}
+\centering
+\makebox[0.8\textwidth][c]{
+\begin{tabular}{l  c |cc | cc |cc }
+\hline
+branch & algorithm  &  $m_1\times1000$ & $m_2\times1000$  & $a_1\times1000$ & $a_2\times1000$ &  $c_1\times1000$ & $c_2\times1000$ \\
+\hline
+\hline
+CGC & regauss (MC)  & $3.6 \pm 7.2$ & $2.3\pm 6.4$ & $-20.6\pm4.6$ & $-19.4\pm3.6$ &  $0.0\pm.2$ & $0.1\pm0.2$ \\
+CGC & regauss  &  $71.9\pm6.1$ & $65.5\pm4.9$  & $-39.7\pm3.8$ & $-43.9\pm2.9$ &  $0.0\pm0.1$ & $0.0\pm0.1$ \\
+%CGC & regauss-noisy (MC) & $-15.0\pm 8.9$ & $3.7\pm7.9$ & $-24.5\pm5.7$ & $-19.7\pm4.5$ & $-0.1\pm0.2$ & $-0.1\pm0.2$\\
+%CGC & regauss-noisy & $117.2 \pm  7.7$ & $105.2\pm6.6 $ & $40.2\pm4.9$ & $-48.4\pm4.1$ & $0.2\pm0.2$ & $-0.1\pm0.2$ \\
+CGC & ksb (MC)  &  $8.0\pm9.8$ & $-17.0\pm8.7$  & $-19.8\pm6.0$ & $-9.2\pm5.0$ &  $0.3\pm0.2$ & $-0.2\pm0.2$ \\
+CGC & ksb  &  $132.2\pm8.8$ & $145.5\pm10.4$  & $114.8\pm5.4$ & $109.6\pm6.1$ &  $-0.4\pm0.2$ & $0.0\pm.3$ \\
+CGC & moments (MC) & $37.1\pm17.3$ & $45.9\pm18.4$ & $-88.0\pm9.9$ & $-87.7\pm9.5$ & $0.1\pm0.4$ & $-0.2\pm0.5$\\
+CGC & moments & $3417.0\pm138.2$ & $3223.8\pm173.1$ & $4480.5\pm77.6$ & $4604.4\pm88.8$ & $0.9\pm3.4$ & $-0.8\pm4.6$ \\
+RGC & regauss (MC) &  $-5.3\pm7.8$ & $6.1\pm6.6$  & $3.6\pm4.0$ & $-3.1\pm3.7$ &  $0.1\pm0.2$ & $0.1\pm0.2$ \\
+RGC & regauss &  $30.4\pm5.2$ & $24.9\pm5.0$  & $-29.5\pm2.8$ & $-18.6\pm2.8$ &  $0.0\pm0.1$ & $0.2\pm0.1$ \\
+CGC-Noaber & regauss (MC)  &  $-7.4\pm6.9$ & $6.1\pm6.4$  & $-33.9\pm12.7$ & $-23.7\pm11.2$ &  $0.1\pm0.2$ & $0.1\pm0.2$ \\
+CGC-Noaber & regauss  &  $40.7\pm2.9$ & $-43.9\pm2.9$  & $-27.4\pm5.2$ & $-26.5\pm5.0$ &  $0.1\pm0.1$ & $0.1\pm0.1$ \\
+RGC-Noaber & regauss (MC)&  $7.5\pm5.0$ & $14.0\pm4.8$  & $-18.8\pm9.6$ & $-10.8\pm9.1$ &  $0.0\pm0.1$ & $0.0\pm0.1$ \\
+RGC-Noaber & regauss &  $16.4\pm3.0$ & $17.4\pm3.4$  & $2.2\pm5.8$ & $2.5\pm6.4$ &  $0.2\pm0.1$ & $0.0\pm0.1$ \\
+RGC-FixedAber & regauss (MC) &  $-4.7\pm8.9$ & $6.0\pm7.2$  & $-15.4\pm22.1$ & $-16.0\pm17.5$ &  $0.1\pm0.2$ & $-0.2\pm0.2$ \\
+RGC-FixedAber  & regauss  &  $61.6\pm6.6$ & $63.7\pm5.2$  & $-30.0\pm12.1$ & $-32.3\pm13.5$ &  $0.3\pm0.2$ & $0.0\pm0.1$ \\
+\hline
+\end{tabular}
+}
+\caption{Shear and PSF calibration bias parameters from each of the
+  branches considered. Rows with metacalibrated parameters are shown
+  above their un-calibrated counterparts. }
+\label{table:results}
+\end{table*}
+
+
 
 In every test we run, metacalibration appreciably reduces the shear
 calibration bias. For all of the regaussianization tests, the results
@@ -847,6 +895,21 @@ perhaps not be surprising, as our assumption that the primary channel
 by which the PSF affects the inferred shear is the PSF ellipticity is
 not completely general, and may in general vary with the choice of
 algorithm or the properties of the PSF. 
+
+
+
+\begin{figure}
+\includegraphics[width=\columnwidth]{./Plots/noise_bias_test.pdf}
+\caption{Effects of introducting additional noise. Points with errors
+  correspond to multiplicative shear calibration bias in the
+  control-ground-constant branch when additional noise is added. The
+  noise enhancement factor corresponds to the factor by which the
+  noise in each galaxy image is increased relative to the fiducial
+  GREAT3 simulations. The solid red line shows the expected power-law scaling
+  resulting from correlated noise bias, with a normalization fixed to
+  the measured calibration biases.}
+\label{fig:noise_bias}
+\end{figure}
 
 Figure~\ref{fig:noise_bias} shows the impact of adding additional
 noise on the metacalibrated shears. The resulting calibration bias
@@ -901,28 +964,6 @@ statistically significant until the noise is approximately doubled.
 %\caption{Multiplicative calibration results for the rgc-fixedaber
 % branch.}
 %\end{figure*}
-
-\begin{figure}
-\includegraphics[width=\columnwidth]{./Plots/noise_bias_test.pdf}
-\caption{Effects of introducting additional noise. Points with errors
-  correspond to multiplicative shear calibration bias in the
-  control-ground-constant branch when additional noise is added. The
-  noise enhancement factor corresponds to the factor by which the
-  noise in each galaxy image is increased relative to the fiducial
-  GREAT3 simulations. The solid red line shows the expected power-law scaling
-  resulting from correlated noise bias, with a normalization fixed to
-  the measured calibration biases.}
-\label{fig:noise_bias}
-\end{figure}
-
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=0.8\columnwidth]{../Plots/rgc_fixedaber_psf_005.pdf}
-\end{center}
-\caption{Example of a PSF in one of the simulations with fixed, large aberrations.  The most obvious
-feature in this case is the trefoil, which gives rise to the triangular shape. \label{fig:trefoil}}
-\end{figure}
 
 \begin{figure*}
 \begin{center}
@@ -987,8 +1028,6 @@ to realistic measurements in the Dark Energy Survey. Follow-up work
 allow this technique to be used on Dark Energy Survey data with
 state-of-the-art shear estimation algorithms.
 
-
-
 \section{Conclusions}
 We have proposed and implemented the first method for self-calibration
 of shear measurements that does not rely on external data or
@@ -1015,51 +1054,6 @@ estimation algorithm.
 We expect future work to extend this method to deal with the
 complexities inherent in real data.
 
-
-\begin{figure*}
-\makebox[\textwidth][c]{
-\begin{tabular}{l  c |cc | cc |cc }
-\hline
-branch & algorithm  &  $m_1\times1000$ & $m_2\times1000$  & $a_1\times1000$ & $a_2\times1000$ &  $c_1\times1000$ & $c_2\times1000$ \\
-\hline
-\hline
-CGC & regauss (MC)  & $3.6 \pm 7.2$ & $2.3\pm 6.4$ & $-20.6\pm4.6$ & $-19.4\pm3.6$ &  $0.0\pm.2$ & $0.1\pm0.2$ \\
-CGC & regauss  &  $71.9\pm6.1$ & $65.5\pm4.9$  & $-39.7\pm3.8$ & $-43.9\pm2.9$ &  $0.0\pm0.1$ & $0.0\pm0.1$ \\
-%CGC & regauss-noisy (MC) & $-15.0\pm 8.9$ & $3.7\pm7.9$ & $-24.5\pm5.7$ & $-19.7\pm4.5$ & $-0.1\pm0.2$ & $-0.1\pm0.2$\\
-%CGC & regauss-noisy & $117.2 \pm  7.7$ & $105.2\pm6.6 $ & $40.2\pm4.9$ & $-48.4\pm4.1$ & $0.2\pm0.2$ & $-0.1\pm0.2$ \\
-CGC & ksb (MC)  &  $8.0\pm9.8$ & $-17.0\pm8.7$  & $-19.8\pm6.0$ & $-9.2\pm5.0$ &  $0.3\pm0.2$ & $-0.2\pm0.2$ \\
-CGC & ksb  &  $132.2\pm8.8$ & $145.5\pm10.4$  & $114.8\pm5.4$ & $109.6\pm6.1$ &  $-0.4\pm0.2$ & $0.0\pm.3$ \\
-CGC & moments (MC) & $37.1\pm17.3$ & $45.9\pm18.4$ & $-88.0\pm9.9$ & $-87.7\pm9.5$ & $0.1\pm0.4$ & $-0.2\pm0.5$\\
-CGC & moments & $3417.0\pm138.2$ & $3223.8\pm173.1$ & $4480.5\pm77.6$ & $4604.4\pm88.8$ & $0.9\pm3.4$ & $-0.8\pm4.6$ \\
-RGC & regauss (MC) &  $-5.3\pm7.8$ & $6.1\pm6.6$  & $3.6\pm4.0$ & $-3.1\pm3.7$ &  $0.1\pm0.2$ & $0.1\pm0.2$ \\
-RGC & regauss &  $30.4\pm5.2$ & $24.9\pm5.0$  & $-29.5\pm2.8$ & $-18.6\pm2.8$ &  $0.0\pm0.1$ & $0.2\pm0.1$ \\
-CGC-Noaber & regauss (MC)  &  $-7.4\pm6.9$ & $6.1\pm6.4$  & $-33.9\pm12.7$ & $-23.7\pm11.2$ &  $0.1\pm0.2$ & $0.1\pm0.2$ \\
-CGC-Noaber & regauss  &  $40.7\pm2.9$ & $-43.9\pm2.9$  & $-27.4\pm5.2$ & $-26.5\pm5.0$ &  $0.1\pm0.1$ & $0.1\pm0.1$ \\
-RGC-Noaber & regauss (MC)&  $7.5\pm5.0$ & $14.0\pm4.8$  & $-18.8\pm9.6$ & $-10.8\pm9.1$ &  $0.0\pm0.1$ & $0.0\pm0.1$ \\
-RGC-Noaber & regauss &  $16.4\pm3.0$ & $17.4\pm3.4$  & $2.2\pm5.8$ & $2.5\pm6.4$ &  $0.2\pm0.1$ & $0.0\pm0.1$ \\
-RGC-FixedAber & regauss (MC) &  $-4.7\pm8.9$ & $6.0\pm7.2$  & $-15.4\pm22.1$ & $-16.0\pm17.5$ &  $0.1\pm0.2$ & $-0.2\pm0.2$ \\
-RGC-FixedAber  & regauss  &  $61.6\pm6.6$ & $63.7\pm5.2$  & $-30.0\pm12.1$ & $-32.3\pm13.5$ &  $0.3\pm0.2$ & $0.0\pm0.1$ \\
-\hline
-\end{tabular}
-}
-\caption{Shear and PSF calibration bias parameters from each of the
-  branches considered. Rows with metacalibrated parameters are shown
-  above their un-calibrated counterparts. }
-\label{table:results}
-\end{figure*}
-
-\begin{figure*}[t]
-\begin{center}
-\includegraphics[width=0.8\linewidth]{./Plots/m_results_linear.pdf}
-\end{center}
-\caption{Calibration bias results. Each row shows muliplicative
-  calibration bias $m_1$ (top) and $m_2$ (bottom) before and after
-  metacalibration. Pre- and post-correction points are connected by
-  gray arrows: in every case the procedure has reduced or eliminated
-  the amplitude of detectable multiplicative calibration bias.}
-\label{fig:m_results}
-\end{figure*}
-
 \begin{figure*}[t]
 \begin{center}
 \includegraphics[width=0.8\linewidth]{./Plots/a_results_linear.pdf}
@@ -1074,6 +1068,24 @@ RGC-FixedAber  & regauss  &  $61.6\pm6.6$ & $63.7\pm5.2$  & $-30.0\pm12.1$ & $-3
 \end{figure*}
 
 
+\begin{figure*}[t]
+\begin{center}
+\includegraphics[width=0.8\linewidth]{./Plots/m_results_linear.pdf}
+\end{center}
+\caption{Calibration bias results. Each row shows muliplicative
+  calibration bias $m_1$ (top) and $m_2$ (bottom) before and after
+  metacalibration. Pre- and post-correction points are connected by
+  gray arrows: in every case the procedure has reduced or eliminated
+  the amplitude of detectable multiplicative calibration bias.}
+\label{fig:m_results}
+\end{figure*}
+
+
+\section*{Acknowledgments}
+
+Part of the research was carried out at the Jet Propulsion Laboratory
+(JPL), California Institute of Technology, under a contract with the
+National Aeronautics and Space Administration.
 
 \bibliographystyle{apj}
 \bibliography{bibliography}
