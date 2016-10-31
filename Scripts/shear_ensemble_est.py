@@ -7,7 +7,6 @@ import numpy as np
 import glob
 from astropy.io import fits
 import re
-import galsim
 import matplotlib as mpl
 mpl.rcParams.update({'font.size':20})
 #mpl.use('Agg')
@@ -342,13 +341,16 @@ def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
             e2p, e2m =  reconstructMetacalMeas(g=catalog['g2'], R= catalog['R2'],
                                                a = catalog['a2'], c=catalog['c2'],
                                                psf_e=catalog['psf_e2'], delta_g = 0.01 )
+
+            R1 = np.mean(e1p - e1m )/0.02 - np.mean(e1p+e1m)
+            R2 = np.mean(e2p - e2m )/0.02 - np.mean(e2p+e2m)
+
             
-            coeff1 = np.polyfit([-0.01, 0.0, 0.01], [np.mean(e1m),np.mean(catalog['g1']),np.mean(e1p)], 1)
-            coeff2 = np.polyfit([-0.01, 0.0, 0.01], [np.mean(e1m),np.mean(catalog['g1']),np.mean(e1p)], 1)
-            this_g1_opt = (np.mean(catalog['g1']) - coeff1[1])/coeff1[0]
-            this_g2_opt = (np.mean(catalog['g2']) - coeff2[1])/coeff2[0]
-            this_g1_var = np.var(catalog['g1'])*1./catalog.size
-            this_g2_var = np.var(catalog['g1'])*1./catalog.size
+            this_g1_opt = np.mean(catalog['g1'] - catalog['a1']*catalog['psf_e1'])/R1
+            this_g2_opt = np.mean(catalog['g2'] - catalog['a2']*catalog['psf_e2'])/R2
+            stop
+            this_g1_var = np.var(catalog['g2'])*1./catalog.size
+            this_g2_var = np.var(catalog['g2'])*1./catalog.size
 
 
                             
@@ -862,7 +864,7 @@ def main(argv):
         catalogs, truthfile = getAllCatalogs(path=path, mc_type=mc_type,sn_cut = sn_cut)
         print 'Got %d catalogs, doing inference'%len(catalogs)
         field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL = \
-            doInference(catalogs=catalogs, nbins=nbins, mean=False)
+            doInference(catalogs=catalogs, nbins=nbins, mean=True)
         field_str = makeFieldStructure(field_id=field_id, g1raw = g1raw, g2raw = g2raw, g1opt = g1opt, g2opt = g2opt,
                                     g1var = g1var, g2var = g2var, psf_e1 = psf_e1, psf_e2 = psf_e2,
                                     e1_logL = e1_logL, e2_logL = e2_logL)

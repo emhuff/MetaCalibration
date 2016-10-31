@@ -335,12 +335,15 @@ Accurate ensemble shears can only be derived through measurement of
 the counterfactual images described above if the shape measurement
 algorithm is sufficiently well-behaved. Here, that entails the
 requirement that the quantity reported by the shape measurement
-algorithm be linear in the underlying shear in the regime relevant for
-the measurement. \rmcomment{I'm not sure that's true on a per-object
-  basis, as long as it's true for the ensemble?  Same comment is
-  relevant on the next paragraph.  I mean, the standard ellipticity
-  and distortion do not have a linear shear response on a per-object
-  basis, only for the ensemble.}
+algorithm be sufficiently linear in the underlying shear in the regime
+relevant for the measurement that the ensemble response is truly
+linear.
+
+%\rmcomment{I'm not sure that's true on a per-object
+%  basis, as long as it's true for the ensemble?  Same comment is
+%  relevant on the next paragraph.  I mean, the standard ellipticity
+%  and distortion do not have a linear shear response on a per-object
+%  basis, only for the ensemble.}
 
 We test a variety of shape algorithms below that make use of differing
 definitions of ellipticity. As we are attempting to construct a shear
@@ -355,14 +358,42 @@ of their precise definition.
 Counterfactual images can in principle be used to derive a per-object
 shear response for a modified version of the original image.  However,
 the quantities of interest in Eq.~\ref{eqn:calibPars} are ensemble
-responses.  Hence it is necessary to run the ensemble shear inference
+responses.  Hence it is necessary to run the shear inference
 step on the counterfactual images, in order to get the shear
 responsivity of the ensemble shear estimate.
 
-\emhcomment{It's really not clear when averaging should work, and when
-  it fails why the histogram estimator should work instead. We have
-  precious little theory at this point about when our proposed
-  procedure should be expected to break. }
+The distribution of measured shear responses determines the nature of
+the ensemble inference procedure. The distribution of MetaCal
+responses, especially for shape measures that involve ratios of noisy
+quantities, can make simple averaging schemes problematic; power-law
+tails result in a very high variance and slow convergence of the mean
+response. We develop and implement a simple technique below which
+deals adequately with the large noise in the regaussianized moment
+responses. If the measurement algorithm is nonlinear, however, then
+our averaging scheme will require some additional correction, beyond
+that we develop here, for the resulting nonlinear ensemble response.
+
+
+\subsection{Algorithmic Limitations}
+In addition to the requirement described above that the measurement
+algorithms be sufficiently well-behaved, it should be noted that the
+fundamental assumptions of this method are frequently violated in real
+data. The image manipulation step assumes that the image is linearly
+related to the true surface brightness on the sky. This is not valid
+for common image processing artifacts like cosmic rays, for saturated
+pixels, or when charge-deflection effects produce a flux-dependent PSF
+(e.g., \citealt{2015JInst..10C5032G}). The presumption of a single
+shear, with a single response factor, can also be problematic. The
+lensing signal varies with redshift along a single line of sight, so
+blended images of multiple galaxies at appreciably different redshifts
+involve at least two different shears, and the relationship of the
+metacalibrated response to the underlying shear field is not
+straightforward. Nevertheless, these issues are generic, and will if
+unaddressed will cause problems for any shear inference method; we
+require our images to be reliable representations of the sky, and that
+the shear field be in some sense single-valued where it can be
+measured.
+
 
 \section{Implementation}
 \subsection{Image Modification}
@@ -401,15 +432,15 @@ image rather than the deconvolved galaxy image. Finally, we create a
 reconvolved image with no added shear but with the PSF $\Gamma$, on
 which we perform the final shape measurement.
 
-\rmcomment{In everything below, we are still kind of conflating the
-  per-object responses with ensemble responses.  We should be very
-  clear and specific about what things we could choose to construct
-  (but don't really use) vs.\ which ones we actually do use in
-  practice. }
+%\rmcomment{In everything below, we are still kind of conflating the
+%  per-object responses with ensemble responses.  We should be very
+%  clear and specific about what things we could choose to construct
+%  (but don't really use) vs.\ which ones we actually do use in
+%  practice. }
 
-Shape measurements on these images are used to derive shear
-calibration and PSF biases {introduced by the chosen shape measurement
-  method}. The shapes measured from the sheared reconvolved images
+Shape measurements on these images are used to derive per-object shear
+calibration and PSF biases {introduced by the measurement
+  process}. The shapes measured from the sheared reconvolved images
 with positive and negative applied shears, $\mathbf{e}_{+}$ and
 $\mathbf{e}_{-}$, can be used for a straightforward finite-difference
 estimate of the multiplicative shear calibration
@@ -429,16 +460,16 @@ of at least the linear-order residual PSF ellipticity biases:
 \begin{align}
 R_{\rm PSF} = \frac{\mathbf{e}_{+,\rm PSF} - \mathbf{e}_{-,\rm PSF}}{2\Delta\mathbf{g}}.
 \end{align}
-The result of this process is a catalog of shear responsivities, PSF
-responsivities, and additive biases for every galaxy. A histogram of
-these quantities is shown in figure~\ref{fig:calibhist}. The derived
-biases and responsivities are very noisy, so attention must be paid to
-how inference is performed on the full ensemble of galaxies.
-\rmcomment{It's not really clear to me how useful this is, considering
-  that we don't use these directly, and the level of noise etc.\ must
-  surely depend on the shape measurement method?  Unless you want to
-  specifically use this to motivate the use of the histogram
-  estimator?}
+The result of this process is a catalog of per-object shear responsivities, PSF
+responsivities, and additive biases for every galaxy. Accurate lensing
+depends on the characterising ensemble response, however, not the
+per-object responses. 
+
+A histogram of these quantities is shown in
+figure~\ref{fig:calibhist}. We argue that the power-law wings of the
+distribution make estimation of the ensemble response by simple
+averaging problematic, and describe next a scheme for regularizing the
+ensemble response estimation.
 
 \begin{figure*}
 \begin{center}

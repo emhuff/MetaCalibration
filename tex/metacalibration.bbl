@@ -1,4 +1,4 @@
-\begin{thebibliography}{36}
+\begin{thebibliography}{37}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 
 \bibitem[{{Bartelmann} \& {Schneider}(2001)}]{2001PhR...340..291B}
@@ -51,6 +51,11 @@
 
 \bibitem[{{Flaugher}(2005)}]{DES_main}
 {Flaugher}, B. 2005, International Journal of Modern Physics A, 20, 3121
+
+\bibitem[{{Gruen} {et~al.}(2015){Gruen}, {Bernstein}, {Jarvis}, {Rowe},
+  {Vikram}, {Plazas}, \& {Seitz}}]{2015JInst..10C5032G}
+{Gruen}, D., {Bernstein}, G.~M., {Jarvis}, M., {Rowe}, B., {Vikram}, V.,
+  {Plazas}, A.~A., \& {Seitz}, S. 2015, Journal of Instrumentation, 10, C05032
 
 \bibitem[{{Heymans} {et~al.}(2006){Heymans}, {Van Waerbeke}, {Bacon}, {Berge},
   {Bernstein}, {Bertin}, {Bridle}, \& et~al.}]{2006MNRAS.368.1323H}
