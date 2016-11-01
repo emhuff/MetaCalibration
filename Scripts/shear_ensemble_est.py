@@ -348,7 +348,6 @@ def doInference(catalogs=None, nbins=None, mean = False, plotFile = None):
             
             this_g1_opt = np.mean(catalog['g1'] - catalog['a1']*catalog['psf_e1'])/R1
             this_g2_opt = np.mean(catalog['g2'] - catalog['a2']*catalog['psf_e2'])/R2
-            stop
             this_g1_var = np.var(catalog['g2'])*1./catalog.size
             this_g2_var = np.var(catalog['g2'])*1./catalog.size
 
@@ -864,7 +863,7 @@ def main(argv):
         catalogs, truthfile = getAllCatalogs(path=path, mc_type=mc_type,sn_cut = sn_cut)
         print 'Got %d catalogs, doing inference'%len(catalogs)
         field_id, g1raw, g2raw, g1opt, g2opt, g1var, g2var, psf_e1, psf_e2, e1_logL, e2_logL = \
-            doInference(catalogs=catalogs, nbins=nbins, mean=True)
+            doInference(catalogs=catalogs, nbins=nbins, mean=False)
         field_str = makeFieldStructure(field_id=field_id, g1raw = g1raw, g2raw = g2raw, g1opt = g1opt, g2opt = g2opt,
                                     g1var = g1var, g2var = g2var, psf_e1 = psf_e1, psf_e2 = psf_e2,
                                     e1_logL = e1_logL, e2_logL = e2_logL)
