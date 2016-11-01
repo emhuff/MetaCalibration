@@ -701,7 +701,7 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
 
     ax3.plot(truthTable['g1'], obsTable['g1'] - truthTable['g1'],'.')
     ax3.plot(truthTable['g1'],coeff1[0]*truthTable['g1'] + coeff1[2],linestyle='--',color='cyan')
-    ax3.set_xlabel(r'$g_{1,{\rm true}}$')
+    ax3.set_xlabel(r'true shear ($g_1$)')
     ax3.set_ylabel(r'$g_{1,{\rm obs}} - g_{1,{\rm true}}$')
     ax3.set_ylim([-0.03,0.03])#set_ylim([-shear_range, shear_range])
     if "moments" in mc:
@@ -722,7 +722,7 @@ def no_correction_plots(catalogs= None,truthtable = None, mc= None):
         ax4.text(0.0,-0.5,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]))    
     else:
         ax4.text(0.0,0.015,'m = %.4f +/- %.4f \n a = %.4f +/- %.4f \n c = %.4f +/0 %.4f'%(coeff2[0],coeff2[3],coeff2[1],coeff2[4],coeff2[2],coeff2[5]))    
-    ax4.set_xlabel(r'$g_{2,{\rm true}}$')
+    ax4.set_xlabel(r'true shear ($g_2$)')
     ax4.set_ylabel(r'$g_{2,{\rm obs}} - g_{2,{\rm true}}$')
     ax4.axhspan(np.median(obsTable['err2']),-np.median(obsTable['err2']),alpha=0.2,color='red')
     ax4.axhline(0.,linestyle='--',color='red')
