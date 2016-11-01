@@ -375,24 +375,33 @@ that we develop here, for the resulting nonlinear ensemble response.
 
 
 \subsection{Algorithmic Limitations}
-In addition to the requirement described above that the measurement
-algorithms be sufficiently well-behaved, it should be noted that the
-fundamental assumptions of this method are frequently violated in real
-data. The image manipulation step assumes that the image is linearly
-related to the true surface brightness on the sky. This is not valid
-for common image processing artifacts like cosmic rays, for saturated
-pixels, or when charge-deflection effects produce a flux-dependent PSF
-(e.g., \citealt{2015JInst..10C5032G}). The presumption of a single
-shear, with a single response factor, can also be problematic. The
-lensing signal varies with redshift along a single line of sight, so
-blended images of multiple galaxies at appreciably different redshifts
-involve at least two different shears, and the relationship of the
-metacalibrated response to the underlying shear field is not
-straightforward. Nevertheless, these issues are generic, and will if
-unaddressed will cause problems for any shear inference method; we
-require our images to be reliable representations of the sky, and that
-the shear field be in some sense single-valued where it can be
-measured.
+The fundamental assumptions of the image processing steps are
+frequently violated in real data. The image manipulation step assumes
+that the image is linearly related to the true surface brightness on
+the sky. This is not valid for common image processing artifacts like
+cosmic rays, for saturated pixels, or when charge-deflection effects
+produce a flux-dependent PSF (e.g.,
+\citealt{2015JInst..10C5032G}). 
+
+The presumption of a single shear, with a single response factor, can
+also be problematic. The lensing signal varies with redshift along a
+single line of sight, so blended images of multiple galaxies at
+appreciably different redshifts involve at least two different shears,
+and the relationship of the metacalibrated response to the underlying
+shear field is not straightforward. Nevertheless, these issues are
+generic, and will if unaddressed will cause problems for any shear
+inference method; we require our images to be reliable representations
+of the sky, and that the shear field be in some sense single-valued
+where it can be measured.
+
+Linearity in the ensemble inference is also vital if the image
+processing algorithm only computes first derivatives of the image with
+respect to the shear, as in the implementation we describe here. More
+finite difference steps could in princple be used to calibrate a
+nonlinear shear response, but this significantly increases the noise
+and the comptuation cost of the method. Here we will perform enough
+finite difference steps to allow for anestimate of the linearity of
+each estimator.
 
 
 \section{Implementation}
@@ -701,6 +710,19 @@ the similarity of the model to the measurement field. The likelihood
 can then be used as an objective criterion for the quality of the
 inference.
 
+We can also devise a simple test for the linearity (in the shear) of
+the ensemble estimator. The estimator we use to derive calubration
+relies on two-sided finite-difference numerical derivatives, but it is
+also possible to measure the nonlinear ensemble response by measuring
+the agreement of the forward- and backwards finite-difference
+estimates for the ensemble response. We quantify this with the parameter $\eta_{\rm
+  nl}$, defined as 
+\begin{align}
+1+\eta_{nl} = \frac{\Delta_{h+}^T C^{-1} \Delta_{h-}}{\Delta_{h}^TC^{-1}\Delta_{h}}
+\end{align}
+where the $+$ and $-$ subscripts refer to the forward- and backwards
+finite difference histogram derivative estimates.
+
 \subsection{Relationship to previous implementations}
 
 As shown in the GREAT3 results paper \citep{2015MNRAS.450.2963M}, an
@@ -826,6 +848,25 @@ We next report results for the GREAT RGC branch, incorporating more
 realistic galaxy morphologies along with the aberrant PSFs introduced
 in the CGC branch.
 
+
+\begin{figure*}[t]
+\begin{center}
+\includegraphics[width=0.46\linewidth]{./Plots/m1-no_corrections-regauss.pdf}
+\includegraphics[width=0.46\linewidth]{./Plots/m1-regauss-opt-shear_plots.pdf}\\
+\includegraphics[width=0.46\linewidth]{./Plots/m1-no_corrections-ksb.pdf}
+\includegraphics[width=0.46\linewidth]{./Plots/m1-ksb-opt-shear_plots.pdf}\\
+\includegraphics[width=0.46\linewidth]{./Plots/m1-no_corrections-moments.pdf}
+\includegraphics[width=0.46\linewidth]{./Plots/m1-moments-opt-shear_plots.pdf}
+\end{center}
+\caption{Shear calibration bias $m_1$ {\it before} ({\bf left}) and
+  {\it after} {\bf right} metacalibration for the regaussianization
+  ({\bf top}), KSB ({\bf middle}), and Linear Moments ({\bf bottom})
+  algorithms on the CGC branch. The shaded region covers the same
+  vertical range in each panel.  Points excluded by the log-likelihood
+  cut are marked with red squares.}
+\label{fig:m_comparison}
+\end{figure*}
+
 One issue of concern is how to understand outlier fields.  In GREAT3,
 there was a concern that some outliers were due to failure of our
 model for interpreting the per-object shapes in fields that had large
@@ -861,6 +902,33 @@ signal-to-noise scaling. The results of simply doubling the noise are
 shown in the summary results figures and table below with the label
 ``CGC-regauss-noisy''.
 
+
+
+\begin{figure*}
+\begin{center}
+\includegraphics[width=0.4\linewidth]{./Plots/psf_e1-no_corrections-rgc-regauss.pdf}
+\includegraphics[width=0.4\linewidth]{./Plots/psf_e1-rgc-regauss-opt-shear_plots.pdf}
+\includegraphics[width=0.4\linewidth]{./Plots/psf_e1-no_corrections-ksb.pdf}
+\includegraphics[width=0.4\linewidth]{./Plots/psf_e1-ksb-opt-shear_plots.pdf}
+\includegraphics[width=0.4\linewidth]{./Plots/psf_e1-no_corrections-moments.pdf}
+\includegraphics[width=0.4\linewidth]{./Plots/psf_e1-moments-opt-shear_plots.pdf}
+\end{center}
+\caption{Effects of the metacalibration alogorithm applied to PSF
+  correction. {\bf Left} panels show the relationship between measured
+  shear and PSF ellipticity before correction, and {\bf right} panels
+  show the same trends afterwards. Note that the shaded horizontal
+  band covers the same vertical range in each panel.  \\
+  Simulation branch/algorithm pairs shown in order from {\bf top} to
+  {\bf bottom} are RGC-regauss, CGC-KSB, and CGC-moments. The
+  combination of the metacalibration algorithm with our
+  maximum-likelihood averaging procedure makes accurate corrections
+  when the PSF ellipticities are small or comparable to the magnitude
+  of the shear signal. It is clear that a large fraction of the trend
+  remaining after correction is driven by high-PSF-ellipticity outlier
+  fields, which would typically not pass the image quality
+  requirements in a realistic experiment.}
+\label{fig:psf_trends}
+\end{figure*}
 
 
 
@@ -949,78 +1017,15 @@ appears to scale as the variance, though at least for the
 statistically significant until the noise is approximately doubled.
 
 
-
-
-\begin{figure*}[t]
-\begin{center}
-\includegraphics[width=0.46\linewidth]{./Plots/m1-no_corrections-regauss.pdf}
-\includegraphics[width=0.46\linewidth]{./Plots/m1-regauss-opt-shear_plots.pdf}\\
-\includegraphics[width=0.46\linewidth]{./Plots/m1-no_corrections-ksb.pdf}
-\includegraphics[width=0.46\linewidth]{./Plots/m1-ksb-opt-shear_plots.pdf}\\
-\includegraphics[width=0.46\linewidth]{./Plots/m1-no_corrections-moments.pdf}
-\includegraphics[width=0.46\linewidth]{./Plots/m1-moments-opt-shear_plots.pdf}
-\end{center}
-\caption{Shear calibration bias $m_1$ {\it before} ({\bf left}) and
-  {\it after} {\bf right} metacalibration for the regaussianization
-  ({\bf top}), KSB ({\bf middle}), and Linear Moments ({\bf bottom})
-  algorithms on the CGC branch. The shaded region covers the same
-  vertical range in each panel.  Points excluded by the log-likelihood
-  cut are marked with red squares.}
-\label{fig:m_comparison}
-\end{figure*}
-
-
-
-%\begin{figure*}[t]
-%\begin{center}
-%\includegraphics[width=0.48\linewidth]{./Plots/logL1-regauss-opt-shear_plots.pdf}
-%\includegraphics[width=0.48\linewidth]{./Plots/logL1-rgc-regauss-opt-shear_plots.pdf}
-%\includegraphics[width=0.48\linewidth]{./Plots/logL1-ksb-opt-shear_plots.pdf}
-%\includegraphics[width=0.48\linewidth]{./Plots/logL1-moments-opt-shear_plots.pdf}
-%\end{center}
-%\caption{log-likelihoods used to rank-order fields for applying
-% cuts. Vertical red line indicates location of $20\%$ $\log L$
-% cut. This metric tends to be a reliable indicator whether
-% the inference procedure will fail. Clockwise from the top-left
-% panel: CGC-regauss, RGC-regauss, CGC-moments, and CGC-KSB.}
-%\end{figure*}
-
-%\begin{figure*}[t]
-%\begin{center}
-%\includegraphics[width=0.48\linewidth]{./Plots/m1-no_corrections-rgc-fixedaber-regauss.pdf}
-%\includegraphics[width=0.48\linewidth]{./Plots/m1-rgc-fixedaber-regauss-opt-shear_plots.pdf}
-%\includegraphics[width=0.48\linewidth]{./Plots/m2-no_corrections-rgc-fixedaber-regauss.pdf}
-%\includegraphics[width=0.48\linewidth]{./Plots/m2-rgc-fixedaber-regauss-opt-shear_plots.pdf}
-%\end{center}
-%\caption{Multiplicative calibration results for the rgc-fixedaber
-% branch.}
-%\end{figure*}
-
-\begin{figure*}
-\begin{center}
-\includegraphics[width=0.4\linewidth]{./Plots/psf_e1-no_corrections-rgc-regauss.pdf}
-\includegraphics[width=0.4\linewidth]{./Plots/psf_e1-rgc-regauss-opt-shear_plots.pdf}
-\includegraphics[width=0.4\linewidth]{./Plots/psf_e1-no_corrections-ksb.pdf}
-\includegraphics[width=0.4\linewidth]{./Plots/psf_e1-ksb-opt-shear_plots.pdf}
-\includegraphics[width=0.4\linewidth]{./Plots/psf_e1-no_corrections-moments.pdf}
-\includegraphics[width=0.4\linewidth]{./Plots/psf_e1-moments-opt-shear_plots.pdf}
-\end{center}
-\caption{Effects of the metacalibration alogorithm applied to PSF
-  correction. {\bf Left} panels show the relationship between measured
-  shear and PSF ellipticity before correction, and {\bf right} panels
-  show the same trends afterwards. Note that the shaded horizontal
-  band covers the same vertical range in each panel.  \\
-  Simulation branch/algorithm pairs shown in order from {\bf top} to
-  {\bf bottom} are RGC-regauss, CGC-KSB, and CGC-moments. The
-  combination of the metacalibration algorithm with our
-  maximum-likelihood averaging procedure makes accurate corrections
-  when the PSF ellipticities are small or comparable to the magnitude
-  of the shear signal. It is clear that a large fraction of the trend
-  remaining after correction is driven by high-PSF-ellipticity outlier
-  fields, which would typically not pass the image quality
-  requirements in a realistic experiment.}
-\label{fig:psf_trends}
-\end{figure*}
+We also quantify the nonlinearity of the ensemble estimates. For the
+CGC branch we find values for regauss, KSB, and linear moments of
+$\eta_{nl}$ of $-0.0045$, $-0.0150$, and $-0.0050$, respectively. From
+this we would expect KSB to be more difficult to calibrate with our
+techinique that linear moments, all else being equal. It seems clear
+from this and from Figure~\ref{fig:psf_trends} that the (vastly improved,
+but still) poor calibration results for the linear moments are driven
+not be the linearity of their reponse, but by sub-optimal PSF
+correction.
 
 \section{Applicability to real data}
 Several implementation issues need to be solved before this method can
@@ -1059,6 +1064,18 @@ to realistic measurements in the Dark Energy Survey. Follow-up work
 allow this technique to be used on Dark Energy Survey data with
 state-of-the-art shear estimation algorithms.
 
+\begin{figure*}[t]
+\begin{center}
+\includegraphics[width=0.8\linewidth]{./Plots/m_results_linear.pdf}
+\end{center}
+\caption{Calibration bias results. Each row shows muliplicative
+  calibration bias $m_1$ (top) and $m_2$ (bottom) before and after
+  metacalibration. Pre- and post-correction points are connected by
+  gray arrows: in every case the procedure has reduced or eliminated
+  the amplitude of detectable multiplicative calibration bias.}
+\label{fig:m_results}
+\end{figure*}
+
 \section{Conclusions}
 We have proposed and implemented the first method for self-calibration
 of shear measurements that does not rely on external data or
@@ -1085,6 +1102,8 @@ estimation algorithm.
 We expect future work to extend this method to deal with the
 complexities inherent in real data.
 
+
+
 \begin{figure*}[t]
 \begin{center}
 \includegraphics[width=0.8\linewidth]{./Plots/a_results_linear.pdf}
@@ -1096,19 +1115,6 @@ complexities inherent in real data.
   the procedure has reduced or eliminated the amplitude of detectable
   PSF coupling.}
 \label{fig:a_results}
-\end{figure*}
-
-
-\begin{figure*}[t]
-\begin{center}
-\includegraphics[width=0.8\linewidth]{./Plots/m_results_linear.pdf}
-\end{center}
-\caption{Calibration bias results. Each row shows muliplicative
-  calibration bias $m_1$ (top) and $m_2$ (bottom) before and after
-  metacalibration. Pre- and post-correction points are connected by
-  gray arrows: in every case the procedure has reduced or eliminated
-  the amplitude of detectable multiplicative calibration bias.}
-\label{fig:m_results}
 \end{figure*}
 
 
