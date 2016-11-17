@@ -373,7 +373,7 @@ response. We develop and implement a simple technique below which
 deals adequately with the large noise in the regaussianized moment
 responses. If the measurement algorithm is nonlinear, however, then
 our averaging scheme will require some additional correction, beyond
-that we develop here, for the resulting nonlinear ensemble response.
+what we develop here, for the resulting nonlinear ensemble response.
 
 
 \subsection{Algorithmic Limitations}
@@ -401,8 +401,8 @@ processing algorithm only computes first derivatives of the image with
 respect to the shear, as in the implementation we describe here. More
 finite difference steps could in princple be used to calibrate a
 nonlinear shear response, but this significantly increases the noise
-and the comptuation cost of the method. Here we will perform enough
-finite difference steps to allow for anestimate of the linearity of
+and the computation cost of the method. Here we will perform enough
+finite difference steps to allow for an estimate of the linearity of
 each estimator.
 
 
@@ -427,7 +427,7 @@ performed to enable the GREAT3 shear testing simulations.  From the
 perspective of numerical validation, the tests in section~9 of
 \cite{2015A&C....10..121R} illustrate that GalSim can accurately
 render sheared images of quite complex galaxy and PSF light profiles
-with its default settings that control numerical accuracy.
+with its default interpolants and settings that control numerical accuracy.
 
 For each galaxy and PSF postage stamp, we first create an
 \texttt{InterpolatedImage} object. This object is deconvolved by the
@@ -454,7 +454,7 @@ calibration and PSF biases {introduced by the measurement
   process}. The shapes measured from the sheared reconvolved images
 with positive and negative applied shears, $\mathbf{e}_{+}$ and
 $\mathbf{e}_{-}$, can be used for a straightforward finite-difference
-estimate of the multiplicative shear calibration
+estimate of the per-object shear response
 \begin{align}
 R &= \frac{\partial \mathbf{e}}{\partial \mathbf{g}}  \\
  &=\frac{\mathbf{e}_{+} - \mathbf{e}_{-}}{2\Delta\mathbf{g}}
@@ -464,6 +464,8 @@ sum of these two quantities:
 \begin{align}
 \mathbf{c} &= \frac{\mathbf{e}_{+} + \mathbf{e}_{-}}{2} - \mathbf{e}
 \end{align}
+\rmcomment{Need to clarify that here $\mathbf{e}$ is not the original one, but rather the one with
+  $\Gamma$ for the PSF?}
 and if the shape measurement algorithm does not perfectly remove PSF
 ellipticity, then the shapes measured from shearing the PSF
 ($\mathbf{e}_{+,\rm PSF}$ and $\mathbf{e}_{-,\rm PSF}$) permit calculation
@@ -529,6 +531,7 @@ first order in the PSF non-Gaussianity). The performance of this
 algorithm has been extensively studied in real data and simulations
 \citep[e.g.,][]{2005MNRAS.361.1287M,2012MNRAS.420.1518M,2013MNRAS.432.1544M,2015MNRAS.450.2963M}. In
 the remainder of this paper, we 
+\rmcomment{This sentence just kind of trails off}
 
 The outputs of the re-Gaussianization algorithm are PSF-corrected
 ``distortions'', which for an object with purely elliptical isophotes
@@ -575,11 +578,12 @@ $P_g$ is the correction to the shear polarisability that includes
 the smearing with the isotropic component of the PSF. The
 ellipticities are constructed from weighted quadrupole moments, and
 the other quantities involve higher order moments. A circular Gaussian
-weight of scale length $r_g$ is used, where $r_g$ is galaxy size.
+weight of scale length $r_g$ is used, where $r_g$ is galaxy size. \rmcomment{``Galaxy size'' defined
+  how?}
 
 The KSB method returns a per-object estimate of the shears
 $(\hat{g}_1, \hat{g}_2)$. We can use metacalibration to
-infer the ensemble shear, removing multiplicative and additive biases that come from averaging the
+remove multiplicative and additive biases that come from averaging the
 per-object KSB shear estimates.
 
 \subsubsection{Linear Moments}
@@ -598,10 +602,10 @@ M_{ij} = \frac{\int (x_i-\langle x_i\rangle)(x_j-\langle x_j\rangle) w({\mathbf 
 \end{equation}
 for $i,j=1,2$, and finally 
 \begin{equation}\label{eq:moments-div}
-e_1 = \frac{M_{11}-M_{22}}{M_{11}+M_{22}}, \qquad e_2 \frac{2M_{12}}{M_{11}+M_{22}}.
+e_1 = \frac{M_{11}-M_{22}}{M_{11}+M_{22}}, \qquad e_2 =\frac{2M_{12}}{M_{11}+M_{22}}.
 \end{equation}
 
-One source of noise (including noise bias) in traditional moments-based methods is the
+One source of noise (and noise bias) in traditional moments-based methods is the
 division of two noisy quantities in Eq.~\ref{eq:moments-div},
 typically followed by further division by other noisy quantities to
 remove the dilution of the galaxy shape by the PSF.  Thus, as a final
@@ -617,7 +621,8 @@ quantities, like the galaxy flux and size, and the PSF size and shape.
 In principle, metacalibration should be able to nonetheless determine
 the response of this statistic to shear,
 $\mathrm{d}\hat{M}_i/\mathrm{d}g$, and produce a reliable shear
-estimate, provided that the model for the predominant sources of
+estimate from the ensemble-averaged $\hat{M}_i$ values, 
+provided that the model for the predominant sources of
 systematics follows that in Eq.~\ref{eqn:edist_model}.  This is a
 quite stringent test of the metacalibration method, as it is unclear
 whether that purely linear model will be valid in this case.
