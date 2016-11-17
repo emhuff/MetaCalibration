@@ -407,7 +407,7 @@ each estimator.
 
 
 \section{Implementation}
-\subsection{Image Modification}
+\subsection{Image Modification}\label{subsec:imagemod}
 We use
 GalSim\footnote{\url{https://github.com/GalSim-developers/GalSim}} to
 manipulate the images and to generate simulations for validation. For
@@ -652,6 +652,11 @@ noisy estimates of the constants $R_{\rm PSF}$, $R$, and $c$ have been
 determined separately for each galaxy, as described above, during the
 image modification step. This is then used to construct a linear
 estimator for the ensemble shear, as follows.
+\rmcomment{The text here seems to imply that you use the individual object responses, but that's not
+  true.  You are assuming this model but you simply use the measured $e_{\rm meas}$ directly.  My
+  recommendation: move this equation up to section~\ref{subsec:imagemod}, after you've defined all
+  those responses, since this is a summary of what the individual responses mean.  Here, don't give
+  the model again, just say you use ${e}_{\rm meas}$ to avoid conclusion.}
 
 If the measured shape distribution $n(\mathbf{e}_{\rm meas})$ is linear
 in the shear, then we can write
@@ -662,7 +667,7 @@ It will be convenient to discretize this distribution into a
 histogram. If the probability of a galaxy ending up in the
 $i^{\rm th}$ shape histogram bin is $q_i$, and each galaxy's shape can
 be considered an independent draw from some underlying distribution,
-then the likelihood function for an observed histogram is exactly the
+then the likelihood function for an observed histogram is the
 multinomial likelihood
 \begin{align}
 p( \left\{N_i\right\} |\left\{ q_i\right\} ) = \frac{N_{\rm tot}!}{\prod\limits_i (N_i!)}\prod\limits_j q_j^{N_j}
@@ -715,13 +720,13 @@ estimated shear. If the shear response measured for the unlensed prior
 is correct, then the performance of the estimator will depend only on
 the similarity of the model to the measurement field. The likelihood
 can then be used as an objective criterion for the quality of the
-inference.
+inference.  \rmcomment{Do we ever actually do this?}
 
 We can also devise a simple test for the linearity (in the shear) of
-the ensemble estimator. The estimator we use to derive calubration
+the ensemble estimator. The estimator we use to infer the shear response 
 relies on two-sided finite-difference numerical derivatives, but it is
-also possible to measure the nonlinear ensemble response by measuring
-the agreement of the forward- and backwards finite-difference
+also possible to measure the nonlinear ensemble response by testing for consistency between the 
+forward- and backwards finite-difference
 estimates for the ensemble response. We quantify this with the parameter $\eta_{\rm
   nl}$, defined as 
 \begin{align}
@@ -735,10 +740,10 @@ finite difference histogram derivative estimates.
 As shown in the GREAT3 results paper \citep{2015MNRAS.450.2963M}, an
 early version of metacalibration was used in the GREAT3 challenge.
 That implementation differs from the one presented here and released
-publicly in association with this paper in two important ways: the
-model for systematics was simpler than the one presented below (in
-particular, it neglected additive systematics entirely in favor of
-focusing exclusively on multiplicative systematics) and the method for
+publicly in association with this paper in two important ways.  First, the
+model for systematics was simpler than the one presented below; 
+it neglected additive systematics entirely, 
+focusing exclusively on multiplicative systematics. Second, the method for 
 inferring shears from an ensemble of objects was entirely different.
 These differences are of sufficient importance that the GREAT3 results
 (especially the ones for additive systematics) are not relevant to the
