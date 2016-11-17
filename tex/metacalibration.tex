@@ -720,7 +720,9 @@ estimated shear. If the shear response measured for the unlensed prior
 is correct, then the performance of the estimator will depend only on
 the similarity of the model to the measurement field. The likelihood
 can then be used as an objective criterion for the quality of the
-inference.  \rmcomment{Do we ever actually do this?}
+inference.  \rmcomment{Do we ever actually do this?  There are some subsections in section 4 that
+  mention where we do {\em not} need to make a likelihood cut, but I do not see any that explicitly
+  say we {\em do} make a likelihood cut.  If we do that, we should say so (and explain the cut).}
 
 We can also devise a simple test for the linearity (in the shear) of
 the ensemble estimator. The estimator we use to infer the shear response 
@@ -752,9 +754,9 @@ implementation described here.
 
 \section{Testing Framework}
 We test the performance of our algorithm on simulated image sets. Our
-baselines simulations are drawn from the GREAT3 simulation suite. We
+baseline simulations are drawn from the GREAT3 simulation suite. We
 run additional simulations in order to distinguish between potential
-biases arising separately from the three components of our inference
+biases arising separately from the three steps in our inference
 framework.
 
 
@@ -826,7 +828,7 @@ newly-generated set of simulations that is closely analogous to the
 GREAT3 CGC branch (parametric galaxy profiles), but with one
 modification to avoid a problem raised in the results paper
 \citep{2015MNRAS.450.2963M}.  There, it was noted that the CGC branch
-has a number of outlier fields related to unusually large optical PSF
+has a small fraction of outlier fields related to unusually large optical PSF
 aberrations, specifically defocus and trefoil.  Thus, our first
 simulated dataset is designed exactly like CGC but with all
 aberrations in the optical PSF set to zero, to ensure reasonable
@@ -858,8 +860,17 @@ challenge.
 
 We next report results for the GREAT RGC branch, incorporating more
 realistic galaxy morphologies along with the aberrant PSFs introduced
-in the CGC branch.
+in the CGC branch. \rmcomment{For consistency, should say what abbreviation we use for this one.}
 
+
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=0.8\columnwidth]{../Plots/rgc_fixedaber_psf_005.pdf}
+\end{center}
+\caption{Example of a PSF in one of the simulations with fixed, large aberrations.  The most obvious
+feature in this case is the trefoil, which gives rise to the triangular shape. \label{fig:trefoil}}
+\end{figure}
 
 \begin{figure*}[t]
 \begin{center}
@@ -882,37 +893,29 @@ in the CGC branch.
 One issue of concern is how to understand outlier fields.  In GREAT3,
 there was a concern that some outliers were due to failure of our
 model for interpreting the per-object shapes in fields that had large
-aberrations.
-
+aberrations. 
 As a way to understand this, we generated a version of RGC that had
 quite large aberrations that were identical in each field:
 specifically defocus of $0.5$ waves and one component of trefoil of
 $0.1$ wave.  An example of a PSF in one subfield is shown in
 Fig.~\ref{fig:trefoil}; they do not all look identical, since the
 atmospheric component was still allowed to vary stochastically
-according to some seeing distribution. This removes the difficulties
+according to a distribution of seeing FWHM. This removes the difficulties
 in building a null ellipticity distribution, isolating the impact of a
 complex PSF. The results from this simulation are labelled
 ``RGC-FixedAber-regauss''.
 
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=0.8\columnwidth]{../Plots/rgc_fixedaber_psf_005.pdf}
-\end{center}
-\caption{Example of a PSF in one of the simulations with fixed, large aberrations.  The most obvious
-feature in this case is the trefoil, which gives rise to the triangular shape. \label{fig:trefoil}}
-\end{figure}
 
 Finally, we investigate the effects of increasing the noise in the
 images. We re-run the ``CGC-regauss'' analysis five times, increasing
 the noise in the initial image each time. The correlated noise
 produced by the image modification procedure may affect the derived
 calibration, and we expect this number of realizations to demonstrate
-whether correlated noise biases is consistent with some simple
-signal-to-noise scaling. The results of increasing the noise are
-shown in figure~\ref{fig:noise_bias}.
-
+whether correlated noise biases is consistent with the expected 
+signal-to-noise scaling. %The results of increasing the noise are
+%shown in Figure~\ref{fig:noise_bias}.
+%
+% Discuss how to view/understand results in next section, for consistency with other tests.
 
 
 \begin{figure*}
@@ -944,6 +947,12 @@ shown in figure~\ref{fig:noise_bias}.
 
 
 \section{Results}
+\rmcomment{This section never refers to Table~\ref{table:results}.  Need to prominently highlight
+  its existence from the start.  Also, the figures are all out of order (we've gone from fig 2 to
+  fig 6 for example).  And I feel the section is kind of odd in that the previous section takes time
+to step through all branches and what we hope to learn from them, yet this section doesn't
+explicitly refer back and explain the lessons learned from each one.}
+
 The primary results from our correction procedure are shown in
 Figures~\ref{fig:m_results} and \ref{fig:a_results}. The calibration
 biases for individual fields before and after metacalibration for
