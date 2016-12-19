@@ -8,6 +8,7 @@
 \usepackage{ulem}
 \usepackage{adjustbox}
 \usepackage[draft]{todonotes}
+\usepackage{mathtools}
 
 \newcommand\toplotrm[1]{\todo[color=green, inline, size=\small]{Plot: #1}}
 \newcommand\towriterm[1]{\todo[color=yellow, inline, size=\small]{Write: #1}}
@@ -86,6 +87,7 @@ $\boldsymbol{A}\mathbf{x}_{\rm true} = \mathbf{x}_{\rm obs}$ between
 the lensed and unlensed image coordinates, parameterized by two shears
 $(\gamma_1,\gamma_2)$ and a convergence $\kappa$
 \begin{align}
+\boldsymbol{A}=
 \begin{pmatrix}
 1 + \kappa + \gamma_1 & \gamma_2 \\
 \gamma_2 & 1 + \kappa - \gamma_1
@@ -185,10 +187,17 @@ simulations described in \citealt{2013A&C.....1...23B}, or the
 calibration simulations used for the KiDS weak lensing cosmology in
 \citealt{2016arXiv160605337F}).
 
-The method outlined in this paper is motivated by the observation
-that introducing a synthetic shear signal into real data is much
-easier than building a realistic comprehensive first-principles simulation
-suite. Perturbing the actual data automatically incorporates features
+The method outlined in this paper is motivated by the observation that
+introducing a synthetic shear signal into real data is much easier
+than building a realistic comprehensive first-principles simulation
+suite. While in practice the need for accurate simulations of the
+ensemble of galaxy images is sometimes met by relying on images from
+external deep fields like the Hubble Space Telescope's COSMOS survey
+\citep{2007ApJS..172..196K,2007ApJS..172....1S,2007ApJS..172...38S},
+the deeper fields needed for calibration of future surveys like LSST
+and WFIRST may not be available in the volume necessary.
+
+ Perturbing the actual data automatically incorporates features
 present in real images (e.g., image artifacts, selection biases,
 unusual high-redshift galaxy morphologies) that are otherwise
 difficult to accurately simulate.  It enables the determination of how the {\em real galaxy
@@ -255,9 +264,10 @@ $I({\mathbf{x}})$ is equal to the unsmeared galaxy image
 $G(\mathbf{x})$ convolved with some point-spread function (including the
 atmospheric seeing, the optical PSF, and the pixel response function) $P(\mathbf{x})$.
 
-In an ideal world, we would vary the gravitational shear experienced
-by the image before is smeared by $P$, constructing the counterfactual
-image $I'(\mathbf{x}| {\boldsymbol g})$:
+In an ideal world, we would calibrate our measurement algorithm by
+making measurements while varying the gravitational shear experienced
+by the pre-seeing image, constructing the counterfactual image
+$I'(\mathbf{x}| {\boldsymbol g})$:
 \begin{equation}
   I'({\mathbf{x}}|\mathbf{g}) = P \ast\left( \hat{\mathbf{s}}_{\mathbf{g}}G\right)
 \end{equation}
@@ -267,26 +277,39 @@ e.g.~\cite{2002AJ....123..583B}. The shear sensitivity of the image
 would then be a straightforward numerical derivative of $I'$ with
 respect to $\mathbf{g}$, and the shear sensitivity of an ellipticity
 measure $\mathbf{e}$ can be calculated from measurements on multiple
-counterfactual images. We can even write down a procedure for
+counterfactual images. We can even write down a formal procedure for
 producing $I'$ from $I$ if we know $P$:
 \begin{equation}
   I'({\mathbf{x}}|\mathbf{g}) = P \ast \left[\hat{\mathbf{s}}_\mathbf{g}\left( P^{-1} \ast I \right)\right].
 \end{equation}
-The noise in $I$ has finite power on scales where $P$ is small or
-vanishing. Deconvolution amplifies noise, and because of the shear,
-this is not cancelled for all Fourier modes by reconvolution with $P$.  The noise
-amplification can be mitigated by reconvolving after the shear
-operation with a new PSF $\Gamma$ (instead of $P$), constructing
-$\Gamma$ so that it suppresses the noise amplification that is
-produced by the deconvolution operation.
+The convolutions become products in Fourier space, where we can write
+\begin{align}
+\tilde{I'({\mathbf{k}}|\mathbf{g})} = \tilde{P}^{\ast} (\mathbf{k}) \: \hat{\mathbf{s}}_\mathbf{g}\left(\frac{\tilde{I} (\mathbf{k})}{\tilde{P}^\ast (\mathbf{k})}\right)
+\end{align}
+Noise in the original image $\tilde{I}$ generally has power at Fourier
+modes where $\tilde{P}$ is small or vanishing. The power in these
+modes will thus be formally large or inifite. Because of the shear
+operation, this power is not subsequently cancelled by multiplication
+by $\tilde{P}$. We must choose a new PSF $\Gamma$ for the final
+convolution step to suppress this deconvolution-amplified noise.
 
-All that is required for $\Gamma$ is that (in Fourier space, with the
-tilde indicating the Fourier transformed quantity)
-$\|\tilde{\Gamma}(\mathbf{|k|}) \| \geq
-\|\hat{\mathbf{s}}\tilde{P}(\mathbf{k})\|$
-for all $\mathbf{k}$.  This condition can be achieved  without introducing additional
-PSF anisotropy by choosing
-$\Gamma(\mathbf{x}) = P\left((1+2|\gamma|)\mathbf{x}\right)$.
+If $||\tilde{P}(\mathbf{k})||$ is monotonically decreasing with $k$,
+this condition can be achieved without introducing additional PSF
+anisotropy by choosing
+\begin{align}
+\Gamma(\mathbf{x}) = P\left((1+2|\gamma|)\mathbf{x}\right).
+\end{align}
+This doesn't always work, however. If $||\tilde{P}(\mathbf{k})||$
+crosses zero (as in cases with strong under-sampling of the PSF) the
+ratio of $\tilde{\Gamma}(\mathbf{k})$ and the sheared, deconvolved
+image will still be formally large or infinite, as power from
+$k-$values beyond the zero crossing will be dragged by the shear
+operation into the region where the dilated PSF does not vanish.
+
+Other, implementation-specific considerations may be important when
+choosing $\Gamma$. When choosing a target PSF, it may prove convenient
+to design one which is well-suited to the shear estimator in hand. We
+defer exploration of this topic to future work.
 
 Our chosen procedure for producing a sheared counterfactual image is
 \begin{equation}
@@ -826,17 +849,17 @@ noise.  The ultimate goal is to estimate the average shear in each
 subfield in an unbiased way, without any multiplicative bias or
 correlations with the per-subfield PSF ellipticity.
 
-One important distinction between GREAT3 and the real Universe that we
-will have to consider is the mean shear.  In a real patch of sky
-comparable to the size of a large survey, the expected mean shear is
-zero.  In GREAT3, while lensing shears $g_1$ and $g_2$ are drawn from
-a distribution with zero mean, the fact that there are only 200
-subfields means that effectively only 200 draws from that distribution
-were made, and that is not enough to have an effective mean shear of
-zero.  Thus, for all of the results below, we will take the averages
-of the true shears per component as a known quantity instead of doing
-a fully blind analysis, since the deviation of those quantities from
-zero is just due to the artificial nature of the simulation design.
+%One important distinction between GREAT3 and the real Universe that we
+%will have to consider is the mean shear.  In a real patch of sky
+%comparable to the size of a large survey, the expected mean shear is
+%zero.  In GREAT3, while lensing shears $g_1$ and $g_2$ are drawn from
+%a distribution with zero mean, the fact that there are only 200
+%subfields means that effectively only 200 draws from that distribution
+%were made, and that is not enough to have an effective mean shear of
+%zero.  Thus, for all of the results below, we will take the averages
+%of the true shears per component as a known quantity instead of doing
+%a fully blind analysis, since the deviation of those quantities from
+%zero is just due to the artificial nature of the simulation design.
 
 We consider two sets of galaxy populations.  One comes directly from
 {\it HST} images, and includes a process to remove the {\it HST} PSF before
@@ -891,9 +914,11 @@ straightforward comparison between the performance of our chosen
 procedure and the variety of other algorithms tested in the GREAT3
 challenge.
 
-We next report results for the GREAT RGC branch, incorporating more
-realistic galaxy morphologies along with the aberrant PSFs introduced
-in the CGC branch. \rmcomment{For consistency, should say what abbreviation we use for this one.}
+We next report results for the GREAT3 RGC branch (``RGC-regauss''),
+incorporating more realistic galaxy morphologies along with the
+aberrant PSFs introduced in the CGC branch. 
+%\rmcomment{For
+%  consistency, should say what abbreviation we use for this one.}
 
 
 
@@ -986,10 +1011,11 @@ signal-to-noise scaling. %The results of increasing the noise are
 to step through all branches and what we hope to learn from them, yet this section doesn't
 explicitly refer back and explain the lessons learned from each one.}
 
-The primary results from our correction procedure are shown in
+The primary results from our correction procedure are listed in
+Table~\ref{table:results} and illustrated in
 Figures~\ref{fig:m_results} and \ref{fig:a_results}. The calibration
 biases for individual fields before and after metacalibration for
-several branches are shown in Figure~\ref{fig:m_comparison}. 
+several branches are shown in Figure~\ref{fig:m_comparison}.
 
 \begin{table*}
 \centering
@@ -1037,16 +1063,17 @@ metacalibration, though here our procedure has suppressed the
 calibration bias by almost two orders of magnitude; metacalibrated raw
 moments appear to perform better than uncorrected KSB.
 
-Our PSF detrending scheme reduces the amplitude of
-residual trends between the PSF ellipticity and the inferred shear, though the
+Our PSF detrending scheme reduces the amplitude of residual trends
+between the PSF ellipticity and the inferred shear, though the
 reductions in $a$ are less dramatic than those in $m$. The residual
 PSF trends for several of the branches are shown in
 Figure~\ref{fig:psf_trends}. Fields with large PSF ellipticity
 outliers appear to be driving most of the residual trends. This should
-perhaps not be surprising, as our assumption that the primary channel
-by which the PSF affects the inferred shear is the PSF ellipticity is
-not completely general, and may in general vary with the choice of
-algorithm or the properties of the PSF. 
+perhaps not be surprising, as our assumption -- that the primary
+channel by which the PSF affects the inferred shear is the PSF
+ellipticity -- is not completely general. The choice of property to
+vary for PSF detrending should depend on the measurement algorithm and
+the properties of the PSF.
 
 
 
