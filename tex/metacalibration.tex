@@ -449,41 +449,6 @@ which we perform the final shape measurement.
 %  (but don't really use) vs.\ which ones we actually do use in
 %  practice. }
 
-Shape measurements on these images are used to derive per-object shear
-calibration and PSF biases {introduced by the measurement
-  process}. The shapes measured from the sheared reconvolved images
-with positive and negative applied shears, $\mathbf{e}_{+}$ and
-$\mathbf{e}_{-}$, can be used for a straightforward finite-difference
-estimate of the per-object shear response
-\begin{align}
-R &= \frac{\partial \mathbf{e}}{\partial \mathbf{g}}  \\
- &=\frac{\mathbf{e}_{+} - \mathbf{e}_{-}}{2\Delta\mathbf{g}}
-\end{align}
-Additive biases introduced by the shape measurement are related to the
-sum of these two quantities:
-\begin{align}
-\mathbf{c} &= \frac{\mathbf{e}_{+} + \mathbf{e}_{-}}{2} - \mathbf{e}
-\end{align}
-\rmcomment{Need to clarify that here $\mathbf{e}$ is not the original one, but rather the one with
-  $\Gamma$ for the PSF?}
-and if the shape measurement algorithm does not perfectly remove PSF
-ellipticity, then the shapes measured from shearing the PSF
-($\mathbf{e}_{+,\rm PSF}$ and $\mathbf{e}_{-,\rm PSF}$) permit calculation
-of at least the linear-order residual PSF ellipticity biases:
-\begin{align}
-R_{\rm PSF} = \frac{\mathbf{e}_{+,\rm PSF} - \mathbf{e}_{-,\rm PSF}}{2\Delta\mathbf{g}}.
-\end{align}
-The result of this process is a catalog of per-object shear responsivities, PSF
-responsivities, and additive biases for every galaxy. Accurate lensing
-depends on the characterising ensemble response, however, not the
-per-object responses. 
-
-A histogram of these quantities is shown in
-figure~\ref{fig:calibhist}. We argue that the power-law wings of the
-distribution make estimation of the ensemble response by simple
-averaging problematic, and describe next a scheme for regularizing the
-ensemble response estimation.
-
 \begin{figure*}
 \begin{center}
 \includegraphics[width=0.45\textwidth]{./Plots/R1_hist.pdf}
@@ -529,9 +494,7 @@ corrections for the non-Gaussianity of the galaxy profile
 \citep{2002AJ....123..583B,2003MNRAS.343..459H} and of the PSF (to
 first order in the PSF non-Gaussianity). The performance of this
 algorithm has been extensively studied in real data and simulations
-\citep[e.g.,][]{2005MNRAS.361.1287M,2012MNRAS.420.1518M,2013MNRAS.432.1544M,2015MNRAS.450.2963M}. In
-the remainder of this paper, we 
-\rmcomment{This sentence just kind of trails off}
+\citep[e.g.,][]{2005MNRAS.361.1287M,2012MNRAS.420.1518M,2013MNRAS.432.1544M,2015MNRAS.450.2963M}. 
 
 The outputs of the re-Gaussianization algorithm are PSF-corrected
 ``distortions'', which for an object with purely elliptical isophotes
@@ -578,8 +541,9 @@ $P_g$ is the correction to the shear polarisability that includes
 the smearing with the isotropic component of the PSF. The
 ellipticities are constructed from weighted quadrupole moments, and
 the other quantities involve higher order moments. A circular Gaussian
-weight of scale length $r_g$ is used, where $r_g$ is galaxy size. \rmcomment{``Galaxy size'' defined
-  how?}
+weight of scale length $r_g$ is used, where $r_g$ is galaxy size, as
+determined by the second moment of the surface-brightness profile. 
+%\rmcomment{``Galaxy size'' defined how?}
 
 The KSB method returns a per-object estimate of the shears
 $(\hat{g}_1, \hat{g}_2)$. We can use metacalibration to
@@ -621,47 +585,94 @@ quantities, like the galaxy flux and size, and the PSF size and shape.
 In principle, metacalibration should be able to nonetheless determine
 the response of this statistic to shear,
 $\mathrm{d}\hat{M}_i/\mathrm{d}g$, and produce a reliable shear
-estimate from the ensemble-averaged $\hat{M}_i$ values, 
-provided that the model for the predominant sources of
-systematics follows that in Eq.~\ref{eqn:edist_model}.  This is a
-quite stringent test of the metacalibration method, as it is unclear
-whether that purely linear model will be valid in this case.
+estimate from the ensemble-averaged $\hat{M}_i$ values, provided that
+the linear model for the signal and dominant sources of systematic
+error is correct.  This is a quite stringent test of the
+metacalibration method, as it is unclear whether that purely linear
+model will be valid in this case.
 
+\subsection{Per-Object Responsivity}
+Shape measurements on the set of modified images can be used to derive
+noisy shear and PSF responsivities for individual galaxies. In the
+case where the measured ellipticity is thought to depend linearly on
+the lensing shear and the PSF ellipticity, the shapes measured from
+the sheared, reconvolved images with positive and negative applied
+shears, $\mathbf{e}_+$ and $\mathbf{e}_-$, can be used for a
+straightforward finite-difference estimate of the per-object shear
+response
+\begin{align}
+R &= \frac{\partial \mathbf{e}}{\partial \mathbf{g}}  \\
+ &=\frac{\mathbf{e}_{+} - \mathbf{e}_{-}}{2\Delta\mathbf{g}}
+\end{align}
+Additive biases introduced by the shape measurement can be extracted from the
+sum of these two quantities
+\begin{align}
+\mathbf{c} = \frac{\mathbf{e}_+ + \mathbf{e}_-}{2} - \mathbf{e},
+\end{align}
+where the final $\mathbf{e}$ on the right-hand side is the ellipticity
+measured using the reconvolved PSF $\Gamma$, not that measured from
+the unmodified original image.
 
-\subsection{Ensemble Inference}
+If the shape measurement algorithm does not perfectly remove PSF
+ellipticity, then the shapes measured from shearing the PSF
+($\mathbf{e}_{+,\rm PSF}$ and $\mathbf{e}_{-,\rm PSF}$) permit
+calculation of at least the linear-order residual PSF ellipticity
+biases:
+\begin{align}
+R_{\rm PSF} = \frac{\mathbf{e}_{+,\rm PSF} - \mathbf{e}_{-,\rm PSF}}{2\Delta\mathbf{g}}.
+\end{align}
+The result of this process is a catalog of per-object shear and PSF
+responsivities every galaxy.  A histogram of these quantities for one
+of the measurement algorithms examined in this paper is shown in
+figure~\ref{fig:calibhist}. 
+
+Accurate calibration depends on characterising the ensemble response,
+however, not the per-object responses. We argue that the power-law
+wings of the distribution make estimation of the ensemble response by
+simple averaging problematic, and describe next a general scheme for
+regularizing the ensemble response estimation.
+
+\subsection{Ensemble Responsivity}
 We test the metacalibration procedure on two different shear
 estimation methods -- regaussianization and KSB -- each of which is
 known to have calibration biases that depend on the $S/N$, galaxy size
 and morphology, and so on. For both methods, we use the entire
 ensemble of measured shapes to build a model of the {\it unlensed}
 shape distribution, $p_0(\mathbf{e})$. There is no guarantee that the
-average shear over the ensemble is actually sufficiently small to
-allow unbiased inference, however, so we symmetrize this model
+average shear (or PSF ellipticity) over the ensemble is actually small
+enough that the effective mean ellipticity is zero, however. Before
+proceeding with the inference, we subtract from each galaxy the
+expected contribution from the PSF for its field,
+$R_{\rm PSF}e_{\rm PSF}$. We then symmetrize the resulting
 distribution by averaging it with its reflection about $\mathbf{e}=0$
 (note that the resulting model for the null shape distribution will be
 somewhat broader than the true distribution of ellipticities at zero
 shear). The newly symmetrized model unlensed distribution is
-$p_{0,\rm sym}$. We assume that the ellipticities in each field
-transform as
-\begin{align}
-{e}_{\rm meas} = {e}_{0} + R_{\rm PSF}{e}_{\rm PSF} + R{g} + {c}
-\label{eqn:edist_model}
-\end{align}
-where $e_{\rm meas}$ is the vector of measured ellipticities, and
-noisy estimates of the constants $R_{\rm PSF}$, $R$, and $c$ have been
-determined separately for each galaxy, as described above, during the
-image modification step. This is then used to construct a linear
-estimator for the ensemble shear, as follows.
-\rmcomment{The text here seems to imply that you use the individual object responses, but that's not
-  true.  You are assuming this model but you simply use the measured $e_{\rm meas}$ directly.  My
-  recommendation: move this equation up to section~\ref{subsec:imagemod}, after you've defined all
-  those responses, since this is a summary of what the individual responses mean.  Here, don't give
-  the model again, just say you use ${e}_{\rm meas}$ to avoid conclusion.}
+$p_{0,\rm sym}$. We perform the same PSF subtraction from the measured
+catalog prior to performing inference in the procedure described
+below.
+
+%We assume that the ellipticities in each field
+%transform as
+%\begin{align}
+%{e}_{\rm meas} = {e}_{0} + R_{\rm PSF}{e}_{\rm PSF} + R{g} + {c}
+%\label{eqn:edist_model}
+%\end{align}
+%where $e_{\rm meas}$ is the vector of measured ellipticities, and
+%noisy estimates of the constants $R_{\rm PSF}$, $R$, and $c$ have been
+%determined separately for each galaxy, as described above, during the
+%image modification step. This is then used to construct a linear
+%estimator for the ensemble shear, as follows.
+%\rmcomment{The text here seems to imply that you use the individual object responses, but that's not
+%  true.  You are assuming this model but you simply use the measured $e_{\rm meas}$ directly.  My
+%  recommendation: move this equation up to section~\ref{subsec:imagemod}, after you've defined all
+%  those responses, since this is a summary of what the individual responses mean.  Here, don't give
+%  the model again, just say you use ${e}_{\rm meas}$ to avoid conclusion.}
 
 If the measured shape distribution $n(\mathbf{e}_{\rm meas})$ is linear
 in the shear, then we can write
 \begin{align}
-\frac{n(\mathbf{e}_{\rm meas})}{N_{tot}} = p_{0,\rm sym}(\mathbf{e}) + \mathbf{g}\cdot \partial_{g} p_{0,\rm sym}(\mathbf{e})
+  \frac{n(\mathbf{e}_{\rm meas})}{N_{tot}} = p_{0,\rm sym}(\mathbf{e}) + \mathbf{g}\cdot \partial_{g} p_{0,\rm sym}(\mathbf{e})
 \end{align}
 It will be convenient to discretize this distribution into a
 histogram. If the probability of a galaxy ending up in the
@@ -703,34 +714,56 @@ with variance
 This method for shear inference has as its tunable parameter only the
 histogram binning scheme. Once we have chosen a suitable scheme, we
 then bin the prior into equal-number bins and calculate its shear
-derivative using equation~\ref{eqn:edist_model} by adding a small
-shear $\mathbf{g}$ using the per-object responses, then
-rebinning. This provides the inputs for the per-field shear
+derivative %using equation~\ref{eqn:edist_model}
+by adding a small shear $\mathbf{g}$ using the per-object responses,
+then rebinning. This provides the inputs for the per-field shear
 estimation.  To carry out the per-field shear estimation, we calculate
 a shape histogram with these bins for each separate field, and
 evaluate equations~\ref{eqn:hist_est} and~\ref{eqn:hist_est_var} using
 the globally-derived $\mathbf{\Delta}_h^T$.
 
+\subsection{Model Checking}
 If we have a poor model for the unlensed histogram, $h_{\rm fid}$,
-then the results will be biased. We can define a distance between each
-field and the unlensed model using equation~\ref{eqn:multnomial},
-taking the probabilities $q_i$ from the unlensed model and the
-histogram amplitudes from the current field, after correcting for the
-estimated shear. If the shear response measured for the unlensed prior
-is correct, then the performance of the estimator will depend only on
-the similarity of the model to the measurement field. The likelihood
-can then be used as an objective criterion for the quality of the
-inference.  \rmcomment{Do we ever actually do this?  There are some subsections in section 4 that
-  mention where we do {\em not} need to make a likelihood cut, but I do not see any that explicitly
-  say we {\em do} make a likelihood cut.  If we do that, we should say so (and explain the cut).}
+then the results will be biased. Once we have derived a mean shear for
+each field, we can quantify the degree to which the shape histogram
+resembles our model of the unlensed prior distribution.
+
+To do this, we subtract from each galaxy in each field the product of
+its individual responsivity and the estiamted shear (the PSF
+contribution having already been removed, as above). We then define
+the distance between each field and the unlensed prior using
+equation~\ref{eqn:multnomial}, taking the probabilities $q_i$ from the
+unlensed model and the histogram amplitudes from the current field,
+after correcting for the estimated shear. If the shear response
+measured for the unlensed prior is correct, then the performance of
+the estimator will depend only on the similarity of the model to the
+measurement field. The likelihood can then be used as an objective
+criterion for the quality of the inference.
+
+In practice, we only apply this cut in cases where we have an {\it a
+  prior} reason to believe that the prior constructed as we describe
+above will not be an adequate description of all of the simulation
+fields. In our tests below, we apply this cut in simulation branches
+where there is large expected variation in the PSF properties. In
+these cases, we exclude from our analysis those fields with the $10\%$
+worst log-likelihood cuts.
+
+%A histogram of the log-likelihoods from the CGC-regauss simulation
+%branch (described in section \ref{sec:branches}
+
+%\rmcomment{Do we ever actually do this?  There are some subsections in
+%  section 4 that mention where we do {\em not} need to make a
+%  likelihood cut, but I do not see any that explicitly say we {\em do}
+%  make a likelihood cut.  If we do that, we should say so (and explain
+ % the cut).}
 
 We can also devise a simple test for the linearity (in the shear) of
-the ensemble estimator. The estimator we use to infer the shear response 
-relies on two-sided finite-difference numerical derivatives, but it is
-also possible to measure the nonlinear ensemble response by testing for consistency between the 
-forward- and backwards finite-difference
-estimates for the ensemble response. We quantify this with the parameter $\eta_{\rm
-  nl}$, defined as 
+the ensemble estimator. The estimator we use to infer the shear
+response relies on two-sided finite-difference numerical derivatives,
+but it is also possible to get a noisier measure the nonlinear
+ensemble response by testing for consistency between the forward- and
+backwards finite-difference estimates for the ensemble response. We
+quantify this with the parameter $\eta_{\rm nl}$, defined as
 \begin{align}
 1+\eta_{nl} = \frac{\Delta_{h+}^T C^{-1} \Delta_{h-}}{\Delta_{h}^TC^{-1}\Delta_{h}}
 \end{align}
@@ -742,14 +775,14 @@ finite difference histogram derivative estimates.
 As shown in the GREAT3 results paper \citep{2015MNRAS.450.2963M}, an
 early version of metacalibration was used in the GREAT3 challenge.
 That implementation differs from the one presented here and released
-publicly in association with this paper in two important ways.  First, the
-model for systematics was simpler than the one presented below; 
-it neglected additive systematics entirely, 
-focusing exclusively on multiplicative systematics. Second, the method for 
-inferring shears from an ensemble of objects was entirely different.
-These differences are of sufficient importance that the GREAT3 results
-(especially the ones for additive systematics) are not relevant to the
-implementation described here.
+publicly in association with this paper in two important ways.  First,
+the model for systematics was simpler than the one presented below; it
+neglected additive systematics entirely, focusing exclusively on
+multiplicative systematics. Second, the method for inferring shears
+from an ensemble of objects was entirely different.  These differences
+are of sufficient importance that the GREAT3 results (especially the
+ones for additive systematics) are not relevant to the implementation
+described here.
 
 
 \section{Testing Framework}
@@ -821,7 +854,7 @@ real$\_$galaxy-ground-constant (the realistic galaxy sample), denoted
 CGC and RGC.
 
 \subsection{Simulation Branches}
-
+\label{sec:branches}
 
 The simplest of our simulation tests was performed on a
 newly-generated set of simulations that is closely analogous to the
