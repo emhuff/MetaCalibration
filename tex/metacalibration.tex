@@ -288,7 +288,7 @@ The convolutions become products in Fourier space, where we can write
 \end{align}
 Noise in the original image $\tilde{I}$ generally has power at Fourier
 modes where $\tilde{P}$ is small or vanishing. The power in these
-modes will thus be formally large or inifite. Because of the shear
+modes will thus be formally large or infite. Because of the shear
 operation, this power is not subsequently cancelled by multiplication
 by $\tilde{P}$. We must choose a new PSF $\Gamma$ for the final
 convolution step to suppress this deconvolution-amplified noise.
@@ -894,7 +894,7 @@ branch, it is not necessary to use a likelihood cut to remove fields
 with aberrant PSF behavior in defining the null ellipticity
 distribution, and so we include all branches in our analysis. In the
 accompanying figures and table, this branch is denoted by
-``CGC-noaber-regauss''.
+``CGC-noaber-regauss.''
 
 The next branch we analyze is similar to the previous one, but with
 realistic galaxies. This lets us separate the effects of realistic
@@ -903,7 +903,7 @@ PSF. Just as with the previous branch, is not necessary to use a
 likelihood cut to remove fields with aberrant PSF behavior in defining
 the null ellipticity distribution, and so we include all the generated
 fields in our analysis. The results from this branch are labelled
-``RGC-noaber-regauss''
+``RGC-noaber-regauss.''
 
 We use the GREAT3 CGC simulation branch as a baseline, and report the
 performance of metacalibration on this branch for all three of our
@@ -1037,7 +1037,7 @@ RGC & regauss (MC) &  $-5.3\pm7.8$ & $6.1\pm6.6$  & $3.6\pm4.0$ & $-3.1\pm3.7$ &
 RGC & regauss &  $30.4\pm5.2$ & $24.9\pm5.0$  & $-29.5\pm2.8$ & $-18.6\pm2.8$ &  $0.0\pm0.1$ & $0.2\pm0.1$ \\
 CGC-Noaber & regauss (MC)  &  $-7.4\pm6.9$ & $6.1\pm6.4$  & $-33.9\pm12.7$ & $-23.7\pm11.2$ &  $0.1\pm0.2$ & $0.1\pm0.2$ \\
 CGC-Noaber & regauss  &  $40.7\pm2.9$ & $-43.9\pm2.9$  & $-27.4\pm5.2$ & $-26.5\pm5.0$ &  $0.1\pm0.1$ & $0.1\pm0.1$ \\
-RGC-Noaber & regauss (MC)&  $7.5\pm5.0$ & $14.0\pm4.8$  & $-18.8\pm9.6$ & $-10.8\pm9.1$ &  $0.0\pm0.1$ & $0.0\pm0.1$ \\
+RGC-Noaber & regauss (MC)&  $-1.3\pm5.9$ & $4.5\pm6.4$  & $-11.5\pm11.4$ & $-0.8\pm12.2$ &  $0.0\pm0.2$ & $-0.1\pm0.2$ \\
 RGC-Noaber & regauss &  $16.4\pm3.0$ & $17.4\pm3.4$  & $2.2\pm5.8$ & $2.5\pm6.4$ &  $0.2\pm0.1$ & $0.0\pm0.1$ \\
 RGC-FixedAber & regauss (MC) &  $-4.7\pm8.9$ & $6.0\pm7.2$  & $-15.4\pm22.1$ & $-16.0\pm17.5$ &  $0.1\pm0.2$ & $-0.2\pm0.2$ \\
 RGC-FixedAber  & regauss  &  $61.6\pm6.6$ & $63.7\pm5.2$  & $-30.0\pm12.1$ & $-32.3\pm13.5$ &  $0.3\pm0.2$ & $0.0\pm0.1$ \\
@@ -1053,7 +1053,11 @@ RGC-FixedAber  & regauss  &  $61.6\pm6.6$ & $63.7\pm5.2$  & $-30.0\pm12.1$ & $-3
 
 
 In every test we run, metacalibration appreciably reduces the shear
-calibration bias. For all of the regaussianization tests, the results
+calibration bias. 
+
+
+
+For all of the regaussianization tests, the results
 are consistent with no remaining calibration biases. Metacalibrating
 KSB results in marginally significant residual calibration bases, and
 the magnitude of the average multiplicative calibration bias $m$ is
