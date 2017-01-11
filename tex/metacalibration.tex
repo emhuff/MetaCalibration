@@ -288,7 +288,7 @@ The convolutions become products in Fourier space, where we can write
 \end{align}
 Noise in the original image $\tilde{I}$ generally has power at Fourier
 modes where $\tilde{P}$ is small or vanishing. The power in these
-modes will thus be formally large or infite. Because of the shear
+modes will thus be formally large or infinite. Because of the shear
 operation, this power is not subsequently cancelled by multiplication
 by $\tilde{P}$. We must choose a new PSF $\Gamma$ for the final
 convolution step to suppress this deconvolution-amplified noise.
@@ -299,7 +299,7 @@ anisotropy by choosing
 \begin{align}
 \Gamma(\mathbf{x}) = P\left((1+2|\gamma|)\mathbf{x}\right).
 \end{align}
-This doesn't always work, however. If $||\tilde{P}(\mathbf{k})||$
+This does not always work, however. If $||\tilde{P}(\mathbf{k})||$
 crosses zero (as in cases with a strongly under-sampled PSF) the
 ratio of $\tilde{\Gamma}(\mathbf{k})$ and the sheared, deconvolved
 image will still be formally large or infinite, as power from
@@ -653,7 +653,11 @@ Accurate calibration depends on characterising the ensemble response,
 however, not the per-object responses. We argue that the power-law
 wings of the distribution make estimation of the ensemble response by
 simple averaging problematic, and describe next a general scheme for
-regularizing the ensemble response estimation.
+regularizing the ensemble response estimation. 
+\rmcomment{Mention something like ``The existence of these power-law wings may be specific to the
+  adopted shape measuremetn method.  It is possible that other shape measurement methods would
+  result in per-object responsivity distributions with properties that are more amenable to simple
+  averaging, simplifying the estimate of the ensemble average responsivity.''?}
 
 \subsection{Ensemble Responsivity}
 We test the metacalibration procedure on two different shear
@@ -747,13 +751,16 @@ the globally-derived $\mathbf{\Delta}_h^T$.
 
 \subsection{Model Checking}
 \label{sec:model_checking}
+
+\rmcomment{Recommend changing subsection title to ``Evaluation of model quality''}
+
 If we have a poor model for the unlensed histogram, $h_{\rm fid}$,
-then the results will be biased. Once we have derived a mean shear for
+then the results for shear inference will be biased. Once we have derived a mean shear for
 each field, we can quantify the degree to which the shape histogram
 resembles our model of the unlensed prior distribution.
 
 To do this, we subtract from each galaxy in each field the product of
-its individual responsivity and the estiamted shear (the PSF
+its individual responsivity and the estimated shear (the PSF
 contribution having already been removed, as above). We then define
 the distance between each field and the unlensed prior using
 equation~\ref{eqn:multnomial}, taking the probabilities $q_i$ from the
@@ -764,8 +771,8 @@ the estimator will depend only on the similarity of the model to the
 measurement field. The likelihood can then be used as an objective
 criterion for the quality of the inference.
 
-In practice, we only apply this cut in cases where we have an {\it a
-  prior} reason to believe that the prior constructed as we describe
+In practice, we only apply a cut on the likelihood in cases where we have an {\it a
+  priori} reason to believe that the prior constructed as we describe
 above will not be an adequate description of all of the simulation
 fields. In our tests below, we apply this cut in simulation branches
 where there is large expected variation in the PSF properties. In
@@ -861,6 +868,8 @@ correlations with the per-subfield PSF ellipticity.
 %of the true shears per component as a known quantity instead of doing
 %a fully blind analysis, since the deviation of those quantities from
 %zero is just due to the artificial nature of the simulation design.
+\rmcomment{Why was the paragraph about the GREAT3 vs.\ the real Universe removed?  This seems like a
+  highly relevant point that one needs to know about in order for the results to be reproducible.}
 
 We consider two sets of galaxy populations.  One comes directly from
 {\it HST} images, and includes a process to remove the {\it HST} PSF before
