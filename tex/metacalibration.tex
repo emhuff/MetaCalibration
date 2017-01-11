@@ -995,7 +995,7 @@ signal-to-noise scaling. %The results of increasing the noise are
 \includegraphics[width=0.4\linewidth]{./Plots/psf_e1-no_corrections-moments.pdf}
 \includegraphics[width=0.4\linewidth]{./Plots/psf_e1-moments-opt-shear_plots.pdf}
 \end{center}
-\caption{Effects of the metacalibration alogorithm applied to PSF
+\caption{Effects of the metacalibration algorithm applied to PSF
   correction. {\bf Left} panels show the relationship between measured
   shear and PSF ellipticity before correction, and {\bf right} panels
   show the same trends afterwards. Note that the shaded horizontal
@@ -1008,23 +1008,18 @@ signal-to-noise scaling. %The results of increasing the noise are
   of the shear signal. It is clear that a large fraction of the trend
   remaining after correction is driven by high-PSF-ellipticity outlier
   fields, which would typically not pass the image quality
-  requirements in a realistic experiment.}
+  requirements in a realistic experiment. \rmcomment{need to explicitly identify these with the red points/boxes.}}
 \label{fig:psf_trends}
 \end{figure*}
 
 
 
 \section{Results}
-\rmcomment{This section never refers to Table~\ref{table:results}.
-  Need to prominently highlight its existence from the start.  Also,
-  the figures are all out of order (we've gone from fig 2 to fig 6 for
-  example).  And I feel the section is kind of odd in that the
-  previous section takes time to step through all branches and what we
-  hope to learn from them, yet this section doesn't explicitly refer
-  back and explain the lessons learned from each one.}
+
+\rmcomment{Figures are still out of order.}
 
 This section draws inferences about the performance of the
-metacalibration algorithm by comparing the results across branches. We
+metacalibration algorithm by comparing the results across simulation branches. We
 discuss the impact of realistic galaxy morphologies, correlated noise,
 a heterogeneous PSF, and shape measurement algorithms.
 
@@ -1034,10 +1029,16 @@ Table~\ref{table:results}. Visualizations of the impact of
 metacalibration and PSF ellipticity detrending are provided in
 Figures~\ref{fig:m_results} and \ref{fig:a_results}.
 
+\rmcomment{You seem to be missing a baseline reporting of the most important results.  You haven't
+  yet said ``here's how metacal does in the simplest case'', but rather jump straight to ``galaxy
+  morphology doesn't significantly impact how well metacal works'', which seems like putting the
+  cart before the horse.  How about a brief subsection called something like ``Basic results''
+  stepping through figure 3 and related numbers in table 1?}
+
 \subsection{Galaxy Morphology}
 We can compare the performance of the metacalibration algorithm on
 model and realistic galaxy morphologies in two cases (RGC-regauss
-vs. CGC-regauss, and RGC-noaber-regauss vs. CGC-noaber-regauss). In
+vs.\ CGC-regauss, and RGC-noaber-regauss vs.\ CGC-noaber-regauss). In
 neither case does the introduction of realistic morphology have any
 impact on the multiplicative shear calibration biases: metacalibrating
 both pairs of branches results in multiplicative biases that are
@@ -1046,11 +1047,12 @@ and real morphologies is apparent in the PSF trends. Our perturbative
 PSF detrending scheme reduces the residual additive bias in most
 cases, but it does not completely correct the model morphologies,
 whereas there is no evidence of any residual PSF effects in any of the
-realistic morphology branches.  This should not surprise: we have
+realistic morphology branches.  This should not surprise us: we have
 chosen to perturb and detrend the linear effects of PSF ellipticity, but
-other PSF properties may be more significant. The coupling between PSF
+other PSF properties may be more significant and hence our model is not a complete description of
+additive systematics. The coupling between PSF
 morphology and inferred shear will in general depend on the details of
-both, as well as the measurement algorithm. We defer further
+both, as well as the galaxy morphology and measurement algorithm. We defer further
 development of methods to select appropriate control variables for PSF
 detrending to future work.
 
@@ -1061,9 +1063,11 @@ original image: the isotropic white noise typical of real images will
 be transformed in the counterfactual images into a correlated noise field
 with preferred direction and scale. The calibration biases resulting
 from the successive increases in initial noise are shown in
-Figure~\ref{fig:noise_bias}. For the typical signal-to-noise ratios
+Figure~\ref{fig:noise_bias}. \rmcomment{I think this is the first reference to ``increases in
+  initial noise'' and I think requires slightly more explanation, i.e., you completely redid the
+  entire metacal and measurement process after making versions of the sims with added noise.} For the typical signal-to-noise ratios
 seen in the GREAT3 simulations, biases resulting from correlated noise
-appear to scale roughly as the variance of the inital noise field. We
+appear to scale roughly as the variance of the initial noise field. We
 note that these effects do not become significant until the overall
 signal-to-noise ratio has been reduced by $50\%$ from the fiducial
 GREAT3 values.
@@ -1072,7 +1076,7 @@ The case of the $50\%$ increase is denoted ``CGC-regauss-noisy'' in
 Table~\ref{table:results} and Figures~\ref{fig:m_results} and
 \ref{fig:a_results}.
 
-\subsection{Hetergeneous PSF}
+\subsection{Heterogeneous PSF}
 Large variations in the PSF properties can impact our measurement
 algorithm via two channels: first, a heterogeneous PSF can result in
 individual fields deviating from the zero-shear distribution
@@ -1082,15 +1086,17 @@ mechanism of incomplete PSF correction and detrending.
 
 Eliminating outlier fields in those branches with large variations in
 the PSF via the rejection mechanism described in
-section~\ref{sec:model_checking} tends to make a significant impact in
-the calibration bias results. The rejected fields (red squares in
+section~\ref{sec:model_checking} tends significantly improve
+the calibration bias after metacalibration. The rejected fields (red squares in
 Figure~\ref{fig:psf_trends}) tend to have substantially larger
 residual shear calibration biases then the mean field in each branch,
 and without the outlier rejection, we see few-percent level
 calibration biases in each of these branches. With the likelihood
 rejection mechanism in place, the multiplicative and additive biases
 in the CGC and RGC-regauss branches are consistent with those in the
-CGC-noaber and RGC-noaber branches.
+CGC-noaber and RGC-noaber branches. \rmcomment{It's unclear how to make this feasible in reality, if
+  the method used in the sims is to reject the worst N\%.  Need some objective cutoff, no?  Is this
+  deferred to future work or\dots?}
 
 Finally, we compare the performance of metacalibration in the
 RGC-noaber, and RGC-FixedAber branches. These branches have a
@@ -1112,10 +1118,10 @@ is essential.
 
 
 \subsection{Shape Measurement Algorithms}
-We investigate the effects of measurement algorithm by comparing the
+We investigate the effects of the shape measurement algorithm by comparing the
 performance of the regauss, KSB, and linear moments measurement
 algorithms on the CGC simulation branch. We see large improvements in
-performance for each method. There is weak evidence for residual KSB
+performance for each method after using metacalibration. There is weak evidence for residual KSB
 calibration biases, and strong evidence for residual biases in the
 linear moments. In the latter case, however, the improvement relative
 to the un-metacalibrated case is large: the multiplicative and
@@ -1128,17 +1134,19 @@ One potential reason for the difference in performance is the
 linearity of the ensemble estimates in the resulting shear. We find
 values for $\eta_{nl}$ of $-0.0034\pm0.0004$, $-0.024\pm0.002$, and
 $-0.0037\pm0.0004$, for the regauss, KSB, and linear moments
-algorithms, respectively (where the errors are boostrap estimates).
+algorithms, respectively (where the errors are boostrap estimates). \rmcomment{It's hard to derive
+  meaning from these numbers without some guidance for the reader of what this may mean in practice.}
 
-Another potential driver of residual calibration performance is
+Another potential driver of residual additive systematics is
 incomplete PSF detrending. The reasons for this are discussed in the
 previous section. The linear moments see significant PSF residuals,
 and Figure~\ref{fig:psf_trends} suggests that these are primarily
 driven by the fields with large PSF ellipticities.
 
-These trends suggest that the small residual calibration bias in KSB
-is driven the nonlinear response of that shape measurement algorithm,
-while the residual linear moments calibration is primarily driven by
+The $\eta_{nl}$ values and the residual additive and multiplicative biases for these methods 
+suggest that the small residual calibration bias in KSB
+is driven by the nonlinear response of that shape measurement algorithm,
+while the residual linear moments calibration bias is primarily driven by
 imperfect PSF correction.
 
 
@@ -1173,7 +1181,9 @@ RGC-FixedAber  & regauss  &  $61.6\pm6.6$ & $63.7\pm5.2$  & $-30.0\pm12.1$ & $-3
 }
 \caption{Shear and PSF calibration bias parameters from each of the
   branches considered. Rows with metacalibrated parameters are shown
-  above their un-calibrated counterparts. }
+  above their un-calibrated counterparts. \rmcomment{Do you ever compare $m_1$ vs $m_2$ and so on?
+    If not, perhaps just show component-averaged $\langle m\rangle$, $\langle a\rangle$, etc.\ to
+    make this less busy.}}
 \label{table:results}
 \end{table*}
 
@@ -1277,7 +1287,9 @@ complexities inherent in real data.
 \begin{center}
 \includegraphics[width=0.8\linewidth]{./Plots/a_results_linear.pdf}
 \end{center}
-\caption{Calibration bias results. Each row shows linear coupling
+\caption{Calibration bias results. \rmcomment{Here, as in several places, additive biases are being
+    called ``calibration bias''.  I would like to avoid that; ``calibration bias'' commonly means a
+    multiplicative factor, so it's confusing to conflate that with additive biases.} Each row shows linear coupling
   between the PSF ellipticity and the measured shape $a_1$ (top) and
   $a_2$ (bottom) before and after metacalibration. Pre- and
   post-correction points are connected by gray arrows: in every case
