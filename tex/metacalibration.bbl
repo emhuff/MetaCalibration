@@ -1,4 +1,4 @@
-\begin{thebibliography}{37}
+\begin{thebibliography}{38}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 
 \bibitem[{{Bartelmann} \& {Schneider}(2001)}]{2001PhR...340..291B}
@@ -292,6 +292,10 @@
   M., {Nemati}, B., {Parvin}, B., {Poberezhskiy}, I., {Peddie}, C., {Ruffa},
   J., {Wallace}, J.~K., {Whipple}, A., {Wollack}, E., \& {Zhao}, F. 2015, ArXiv
   e-prints
+
+\bibitem[{{Viola} {et~al.}(2011){Viola}, {Melchior}, \&
+  {Bartelmann}}]{2011MNRAS.410.2156V}
+{Viola}, M., {Melchior}, P., \& {Bartelmann}, M. 2011, \mnras, 410, 2156
 
 \bibitem[{{Weinberg} {et~al.}(2013){Weinberg}, {Mortonson}, {Eisenstein},
   {Hirata}, {Riess}, \& {Rozo}}]{2013PhR...530...87W}
