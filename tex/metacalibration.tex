@@ -1137,13 +1137,13 @@ significant trend between PSF anisotropy and inferred shear.
 \begin{figure}
 \includegraphics[width=\columnwidth]{./Plots/noise_bias_test.pdf}
 \caption{Effects of introducting additional noise. Points with errors
-  correspond to multiplicative shear calibration bias in the
-  control-ground-constant branch when additional noise is added. The
-  noise enhancement factor corresponds to the factor by which the
-  noise in each galaxy image is increased relative to the fiducial
-  GREAT3 simulations. The solid red line shows the expected power-law scaling
-  resulting from correlated noise bias, with a normalization fixed to
-  the measured calibration biases.}
+  correspond to additive shear bias in the control-ground-constant
+  branch when additional noise is added. The noise enhancement factor
+  corresponds to the factor by which the noise in each galaxy image is
+  increased relative to the fiducial GREAT3 simulations. The solid red
+  line shows the expected power-law scaling resulting from correlated
+  noise bias, with a normalization fixed to the measured additive
+  biases.}
 \label{fig:noise_bias}
 \end{figure}
 
@@ -1166,20 +1166,20 @@ moments. In the latter case, however, the improvement relative to the
 un-metacalibrated case is large: the multiplicative and additive
 biases are reduced by factors of $80$ and $51$, respectively,
 resulting in performance for metacalibrated linear moments that is
-quantitatively superior to that of the un-metacalibrated KSB.  This is remarkable given that simple
-linear moments involve no PSF correction, leaving the entirety of the PSF correction process to
-metacalibration.
+quantitatively superior to that of the un-metacalibrated KSB.  This is
+remarkable given that simple linear moments involve no PSF correction,
+leaving the entirety of the PSF correction process to metacalibration.
 
-One potential reason for the difference in performance for different shape measurement methods is the
-linearity of the ensemble estimates in the resulting shear. We find
-values for $\eta_{nl}$ of $-0.0034\pm0.0004$, $-0.024\pm0.002$, and
-$-0.0037\pm0.0004$, for the regauss, KSB, and linear moments
-algorithms, respectively (where the errors are bootstrap
-estimates). The quadratic correction to the shear response is much
-larger for KSB than for the other methods, suggesting that any
-problems with the KSB shapes may arise from its more nonlinear shear
-response (see \citealt{2011MNRAS.410.2156V} for a detailed
-investigation of this issue).
+One potential reason for the difference in performance for different
+shape measurement methods is the linearity of the ensemble estimates
+in the resulting shear. We find values for $\eta_{nl}$ of
+$-0.0034\pm0.0004$, $-0.024\pm0.002$, and $-0.0037\pm0.0004$, for the
+regauss, KSB, and linear moments algorithms, respectively (where the
+errors are bootstrap estimates). The quadratic correction to the shear
+response is much larger for KSB than for the other methods, suggesting
+that any problems with the KSB shapes may arise from its more
+nonlinear shear response (see \citealt{2011MNRAS.410.2156V} for a
+detailed investigation of this issue).
 
 
 %\rmcomment{It's hard to derive meaning from these numbers
@@ -1197,9 +1197,6 @@ biases for these methods suggest that the small residual calibration
 bias in KSB is driven by the nonlinear response of that shape
 measurement algorithm, while the residual linear moments calibration
 bias is primarily driven by imperfect PSF correction.
-
-
-
 
 \begin{table*}
 \centering
@@ -1286,8 +1283,8 @@ state-of-the-art shear estimation algorithms.
 
 \section{Conclusions}
 We have proposed and implemented the first method for self-calibration
-of shear measurements that does not rely on external data or
-simulations for shear calibration. Our method can be wrapped around
+of shear measurements that does not rely on deeper calibration fields or
+simulations. Our method can be wrapped around
 any sufficiently well-behaved shape measurement algorithm.  We use
 GREAT3 and related simulations to demonstrate that metacalibration
 reduces or eliminates shear calibration biases across a variety of
