@@ -337,10 +337,10 @@ removed with the addition of further anisotropic correlated noise
 (with power spectrum carefully chosen). As we describe below, we have
 not found noise isotropization to be a necessary step for the images
 that we used for testing.  These have an effective $S/N$ limit of
-$\sim 12$, and the mode of the distribution is $\sim20$. The
-forthcoming Sheldon et al.~(2016) will investigate the effects of the
-anisotropic correlated noise at lower signal-to-noise ratios, and
-describe effective mitigation procedures.
+$\sim 12$, and the mode of the distribution is $\sim20$. Concurrent
+work \citep{metacalII} investigates the effects of the anisotropic
+correlated noise at lower signal-to-noise ratios, and describe
+effective mitigation procedures.
 
 Metacalibration can be used to mitigate other systematics as
 well. Even those measurement methods with the highest scores in the
@@ -1074,6 +1074,13 @@ original image: the isotropic white noise typical of real images will
 be transformed in the counterfactual images into a correlated noise
 field with preferred direction and scale. 
 
+This effect was first documented in the context of shear measurement
+in the work described in \citet{metacalII} in simulations
+conducted at much lower signal-to-noise ratios than those of the
+Great3 challenge. A fuller exploration of the impact of correlated
+noise on metacalibration, along with a comprehensive mitigation
+strategy, is presented in that work.
+
 We investigate the impact of this noise by successively adding noise
 to the CGC images and re-running the metacalibration and shear
 estimation algorithms. In the process we gradually increase the noise
@@ -1264,8 +1271,8 @@ shear correlation functions), we leave design and implementation of
 this generalization to future work.
 
 At the time of this writing, metacalibration is being actively adapted
-to realistic measurements in the Dark Energy Survey. Follow-up work
-(Sheldon et al.\ 2016) will demonstrate algorithmic improvements that
+to realistic measurements in the Dark Energy Survey. Concurrent work
+\citep{metacalII} will demonstrate algorithmic improvements that
 allow this technique to be used on Dark Energy Survey data with
 state-of-the-art shear estimation algorithms.
 

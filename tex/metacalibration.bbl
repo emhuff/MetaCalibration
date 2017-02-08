@@ -1,4 +1,5 @@
-\begin{thebibliography}{38}
+ \newcommand{\noop}[1]{}
+\begin{thebibliography}{39}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 
 \bibitem[{{Bartelmann} \& {Schneider}(2001)}]{2001PhR...340..291B}
@@ -270,6 +271,9 @@
 {Scoville}, N., {Aussel}, H., {Brusa}, M., {Capak}, P., {Carollo}, C.~M.,
   {Elvis}, M., {Giavalisco}, M., {Guzzo}, L., {Hasinger}, G., \& et~al.
   2007{\natexlab{b}}, \apjs, 172, 1
+
+\bibitem[{{Sheldon} \& {Huff}(2017)}]{metacalII}
+{Sheldon}, E.~S. \& {Huff}, E.~M. 2017, \apj, submitted
 
 \bibitem[{{Spergel} {et~al.}(2015){Spergel}, {Gehrels}, {Baltay}, {Bennett},
   {Breckinridge}, {Donahue}, {Dressler}, {Gaudi}, {Greene}, {Guyon}, {Hirata},
