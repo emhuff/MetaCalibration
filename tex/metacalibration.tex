@@ -659,95 +659,99 @@ a consequence of the fact that the regaussianization shapes are
 themselves ratios of noisy quantities; other methods with more compact
 support may not require this sort of regularization scheme.
 
-\subsection{Ensemble Responsivity}
-We test the metacalibration procedure on two different shear
-estimation methods -- regaussianization and KSB -- each of which is
-known to have calibration biases that depend on the $S/N$, galaxy size
-and morphology, and so on. For both methods, we use the entire
-ensemble of measured shapes to build a model of the {\it unlensed}
-shape distribution, $p_0(\mathbf{e})$. There is no guarantee that the
-average shear (or PSF ellipticity) over the ensemble is actually small
-enough that the effective mean ellipticity is zero, however. Before
-proceeding with the inference, we subtract from each galaxy the
-expected contribution from the PSF for its field,
-$R_{\rm PSF}e_{\rm PSF}$. We then symmetrize the resulting
-distribution by averaging it with its reflection about $\mathbf{e}=0$
-(note that the resulting model for the null shape distribution will be
-somewhat broader than the true distribution of ellipticities at zero
-shear). The newly symmetrized model unlensed distribution is
-$p_{0,\rm sym}$. We perform the same PSF subtraction from the measured
-catalog prior to performing inference in the procedure described
-below.
+\subsection{Ensemble Averaging}
+Every simulated galaxy in a single field has had the same constant
+shear applied to it. Fields differ in their shear and PSF properties,
+but each field contains a realization of galaxies drawn from the same
+underlying distribution. To infer the shear, we will first derive a
+likelihood function for the distribution of galaxy shapes:
 
-%We assume that the ellipticities in each field
-%transform as
-%\begin{align}
-%{e}_{\rm meas} = {e}_{0} + R_{\rm PSF}{e}_{\rm PSF} + R{g} + {c}
-%\label{eqn:edist_model}
-%\end{align}
-%where $e_{\rm meas}$ is the vector of measured ellipticities, and
-%noisy estimates of the constants $R_{\rm PSF}$, $R$, and $c$ have been
-%determined separately for each galaxy, as described above, during the
-%image modification step. This is then used to construct a linear
-%estimator for the ensemble shear, as follows.
-%\rmcomment{The text here seems to imply that you use the individual object responses, but that's not
-%  true.  You are assuming this model but you simply use the measured $e_{\rm meas}$ directly.  My
-%  recommendation: move this equation up to section~\ref{subsec:imagemod}, after you've defined all
-%  those responses, since this is a summary of what the individual responses mean.  Here, don't give
-%  the model again, just say you use ${e}_{\rm meas}$ to avoid conclusion.}
+\begin{equation}
+p(\mathbf{e}|\mathbf{g})
+\end{equation}
 
-If the measured shape distribution $n(\mathbf{e}_{\rm meas})$ is linear
-in the shear, then we can write
-\begin{align}
-  \frac{n(\mathbf{e}_{\rm meas})}{N_{tot}} = p_{0,\rm sym}(\mathbf{e}) + \mathbf{g}\cdot \partial_{g} p_{0,\rm sym}(\mathbf{e})
-\end{align}
-It will be convenient to discretize this distribution into a
-histogram. If the probability of a galaxy ending up in the
-$i^{\rm th}$ shape histogram bin is $q_i$, and each galaxy's shape can
-be considered an independent draw from some underlying distribution,
-then the likelihood function for an observed histogram is the
-multinomial likelihood
-\begin{align}
-p( \left\{N_i\right\} |\left\{ q_i\right\} ) = \frac{N_{\rm tot}!}{\prod\limits_i (N_i!)}\prod\limits_j q_j^{N_j}
-\label{eqn:multnomial}
-\end{align}
-where $N_{\rm tot} = \sum\limits_i N_i$ is the total number of samples
-in the histogram. The covariance matrix for the
-bin amplitudes of this histogram is
-\begin{align}
-{\rm cov}(N_i, N_j) = C_{ij} = \begin{cases}
-  q_i(1-q_i)N_{\rm tot}, & i=j \\
-  -q_iq_j N_{\rm tot}, & i \neq j.
+and then choose as our estimator $\hat{g}$ the value which
+maximises the likelihood in each field.
+
+If we know the distribution of shapes in the absence of a shear, have
+an estimate of the shear response of each galaxy, and there are no
+shear-dependent selection effects, then the likelihood can be gotten
+by modifying the distribution of unlensed shapes as
+
+\begin{equation}
+p(\mathbf{e}|\mathbf{g}) = p(\mathbf{e}-R\cdot\mathbf{g} | \mathbf{g}=0).
+\end{equation}
+
+
+The precise form of $p(\mathbf{e}|\mathbf{g}=0)$ depends on the ensemble properties
+of the PSF-convolved galaxy shapes. One simple way of representing this
+distribution is to bin the galaxy ellipticities into a histogram. For
+a finitely sampled histogram, the likelihood function for the bin
+counts $N_i$ given a set of model bin probabilities $q_i$ is the
+multinomial distribution
+
+\begin{equation}
+p( N_i | q_i) = \frac{N_{\rm tot} !}{\Pi_i (N_i!)}\Pi_j q^{N_j}_j
+\end{equation}
+
+and the bin occupation number covariance matrix $C$ is
+
+\begin{equation}
+C_{ij}= \begin{cases}
+q_i ( 1 - q_i) N_{\rm tot} &  i=j\\
+-q_i q_j N_{\rm tot} &  i \ne j
 \end{cases}
-\end{align}
-To make the notation for what follows less cumbersome, let the
-normalized histogram be $h_i = N_i / N_{\rm tot}$, and its first
-derivative with respect to the shear be
-$\mathbf{\Delta}_h=\partial_{g}\mathbf{h}_{\rm fid}$.
+\end{equation}
 
-Given a measured shape histogram with some unknown shear and a
-fiducial, unlensed shape histogram, the (component-wise)
-minimum-variance estimator for $g$ is
+For large enough $N_{\rm tot}$, we can treat the histogram likelihood as
+if it were Gaussian. The $q_i$ are just $N_{\rm tot} p(\mathbf{e}_i|\mathbf{g})$
+integrated over the $i^{th}$ ellipticity bin. This allows us to
+write the histogram log-likelihood for the shear, up to a constant, as
+
+\begin{widetext}
 \begin{align}
-\hat{g} = \frac{\mathbf{\Delta}_h^T C^{-1}\left( \mathbf{h}_{\rm meas} - \mathbf{h}_{\rm fid}\right)} {\mathbf{\Delta}_h^TC^{-1}\mathbf{\Delta}_h},
-\label{eqn:hist_est}
+  \log p(N_i | \mathbf{g} ) &= -\frac{\left[N_i - N_{\rm tot} \mathbf{q} (\mathbf{g})
+                              \right]C^{-1} \left[N_i - N_{\rm tot} \mathbf{q}
+                              (\mathbf{g}) \right]^T}{2} -
+                              \frac{1}{2}\log(\det{}C) \\
+                            & = -\frac{\left[N_i - N_{\rm tot} \mathbf{q} (\mathbf{g}=0) - \mathbf{g} \partial_\mathbf{g}
+                              N_{\rm tot} \mathbf{q} \right]C^{-1} \left[N_i - N_{\rm tot} \mathbf{q} (\mathbf{g}=0) -
+                              \mathbf{g} \partial_\mathbf{g} N_{\rm tot}
+                              \mathbf{q}) \right]^T}{2} -\frac{1}{2}\log(\det{}C)
 \end{align}
-with variance 
+\end{widetext}
+This likelihood function is maximized for the estimator
+
 \begin{align}
-\sigma^2_{\hat{g}} = \frac{1}{\mathbf{\Delta}_h^TC^{-1}\mathbf{\Delta}_h}
-\label{eqn:hist_est_var}
+  \hat{\mathbf{g}} = \frac{1}{N_{\rm tot}}\frac{\frac{\partial \mathbf{q}}{\partial {\mathbf{g}}} C^{-1} (N_i -  N_{tot }\mathbf{q})}{\frac{\partial \mathbf{q}}{\partial {\mathbf{g}}} C^{-1} \frac{\partial \mathbf{q}}{\partial {\mathbf{g}}}}
 \end{align}
 
-This method for shear inference has as its tunable parameter only the
-histogram binning scheme. Once we have chosen a suitable scheme, we
-then bin the prior into equal-number bins and calculate its shear
-derivative %using equation~\ref{eqn:edist_model}
-by adding a small shear $\mathbf{g}$ using the per-object responses,
-then rebinning. This provides the inputs for the per-field shear
-estimation.  To carry out the per-field shear estimation, we calculate
-a shape histogram with these bins for each separate field, and
-evaluate equations~\ref{eqn:hist_est} and~\ref{eqn:hist_est_var} using
-the globally-derived $\mathbf{\Delta}_h^T$.
+If the PSF-convolved shapes in all of the simulation fields are drawn
+from the same underlying distribution, and if the mean shear across
+all fields is nearly zero, then we can approximate the histogrammed
+$p(e|\mathbf{g}=0)$ as the histogram of all of the shapes in all of the
+fields.
+
+The number of fields in each of our simulation branches is small
+enough that we cannot be confident that neither the mean shear nor the
+mean PSF-induced ellipticity are sufficiently small as to avoid
+biasing the estimate. To remove potential biases resulting from an
+inaccurate model for the unsheared ellipticity distribution, we first
+subtract from each shape its PSF-induced ellipticity,
+$R_{\rm PSF}e_{\rm PSF}$; we then construct a symmetrized model for
+$\mathbf{q}(\mathbf{g} = 0)$ by averaging the histogram of all shapes, in all
+fields in a simulation branch, with its reflection about $e=0$.
+
+The derivative of the histogram with respect to the shear,
+$\partial_{\mathbf{g}} N_{\rm tot} \mathbf{q}$, is constructed as a finite difference
+derivative from the histograms of $e_+$ and $e_-$, which are
+calculated as described in the previous section.
+
+The only tunable parameters in this estimation scheme are those that
+determine the bin size and spacing. We choose these such that the
+histogram $N_{\rm tot} \mathbf{q} (\mathbf{g}=0)$ has the same number
+of galaxies in each ellipticity bin.
+
 
 \subsection{Validating the Shear Inference}
 \label{sec:model_checking}
