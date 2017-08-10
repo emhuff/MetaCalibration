@@ -407,7 +407,7 @@ that the image is linearly related to the true surface brightness on
 the sky. This is not valid for common image processing artifacts like
 cosmic rays, for saturated pixels, or when charge-deflection effects
 produce a flux-dependent PSF (e.g.,
-\citealt{2015JInst..10C5032G}). 
+\citealt{2015JInst..10C5032G, 2017JInst..12C3091L}). 
 
 The presumption of a single shear, with a single response factor, can
 also be problematic. The lensing signal varies with redshift along a
@@ -898,17 +898,17 @@ newly-generated set of simulations that is closely analogous to the
 GREAT3 CGC branch (parametric galaxy profiles), but with one
 modification to avoid a problem raised in the results paper
 \citep{2015MNRAS.450.2963M}.  There, it was noted that the CGC branch
-has a small fraction of outlier fields related to unusually large optical PSF
-aberrations, specifically defocus and trefoil.  Thus, our first
-simulated dataset is designed exactly like CGC but with all
-aberrations in the optical PSF set to zero, to ensure reasonable
-consistency of data quality.  Note that the atmospheric PSF is still
-drawn from a distribution of seeing values for each subfield. For this
-branch, it is not necessary to use a likelihood cut to remove fields
-with aberrant PSF behavior in defining the null ellipticity
-distribution, and so we include all branches in our analysis. In the
-accompanying figures and table, this branch is denoted by
-``CGC-noaber-regauss.''
+has a small fraction of outlier fields related to unusually large
+optical PSF aberrations, specifically defocus and trefoil.  Thus, our
+first simulated dataset is designed exactly like CGC but with all
+aberrations in the optical PSF set to zero, to ensure that the shapes
+in each field are drawn from the same distribution.  Note that
+the atmospheric PSF is still drawn from a distribution of seeing
+values for each subfield. For this branch, it is not necessary to use
+a likelihood cut to remove fields with aberrant PSF behavior in
+defining the null ellipticity distribution, and so we include all
+branches in our analysis. In the accompanying figures and table, this
+branch is denoted by ``CGC-noaber-regauss.''
 
 The next branch we analyze is similar to the previous one, but with
 realistic galaxies. This lets us separate the effects of realistic
@@ -1309,16 +1309,14 @@ known PSF are model-independent.
 Those cases we have examined where the initial biases are large or not
 linear are not completely corrected by our linear detrending scheme,
 though in every case we have studied the algorithm appears to
-substantially improve biases resulting from faulty additive PSF correction and
-multiplicative shear calibration biases. Even the nearly information-free linear moments
-algorithm appears to be calibrated by our procedure to a level
-superior to uncorrected KSB, a widely used traditional shear
-estimation algorithm.
+substantially improve biases resulting from faulty additive PSF
+correction and multiplicative shear calibration biases. Even the
+highly uninformative linear moments algorithm appears to be calibrated
+by our procedure to a level superior to uncorrected KSB, a widely used
+traditional shear estimation algorithm.
 
 We expect future work to extend this method to deal with the
 complexities inherent in real data.
-
-
 
 \begin{figure*}[t]
 \begin{center}
