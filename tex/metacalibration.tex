@@ -713,12 +713,13 @@ write the histogram log-likelihood for the shear, up to a constant, as
   \log p(N_i | \mathbf{g} ) &= -\frac{\left[N_i - N_{\rm tot} \mathbf{q} (\mathbf{g})
                               \right]C^{-1} \left[N_i - N_{\rm tot} \mathbf{q}
                               (\mathbf{g}) \right]^T}{2} -
-                              \frac{1}{2}\log(\det{}C) \\
+                              \frac{1}{2}\log(\det{}C) \\ \nonumber
                             & = -\frac{\left[N_i - N_{\rm tot} \mathbf{q} (\mathbf{g}=0) - \mathbf{g} \partial_\mathbf{g}
                               N_{\rm tot} \mathbf{q} \right]C^{-1} \left[N_i - N_{\rm tot} \mathbf{q} (\mathbf{g}=0) -
                               \mathbf{g} \partial_\mathbf{g} N_{\rm tot}
                               \mathbf{q}) \right]^T}{2} -\frac{1}{2}\log(\det{}C)
 \end{align}
+\label{eqn:likelihood}
 \end{widetext}
 This likelihood function is maximized for the estimator
 
@@ -767,7 +768,7 @@ To do this, we subtract from each galaxy in each field the product of
 its individual responsivity and the estimated shear (the PSF
 contribution having already been removed, as above). We then define
 the distance between each field and the unlensed prior using
-equation~\ref{eqn:multnomial}, taking the probabilities $q_i$ from the
+equation~\ref{eqn:likelihood}, taking the probabilities $q_i$ from the
 unlensed model and the histogram amplitudes from the current field,
 after correcting for the estimated shear. If the shear response
 measured for the unlensed prior is correct, then the performance of
