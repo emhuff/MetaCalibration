@@ -796,15 +796,21 @@ worst log-likelihood cuts.
 We can also devise a simple test for the linearity (in the shear) of
 the ensemble estimator. The estimator we use to infer the shear
 response relies on two-sided finite-difference numerical derivatives,
-but it is also possible to get a noisier measure the nonlinear
+and so it is also possible to get a noisier measure the nonlinear
 ensemble response by testing for consistency between the forward- and
-backwards finite-difference estimates for the ensemble response. We
-quantify this with the parameter $\eta_{\rm nl}$, defined as
+backwards finite-difference estimates for the ensemble response. 
+
+Denoting the normalized histograms of the reconvolved unsheared,
+positively sheared, and negatively sheared ellipticities as
+$\mathbf{q}_+$, $\mathbf{q}_-$ and $\mathbf{q}_0$, respectively, we
+can test for nonlinear shear dependence by computing the Mahalanobis
+distance $1+\eta_{nl}$ between the forward and backwards finite distance
+derivatives, as
 \begin{align}
-1+\eta_{nl} = \frac{\Delta_{h+}^T C^{-1} \Delta_{h-}}{\Delta_{h}^TC^{-1}\Delta_{h}}
+1+\eta_{nl} = \frac{(\mathbf{q}_{+} - \mathbf{q}_{0})^T C^{-1} (\mathbf{q}_{0} - \mathbf{q}_{-})}{(\mathbf{q}_+ -
+  \mathbf{q}_ -)^TC^{-1}(\mathbf{q}_+ - \mathbf{q}_-)}.
 \end{align}
-where the $+$ and $-$ subscripts refer to the forward- and backwards
-finite difference histogram derivative estimates.
+
 
 \subsection{Relationship to previous implementations}
 
