@@ -416,10 +416,12 @@ we develop here, for the resulting nonlinear ensemble response.}
 The fundamental assumptions of the image processing steps are
 frequently violated in real data. The image manipulation step assumes
 that the image is linearly related to the true surface brightness on
-the sky. This is not valid for common image processing artifacts like
-cosmic rays, for saturated pixels, or when charge-deflection effects
-produce a flux-dependent PSF (e.g.,
-\citealt{2015JInst..10C5032G, 2017JInst..12C3091L}). 
+the sky, \hl{and that the linear response of the detector is accurately
+understood}. This is not valid for common image processing artifacts
+like cosmic rays, for saturated pixels, when charge-deflection
+effects produce a flux-dependent PSF (e.g.,
+\citealt{2015JInst..10C5032G, 2017JInst..12C3091L}), \hl{or in the
+presence of PSF model errors.}
 
 The presumption of a single shear, with a single response factor, can
 also be problematic. The lensing signal varies with redshift along a
