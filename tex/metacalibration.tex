@@ -399,14 +399,14 @@ appear in Eq.}~\ref{eqn:calibPars} \hl{are ensemble responses, however, so
 we need an appropriate method for averaging the shear responses
 together. This is more complex than it may at first appear.
 
-Many shape measures that involve ratios of noisy quantities, and this
+Many shape measurements involve taking ratios of noisy quantities, and this
 can make simple averaging schemes problematic. The resulting
 distributions often have shallow power-law tails, which results in a
 very high variance and slow convergence of the mean response. In these
-cases, the sample mean is not a very efficient estimator for the mean
-shear response. To deal with this, section~3.4 develops a technique to
-handle arbitrary distributions of shear responses. This will work as
-long as the the measurement produces an ellipticity estimate which is
+cases, the sample mean is not an efficient estimator for the mean
+shear response. To deal with this, we describe a technique to handle arbitrary distributions of
+shear responses in section~3.4. This will work as
+long as the measurement produces an ellipticity estimate that is
 linear in the shear. If the algorithm is nonlinear, however, then our
 averaging scheme will require some additional correction, beyond what
 we develop here, for the resulting nonlinear ensemble response.}
@@ -727,7 +727,7 @@ q_i ( 1 - q_i) N_{\rm tot} &  i=j\\
 \end{cases}
 \end{equation}
 
-\hl{For large enough $N_{\rm tot}$, we can treat the histogram likelihood as
+\hl{For sufficiently large $N_{\rm tot}$, we can treat the histogram likelihood as
 if it were Gaussian. The $q_i$ are just $N_{\rm tot} p(\mathbf{e}_i|\mathbf{g})$
 integrated over the $i^{th}$ ellipticity bin. This allows us to
 write the histogram log-likelihood for the shear, up to a constant, as}
@@ -805,7 +805,7 @@ Eq.}~\ref{eqn:mle} \hl{will be unbiased. In that case we should expect the
 measured distribution of ellipticities to be different from that which
 is produced by applying this shear to our unlensed prior. The
 log-likelihood in Eq.~24 is also a goodness-of-fit measure, and so we
-make a final cut on this quantity to exlude fields where our inference
+make a final cut on this quantity to exclude fields where our inference
 is flawed and likely to fail.}
 
 
@@ -1302,12 +1302,12 @@ capability here. We have also shown the presence of a calibration bias
 which scales with the variance of the pixel noise, which may be a
 result of the correlations imposed on the noise field during the
 construction of the counterfactual image. \hl{The presence of cosmic
-  rays, or image artifacts necessitates masking, and while it is in
+  rays or image artifacts necessitates masking, and while it is in
   principle possible to apply metacalibration to a partially-masked
   galaxy, we have not attempted to demonstrate this capability here.}
-\hl{(we note that} \citealt{metacalII} \hl{ deals successfully with
+\hl{We note that} \citealt{metacalII} \hl{ deals successfully with
   the latter two issues, as well as most of the items in the larger
-  set of systematics listed in the introduction.)} Finally, as noted
+  set of systematics listed in the introduction.} Finally, as noted
 in the discussion of the PSF dilation factor in
 \ref{sec:counterfactual}, there is no straightforward way to apply our
 algorithm to undersampled images.
