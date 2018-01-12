@@ -1,5 +1,5 @@
  \newcommand{\noop}[1]{}
-\begin{thebibliography}{40}
+\begin{thebibliography}{41}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 
 \bibitem[{{Bartelmann} \& {Schneider}(2001)}]{2001PhR...340..291B}
@@ -9,6 +9,14 @@
   \& {Amara}}]{2013A&C.....1...23B}
 {Berg{\'e}}, J., {Gamper}, L., {R{\'e}fr{\'e}gier}, A., \& {Amara}, A. 2013,
   Astronomy and Computing, 1, 23
+
+\bibitem[{{Bernstein} {et~al.}(2017){Bernstein}, {Abbott}, {Desai}, {Gruen},
+  {Gruendl}, {Johnson}, {Lin}, {Menanteau}, {Morganson}, {Neilsen}, {Paech},
+  {Walker}, {Wester}, {Yanny}, \& {DES Collaboration}}]{2017PASP..129k4502B}
+{Bernstein}, G.~M., {Abbott}, T.~M.~C., {Desai}, S., {Gruen}, D., {Gruendl},
+  R.~A., {Johnson}, M.~D., {Lin}, H., {Menanteau}, F., {Morganson}, E.,
+  {Neilsen}, E., {Paech}, K., {Walker}, A.~R., {Wester}, W., {Yanny}, B., \&
+  {DES Collaboration}. 2017, \pasp, 129, 114502
 
 \bibitem[{{Bernstein} \& {Armstrong}(2014)}]{2014MNRAS.438.1880B}
 {Bernstein}, G.~M. \& {Armstrong}, R. 2014, \mnras, 438, 1880
